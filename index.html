@@ -864,7 +864,8 @@
             margin: 0;
         }
 
-        .local-pick-item {
+        /* Step 0 (zip): icons above, center-aligned */
+        .local-pick-block-intro .local-pick-item {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -875,9 +876,39 @@
             line-height: 1.5;
         }
 
-        .local-pick-item .local-pick-text {
+        .local-pick-block-intro .local-pick-item .local-pick-text {
             text-align: center;
             width: 100%;
+        }
+
+        .local-pick-block-intro .local-pick-icon {
+            width: 64px;
+            height: 64px;
+        }
+
+        /* Post-zip (partner): icons left, like bathrooms.html */
+        .local-pick-block-partner .local-pick-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 18px;
+            font-size: 16px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .local-pick-block-partner .local-pick-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .local-pick-block-partner .local-pick-icon {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+        }
+
+        .local-pick-block-partner .local-pick-item .local-pick-text {
+            text-align: left;
         }
 
         .local-pick-item:last-child {
@@ -886,8 +917,8 @@
 
         .local-pick-icon {
             flex-shrink: 0;
-            width: 64px;
-            height: 64px;
+            width: 48px;
+            height: 48px;
         }
 
         .local-pick-icon img {
@@ -1164,7 +1195,7 @@
             <div class="zip-error-message" id="zipErrorMessage" style="display: none; margin-top: 20px; padding: 16px; background: #ffebee; border-radius: 10px; color: #c62828; font-size: 14px;">
                 We don't have a Local Pick in your area yet. Please check back later or try a nearby zip code.
             </div>
-            <div class="local-pick-block" style="margin-top: 30px;">
+            <div class="local-pick-block local-pick-block-intro" style="margin-top: 30px;">
                 <div class="local-pick-title">Here's how we choose our<br><span class="local-pick-highlight">Local Pick</span></div>
                 <ul class="local-pick-list">
                     <li class="local-pick-item">
@@ -1636,7 +1667,7 @@
     <div class="reviews-section" id="reviewsSection">
         <div class="reviews-content">
             <!-- LOCAL PICK BLOCK (above reviews) -->
-            <div class="local-pick-block" id="localPickBlock" style="display: none;">
+            <div class="local-pick-block local-pick-block-partner" id="localPickBlock" style="display: none;">
                 <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span></div>
                 <ul class="local-pick-list" id="localPickList">
                     <!-- Local Pick items will be dynamically added here -->
