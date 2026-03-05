@@ -836,6 +836,55 @@
             text-align: center;
         }
 
+        .local-pick-block {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .local-pick-title {
+            font-size: 22px;
+            color: #000;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .local-pick-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .local-pick-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 18px;
+            font-size: 16px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .local-pick-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .local-pick-icon {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+        }
+
+        .local-pick-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
         .reviews-container {
             display: flex;
             flex-direction: column;
@@ -897,6 +946,14 @@
         }
 
         @media (max-width: 768px) {
+            .local-pick-block {
+                padding: 30px 20px;
+            }
+
+            .local-pick-title {
+                font-size: 20px;
+            }
+
             .review-block {
                 padding: 30px 20px;
             }
@@ -1181,7 +1238,7 @@
                     </svg>
                 </div>
                 <div class="tile-message-content">
-                    <div class="homeowner-no-text">We do not install tile systems. Please select another material for your estimate.</div>
+                    <div class="homeowner-no-text"><span id="tileInstallCompanyName">Peak Leads Group</span> does not install tile systems. Please select another material for your estimate.</div>
                 </div>
             </div>
         </div>
@@ -1522,6 +1579,13 @@
     <!-- REVIEWS SECTION -->
     <div class="reviews-section" id="reviewsSection">
         <div class="reviews-content">
+            <!-- LOCAL PICK BLOCK (above reviews) -->
+            <div class="local-pick-block" id="localPickBlock" style="display: none;">
+                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick</div>
+                <ul class="local-pick-list" id="localPickList">
+                    <!-- Local Pick items will be dynamically added here -->
+                </ul>
+            </div>
             <div class="reviews-container" id="reviewsContainer">
                 <!-- Review blocks will be dynamically added here -->
             </div>
@@ -2175,10 +2239,10 @@
             }
         })();
         
-        // Function to update partner name in privacy policy
+        // Function to update partner name in privacy policy and other branded elements
         function updatePartnerNameInPrivacyPolicy() {
             const partnerNameElement = document.getElementById('partnerBusinessName');
-            if (!partnerNameElement) return;
+            const tileInstallCompanyElement = document.getElementById('tileInstallCompanyName');
             
             // Try to get partner name from matched client first, then campaign client
             let partnerName = null;
@@ -2190,11 +2254,18 @@
                 partnerName = clientData.fields['Name'];
             }
             
-            // Update the text if we found a partner name, otherwise use default
-            if (partnerName) {
-                partnerNameElement.textContent = partnerName;
-            } else {
-                partnerNameElement.textContent = "Peak Leads Group and it's marketing partners";
+            // Update privacy policy text
+            if (partnerNameElement) {
+                if (partnerName) {
+                    partnerNameElement.textContent = partnerName;
+                } else {
+                    partnerNameElement.textContent = "Peak Leads Group and it's marketing partners";
+                }
+            }
+            
+            // Update tile install message with company name
+            if (tileInstallCompanyElement) {
+                tileInstallCompanyElement.textContent = partnerName || "Peak Leads Group";
             }
         }
         
@@ -3633,6 +3704,22 @@
             reviews = [];
             const fields = activeClient.fields;
 
+            // Collect Local Pick items (up to 5)
+            const localPickItems = [];
+            for (let i = 1; i <= 5; i++) {
+                const fieldName = `Local Pick ${i}`;
+                const text = fields[fieldName];
+                if (text && text.trim()) {
+                    localPickItems.push({ text: text.trim(), iconIndex: i });
+                }
+            }
+
+            // Build Local Pick block if we have items
+            const partnerName = (matchedClientData && matchedClientData.fields && matchedClientData.fields['Name']) ||
+                (campaignClientData && campaignClientData.fields && campaignClientData.fields['Name']) ||
+                (clientData && clientData.fields && clientData.fields['Name']) || 'Peak Leads Group';
+            buildLocalPickBlock(localPickItems, partnerName);
+
             // Collect reviews (up to 3)
             for (let i = 1; i <= 3; i++) {
                 const reviewTextField = `Review Text ${i}`;
@@ -3662,8 +3749,8 @@
                         updateBackgroundHeight();
                     }
                 }, 300);
-            } else if (reviews.length > 0) {
-                // Page load: show reviews below form
+            } else if (reviews.length > 0 || localPickItems.length > 0) {
+                // Page load: show reviews section (with Local Pick block and/or reviews)
                 buildReviewBlocks();
                 document.getElementById('reviewsSection').classList.add('active');
                 const ctaSection = document.getElementById('ctaSection');
@@ -3680,6 +3767,34 @@
                     ctaSection.classList.remove('active');
                 }
             }
+        }
+
+        function buildLocalPickBlock(localPickItems, partnerName) {
+            const block = document.getElementById('localPickBlock');
+            const titleSpan = document.getElementById('localPickCompanyName');
+            const listEl = document.getElementById('localPickList');
+            if (!block || !listEl) return;
+
+            if (localPickItems.length === 0) {
+                block.style.display = 'none';
+                return;
+            }
+
+            if (titleSpan) titleSpan.textContent = partnerName;
+            listEl.innerHTML = '';
+
+            localPickItems.forEach((item) => {
+                const li = document.createElement('li');
+                li.className = 'local-pick-item';
+                const iconPath = `icons/${item.iconIndex}.svg`;
+                li.innerHTML = `
+                    <span class="local-pick-icon"><img src="${escapeHtml(iconPath)}" alt="" onerror="this.parentElement.style.display='none'"></span>
+                    <span class="local-pick-text">${escapeHtml(item.text)}</span>
+                `;
+                listEl.appendChild(li);
+            });
+
+            block.style.display = 'block';
         }
 
         function buildReviewBlocks() {
