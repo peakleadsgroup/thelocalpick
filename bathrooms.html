@@ -853,6 +853,10 @@
             line-height: 1.4;
         }
 
+        .local-pick-highlight {
+            color: #6190f2;
+        }
+
         .local-pick-list {
             list-style: none;
             padding: 0;
@@ -875,8 +879,8 @@
 
         .local-pick-icon {
             flex-shrink: 0;
-            width: 32px;
-            height: 32px;
+            width: 48px;
+            height: 48px;
         }
 
         .local-pick-icon img {
@@ -1184,7 +1188,7 @@
                     </svg>
                 </div>
                 <div class="mobile-home-content">
-                    <div class="why-we-ask-text">We're only able to install showers in mobile homes if they have permanent plumbing fixtures. Would you still like to continue?</div>
+                    <div class="why-we-ask-text">A new shower can only be installed in mobile homes with permanent plumbing fixtures.  Would you still like to continue?</div>
                     <button type="button" class="mobile-home-continue-btn" onclick="continueMobileHome()">Continue</button>
                 </div>
             </div>
@@ -1216,7 +1220,7 @@
                     </svg>
                 </div>
                 <div class="repair-damage-content">
-                    <div class="homeowner-no-text">We don't offer small repairs. We specialize exclusively in full replacements and conversions.</div>
+                    <div class="homeowner-no-text"><span id="repairCompanyName">Peak Leads Group</span> doesn't offer small repairs.  They specialize exclusively in full replacements and conversions</div>
                 </div>
             </div>
         </div>
@@ -1226,7 +1230,7 @@
             <div class="step-header">Do you have any material preferences?</div>
             <div class="options">
                 <div class="option" onclick="selectOptionAndAdvance(this, 'materialPref', 'acrylic')">Acrylic</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'materialPref', 'composite_stone')">Composite stone</div>
+                <div class="option" id="compositeStoneOption" onclick="selectOptionAndAdvance(this, 'materialPref', 'composite_stone')">Composite stone</div>
                 <div class="option" onclick="selectOptionAndAdvance(this, 'materialPref', 'tile')">Tile</div>
                 <div class="option" onclick="selectOptionAndAdvance(this, 'materialPref', 'not_sure')">Not sure</div>
             </div>
@@ -1581,7 +1585,7 @@
         <div class="reviews-content">
             <!-- LOCAL PICK BLOCK (above reviews) -->
             <div class="local-pick-block" id="localPickBlock" style="display: none;">
-                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick</div>
+                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span></div>
                 <ul class="local-pick-list" id="localPickList">
                     <!-- Local Pick items will be dynamically added here -->
                 </ul>
@@ -1590,7 +1594,7 @@
                 <!-- Review blocks will be dynamically added here -->
             </div>
             <div style="text-align: center; padding: 32px 0 0;">
-                <button class="get-quote-bottom-btn" onclick="scrollToForm()">Get Quote</button>
+                <button class="get-quote-bottom-btn" id="getQuoteBottomBtn" onclick="scrollToForm()">Get Estimate from <span id="getQuoteCompanyName">Peak Leads Group</span></button>
             </div>
         </div>
     </div>
@@ -1742,6 +1746,27 @@
         let currentSubmitScreenType = null; // Store the current submit screen type
         let appointmentTimeSelected = false; // True after user selects a time (so bottom shows confirmation, not calendar)
         let lastAppointmentText = ''; // Formatted appointment date/time for confirmation message
+        
+        // Returns true if the active client has "Tile?" checkbox checked in Airtable (tile is allowed)
+        function isTileSupported() {
+            const activeClient = matchedClientData || campaignClientData;
+            if (!activeClient || !activeClient.fields) return false;
+            return activeClient.fields['Tile?'] === true;
+        }
+
+        // Returns true if the active client has "Composite Stone?" checkbox checked in Airtable
+        function isCompositeStoneSupported() {
+            const activeClient = matchedClientData || campaignClientData;
+            if (!activeClient || !activeClient.fields) return false;
+            return activeClient.fields['Composite Stone?'] === true;
+        }
+
+        function updateMaterialStepOptions() {
+            const compositeStoneOpt = document.getElementById('compositeStoneOption');
+            if (compositeStoneOpt) {
+                compositeStoneOpt.style.display = isCompositeStoneSupported() ? '' : 'none';
+            }
+        }
         
         // Get campaign ID immediately from URL (before DOM is ready)
         const urlParams = new URLSearchParams(window.location.search);
@@ -2222,6 +2247,8 @@
                     
                     // Update partner name in privacy policy
                     updatePartnerNameInPrivacyPolicy();
+                    // Update material step options (e.g. Composite stone visibility)
+                    updateMaterialStepOptions();
                 } else {
                     console.warn('No client data loaded from campaign');
                     // Initialize default Meta Pixel (if needed)
@@ -2231,11 +2258,13 @@
                     }
                     // Update partner name with default
                     updatePartnerNameInPrivacyPolicy();
+                    updateMaterialStepOptions();
                 }
             } catch (error) {
                 console.error('Error initializing page:', error);
                 // Update partner name with default on error
                 updatePartnerNameInPrivacyPolicy();
+                updateMaterialStepOptions();
             }
         })();
         
@@ -2266,6 +2295,18 @@
             // Update tile install message with company name
             if (tileInstallCompanyElement) {
                 tileInstallCompanyElement.textContent = partnerName || "Peak Leads Group";
+            }
+
+            // Update repair message with company name
+            const repairCompanyElement = document.getElementById('repairCompanyName');
+            if (repairCompanyElement) {
+                repairCompanyElement.textContent = partnerName || "Peak Leads Group";
+            }
+
+            // Update Get Estimate button with company name
+            const getQuoteCompanyElement = document.getElementById('getQuoteCompanyName');
+            if (getQuoteCompanyElement) {
+                getQuoteCompanyElement.textContent = partnerName || "Peak Leads Group";
             }
         }
         
@@ -2401,12 +2442,18 @@
                 }
             }
             
-            // Material preferences step: show red message when "Tile" selected, don't advance
+            // Material preferences step: show red message when "Tile" selected only if Tile? is unchecked in Airtable
             if (field === 'materialPref') {
                 const tileMsg = document.getElementById('tileMessage');
                 if (value === 'tile') {
-                    if (tileMsg) tileMsg.style.display = 'flex';
-                    return;
+                    if (isTileSupported()) {
+                        // Tile supported - allow selection, don't show message
+                        if (tileMsg) tileMsg.style.display = 'none';
+                    } else {
+                        // Tile not supported - show message, don't advance
+                        if (tileMsg) tileMsg.style.display = 'flex';
+                        return;
+                    }
                 } else {
                     if (tileMsg) tileMsg.style.display = 'none';
                 }
@@ -2527,11 +2574,12 @@
                         repairDamageMsg.style.display = 'none';
                     }
                 }
-                // Reset tile message visibility when returning to step 5
+                // Reset step 5 options visibility when returning to step 5
                 if (currentStep === 5) {
+                    updateMaterialStepOptions();
                     const tileMsg = document.getElementById('tileMessage');
                     if (formData.materialPref === 'tile' && tileMsg) {
-                        tileMsg.style.display = 'flex';
+                        tileMsg.style.display = isTileSupported() ? 'none' : 'flex';
                     } else if (tileMsg) {
                         tileMsg.style.display = 'none';
                     }
@@ -2546,6 +2594,7 @@
                 document.getElementById('step' + currentStep).classList.add('active');
                 updateProgress();
                 updateBackButtonVisibility();
+                if (currentStep === 5) updateMaterialStepOptions();
             }
         }
 
