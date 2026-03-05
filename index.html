@@ -2214,10 +2214,11 @@
                 logoImg.src = logoUrl;
                 logoImg.style.display = 'block';
                 
-                // Handle logo load errors
+                // Handle logo load errors - fall back to default Local Pick logo
                 logoImg.onerror = function() {
                     console.error('Failed to load logo image:', logoUrl);
-                    logoImg.style.display = 'none';
+                    logoImg.src = 'images/TheLocalPick-FlatLeftAligned.svg';
+                    logoImg.onerror = null;
                 };
             }
         }
