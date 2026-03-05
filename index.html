@@ -866,12 +866,18 @@
 
         .local-pick-item {
             display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 18px;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
             font-size: 16px;
             color: #666;
             line-height: 1.5;
+        }
+
+        .local-pick-item .local-pick-text {
+            text-align: left;
+            width: 100%;
         }
 
         .local-pick-item:last-child {
@@ -880,8 +886,8 @@
 
         .local-pick-icon {
             flex-shrink: 0;
-            width: 48px;
-            height: 48px;
+            width: 64px;
+            height: 64px;
         }
 
         .local-pick-icon img {
