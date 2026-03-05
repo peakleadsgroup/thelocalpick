@@ -78,7 +78,8 @@
             display: flex;
             align-items: flex-start;
             gap: 12px;
-            background: #e0f7fa;
+            background: white;
+            border: 2px solid #2196f3;
             border-radius: 10px;
             padding: 16px;
             margin-top: 25px;
@@ -1250,7 +1251,7 @@
         <!-- STEP 6: Timeline -->
         <div class="form-step" id="step6">
             <div class="step-header">How soon would you like this project to be completed?</div>
-            <div class="step-subheader">We only give estimates for projects that can start soon so pricing is accurate</div>
+            <div class="step-subheader">Estimates can only be given for projects that can start soon so pricing is accurate</div>
             <div class="options">
                 <div class="option" onclick="selectOptionAndAdvance(this, 'timeline', 'asap')">ASAP</div>
                 <div class="option" onclick="selectOptionAndAdvance(this, 'timeline', 'within_month')">Within a month</div>
@@ -1270,7 +1271,7 @@
 
         <!-- STEP 8: NAME -->
         <div class="form-step" id="step8">
-            <div class="step-header">Who will we be speaking with?</div>
+            <div class="step-header">What is your name?</div>
             <div class="name-grid">
                 <div class="address-field">
                     <label class="address-label" for="firstName">First Name</label>
@@ -1289,7 +1290,7 @@
         <!-- STEP 9: Address -->
         <div class="form-step" id="step9">
             <div class="step-header">What is the location of this project?</div>
-            <div class="step-subheader">Please make sure your address is full and accurate so we can confirm you are within our service area</div>
+            <div class="step-subheader">Please make sure your address is full and accurate so we can confirm you are within <span id="addressServiceAreaCompany">Peak Leads Group</span>'s service area</div>
             <div class="address-grid">
                 <div class="address-field">
                     <label class="address-label" for="street">Street Address</label>
@@ -1320,7 +1321,7 @@
 
         <!-- STEP 10: PHONE -->
         <div class="form-step" id="step10">
-            <div class="step-header">Where can we reach you to schedule your free in-home estimate?</div>
+            <div class="step-header">Where can <span id="contactReachCompany">Peak Leads Group</span> reach you to schedule your free in-home estimate?</div>
             <div class="step-subheader">To give you an accurate estimate, a design specialist will measure your space and show you design options that fit your home and budget</div>
             <div class="row">
                 <div id="phoneWrap" class="address-field">
@@ -2301,6 +2302,18 @@
             const repairCompanyElement = document.getElementById('repairCompanyName');
             if (repairCompanyElement) {
                 repairCompanyElement.textContent = partnerName || "Peak Leads Group";
+            }
+
+            // Update address service area message with company name
+            const addressServiceAreaElement = document.getElementById('addressServiceAreaCompany');
+            if (addressServiceAreaElement) {
+                addressServiceAreaElement.textContent = partnerName || "Peak Leads Group";
+            }
+
+            // Update contact step header with company name
+            const contactReachElement = document.getElementById('contactReachCompany');
+            if (contactReachElement) {
+                contactReachElement.textContent = partnerName || "Peak Leads Group";
             }
 
             // Update Get Estimate button with company name
