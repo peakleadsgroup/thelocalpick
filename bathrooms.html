@@ -1321,8 +1321,7 @@
 
         <!-- STEP 10: PHONE -->
         <div class="form-step" id="step10">
-            <div class="step-header">Where can <span id="contactReachCompany">Peak Leads Group</span> reach you to schedule your free in-home estimate?</div>
-            <div class="step-subheader">To give you an accurate estimate, a design specialist will measure your space and show you design options that fit your home and budget</div>
+            <div class="step-header">Where can <span id="contactReachCompany">Peak Leads Group</span> reach you with your estimate?</div>
             <div class="row">
                 <div id="phoneWrap" class="address-field">
                     <label class="address-label" for="phone">Phone</label>
@@ -1335,7 +1334,7 @@
                 </div>
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="submitFinalForm()" id="phoneSubmitBtn" disabled>Schedule Estimate</button>
+                <button class="nav-btn" onclick="submitFinalForm()" id="phoneSubmitBtn" disabled>Get Quote</button>
             </div>
             <div class="privacy-policy-text" id="privacyPolicyText">
                 <p>By clicking "NEXT STEP" and submitting this form, (i) I agree that <span id="partnerBusinessName">Peak Leads Group and it's marketing partners</span> may use automated technology to call or text my phone number (provided above) or email me regarding my request, and I may revoke this consent at any time, and (ii) I agree to the <a href="privacypolicy.html" target="_blank">Terms & Conditions and Privacy Policy</a>.</p>
@@ -4381,7 +4380,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 isSubmitting = false;
                 if (phoneSubmitBtn) {
                     phoneSubmitBtn.disabled = false;
-                    phoneSubmitBtn.textContent = 'Schedule Estimate';
+                    phoneSubmitBtn.textContent = 'Get Quote';
                 }
                 return; // Exit early - don't show calendar/phone options
             }
@@ -4466,7 +4465,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 isSubmitting = false;
                 if (phoneSubmitBtn) {
                     phoneSubmitBtn.disabled = false;
-                    phoneSubmitBtn.textContent = 'Schedule Estimate';
+                    phoneSubmitBtn.textContent = 'Get Quote';
                 }
             }
         }

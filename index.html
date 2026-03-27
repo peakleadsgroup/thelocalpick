@@ -1308,30 +1308,8 @@
             </div>
         </div>
 
-        <!-- STEP 5: Material Preferences -->
+        <!-- STEP 5: Timeline -->
         <div class="form-step" id="step5">
-            <div class="step-header">Do you have any material preferences?</div>
-            <div class="options">
-                <div class="option" onclick="selectOptionAndAdvance(this, 'materialPref', 'acrylic')">Acrylic</div>
-                <div class="option" id="compositeStoneOption" onclick="selectOptionAndAdvance(this, 'materialPref', 'composite_stone')">Composite stone</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'materialPref', 'tile')">Tile</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'materialPref', 'not_sure')">Not sure</div>
-            </div>
-            <div class="tile-message" id="tileMessage" style="display: none;">
-                <div class="homeowner-no-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                    </svg>
-                </div>
-                <div class="tile-message-content">
-                    <div class="homeowner-no-text"><span id="tileInstallCompanyName">Peak Leads Group</span> does not install tile systems. Please select another material for your estimate.</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- STEP 6: Timeline -->
-        <div class="form-step" id="step6">
             <div class="step-header">How soon would you like this project to be completed?</div>
             <div class="step-subheader">Estimates can only be given for projects that can start soon so pricing is accurate</div>
             <div class="options">
@@ -1342,17 +1320,8 @@
             </div>
         </div>
 
-        <!-- STEP 7: Has Estimate -->
-        <div class="form-step" id="step7">
-            <div class="step-header">Have you already received an estimate?</div>
-            <div class="options">
-                <div class="option" onclick="selectOptionAndAdvance(this, 'hasEstimate', 'yes')">Yes</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'hasEstimate', 'no')">No</div>
-            </div>
-        </div>
-
-        <!-- STEP 8: NAME -->
-        <div class="form-step" id="step8">
+        <!-- STEP 6: NAME -->
+        <div class="form-step" id="step6">
             <div class="step-header">What is your name?</div>
             <div class="name-grid">
                 <div class="address-field">
@@ -1365,12 +1334,12 @@
                 </div>
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="goToStep9()" id="nameNextBtn" disabled>Next</button>
+                <button class="nav-btn" onclick="goToStep7()" id="nameNextBtn" disabled>Next</button>
             </div>
         </div>
 
-        <!-- STEP 9: Address -->
-        <div class="form-step" id="step9">
+        <!-- STEP 7: Address -->
+        <div class="form-step" id="step7">
             <div class="step-header">What is the location of this project?</div>
             <div class="step-subheader">Please make sure your address is full and accurate so we can confirm you are within <span id="addressServiceAreaCompany">Peak Leads Group</span>'s service area</div>
             <div class="address-grid">
@@ -1397,14 +1366,13 @@
                 </div>
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="goToStep10()" id="submitFormBtn" disabled>Next</button>
+                <button class="nav-btn" onclick="goToStep8()" id="submitFormBtn" disabled>Next</button>
             </div>
         </div>
 
-        <!-- STEP 10: PHONE -->
-        <div class="form-step" id="step10">
-            <div class="step-header">Where can <span id="contactReachCompany">Peak Leads Group</span> reach you to schedule your free in-home estimate?</div>
-            <div class="step-subheader">To give you an accurate estimate, a design specialist will measure your space and show you design options that fit your home and budget</div>
+        <!-- STEP 8: PHONE -->
+        <div class="form-step" id="step8">
+            <div class="step-header">Where can <span id="contactReachCompany">Peak Leads Group</span> reach you with your estimate?</div>
             <div class="row">
                 <div id="phoneWrap" class="address-field">
                     <label class="address-label" for="phone">Phone</label>
@@ -1417,7 +1385,7 @@
                 </div>
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="submitFinalForm()" id="phoneSubmitBtn" disabled>Schedule Estimate</button>
+                <button class="nav-btn" onclick="submitFinalForm()" id="phoneSubmitBtn" disabled>Get Quote</button>
             </div>
             <div class="privacy-policy-text" id="privacyPolicyText">
                 <p>By clicking "NEXT STEP" and submitting this form, (i) I agree that <span id="partnerBusinessName">Peak Leads Group and it's marketing partners</span> may use automated technology to call or text my phone number (provided above) or email me regarding my request, and I may revoke this consent at any time, and (ii) I agree to the <a href="privacypolicy.html" target="_blank">Terms & Conditions and Privacy Policy</a>.</p>
@@ -1810,7 +1778,7 @@
         // ============================================
 
         let currentStep = 0;
-        const TOTAL_STEPS = 11;
+        const TOTAL_STEPS = 9;
         let formData = {};
         let eventId = null;
         let hasTrackedEngagement = false;
@@ -1830,27 +1798,6 @@
         let currentSubmitScreenType = null; // Store the current submit screen type
         let appointmentTimeSelected = false; // True after user selects a time (so bottom shows confirmation, not calendar)
         let lastAppointmentText = ''; // Formatted appointment date/time for confirmation message
-        
-        // Returns true if the active client has "Tile?" checkbox checked in Airtable (tile is allowed)
-        function isTileSupported() {
-            const activeClient = matchedClientData || campaignClientData;
-            if (!activeClient || !activeClient.fields) return false;
-            return activeClient.fields['Tile?'] === true;
-        }
-
-        // Returns true if the active client has "Composite Stone?" checkbox checked in Airtable
-        function isCompositeStoneSupported() {
-            const activeClient = matchedClientData || campaignClientData;
-            if (!activeClient || !activeClient.fields) return false;
-            return activeClient.fields['Composite Stone?'] === true;
-        }
-
-        function updateMaterialStepOptions() {
-            const compositeStoneOpt = document.getElementById('compositeStoneOption');
-            if (compositeStoneOpt) {
-                compositeStoneOpt.style.display = isCompositeStoneSupported() ? '' : 'none';
-            }
-        }
         
         // Index page uses zip code to find client (no campaign ID)
         const initialCampaignID = null;
@@ -2298,11 +2245,6 @@
                 fbq('track', 'PageView');
             }
             updatePartnerNameInPrivacyPolicy();
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', updateMaterialStepOptions);
-            } else {
-                updateMaterialStepOptions();
-            }
         })();
 
         async function handleZipSubmit() {
@@ -2339,7 +2281,6 @@
                         initializeMetaPixel(metaPixel);
                     }
                     updatePartnerNameInPrivacyPolicy();
-                    updateMaterialStepOptions();
                     tryShowReviewsOnLoad();
 
                     document.getElementById('step0').classList.remove('active');
@@ -2364,7 +2305,6 @@
         // Function to update partner name in privacy policy and other branded elements
         function updatePartnerNameInPrivacyPolicy() {
             const partnerNameElement = document.getElementById('partnerBusinessName');
-            const tileInstallCompanyElement = document.getElementById('tileInstallCompanyName');
             
             // Try to get partner name from matched client first, then campaign client
             let partnerName = null;
@@ -2383,11 +2323,6 @@
                 } else {
                     partnerNameElement.textContent = "Peak Leads Group and it's marketing partners";
                 }
-            }
-            
-            // Update tile install message with company name
-            if (tileInstallCompanyElement) {
-                tileInstallCompanyElement.textContent = partnerName || "Peak Leads Group";
             }
 
             // Update repair message with company name
@@ -2547,23 +2482,6 @@
                 }
             }
             
-            // Material preferences step: show red message when "Tile" selected only if Tile? is unchecked in Airtable
-            if (field === 'materialPref') {
-                const tileMsg = document.getElementById('tileMessage');
-                if (value === 'tile') {
-                    if (isTileSupported()) {
-                        // Tile supported - allow selection, don't show message
-                        if (tileMsg) tileMsg.style.display = 'none';
-                    } else {
-                        // Tile not supported - show message, don't advance
-                        if (tileMsg) tileMsg.style.display = 'flex';
-                        return;
-                    }
-                } else {
-                    if (tileMsg) tileMsg.style.display = 'none';
-                }
-            }
-            
             setTimeout(() => {
                 nextStep();
             }, 200);
@@ -2684,28 +2602,17 @@
                         repairDamageMsg.style.display = 'none';
                     }
                 }
-                // Reset step 5 options visibility when returning to step 5
-                if (currentStep === 5) {
-                    updateMaterialStepOptions();
-                    const tileMsg = document.getElementById('tileMessage');
-                    if (formData.materialPref === 'tile' && tileMsg) {
-                        tileMsg.style.display = isTileSupported() ? 'none' : 'flex';
-                    } else if (tileMsg) {
-                        tileMsg.style.display = 'none';
-                    }
-                }
             }
         }
 
         function nextStep() {
-            if (currentStep < 10) {
+            if (currentStep < 8) {
                 document.getElementById('step' + currentStep).classList.remove('active');
                 currentStep++;
                 document.getElementById('step' + currentStep).classList.add('active');
                 updateProgress();
                 updateBackButtonVisibility();
-                if (currentStep === 5) updateMaterialStepOptions();
-                if (currentStep === 9 && formData.initialZip) {
+                if (currentStep === 7 && formData.initialZip) {
                     const zipInput = document.getElementById('zip');
                     if (zipInput && !zipInput.value) zipInput.value = formData.initialZip;
                     validateAddressForm();
@@ -2713,7 +2620,7 @@
             }
         }
 
-        function goToStep9() {
+        function goToStep7() {
             validateNameForm();
             if (formData.firstName && formData.lastName) {
                 nextStep();
@@ -2735,7 +2642,7 @@
             }
         }
 
-        function goToStep10() {
+        function goToStep8() {
             validateAddressForm();
             if (formData.address) {
                 nextStep();
@@ -3589,7 +3496,7 @@
         }
         
         async function showCalendarScreen() {
-            const step10El = document.getElementById('step10');
+            const phoneStepEl = document.getElementById('step8');
             const calendarStep = document.getElementById('calendarStep');
             const progressArea = document.getElementById('progressArea');
             
@@ -3657,7 +3564,7 @@
                 }
             }
             
-            if (step10El) step10El.classList.remove('active');
+            if (phoneStepEl) phoneStepEl.classList.remove('active');
             if (calendarStep) {
                 calendarStep.classList.add('active');
             } else {
@@ -3737,7 +3644,7 @@
                 return;
             }
 
-            document.getElementById('step10').classList.remove('active');
+            document.getElementById('step8').classList.remove('active');
             document.getElementById('contactStep').classList.remove('active');
             document.getElementById('contactStepAddContact').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
@@ -3815,7 +3722,7 @@
             }
             
             // Show the contact screen
-            document.getElementById('step10').classList.remove('active');
+            document.getElementById('step8').classList.remove('active');
             document.getElementById('contactStepAddContact').classList.remove('active');
             document.getElementById('contactStep').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
@@ -3838,7 +3745,7 @@
             if (confirmationReadySubtitle) {
                 confirmationReadySubtitle.textContent = "Can't wait to hear from us? We'll give you a call soon to schedule your free estimate.";
             }
-            document.getElementById('step10').classList.remove('active');
+            document.getElementById('step8').classList.remove('active');
             document.getElementById('confirmationStep').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
             
@@ -4297,10 +4204,6 @@
             };
             return options[value] || value;
         }
-        function getMaterialPrefDisplay(value) {
-            const options = { 'acrylic': 'Acrylic', 'composite_stone': 'Composite stone', 'tile': 'Tile', 'not_sure': 'Not sure' };
-            return options[value] || value;
-        }
         function getTimelineDisplay(value) {
             const options = {
                 'asap': 'ASAP',
@@ -4308,10 +4211,6 @@
                 'within_3_months': 'Within 3 months',
                 'within_6_months': 'Within 6 months'
             };
-            return options[value] || value;
-        }
-        function getHasEstimateDisplay(value) {
-            const options = { 'yes': 'Yes', 'no': 'No' };
             return options[value] || value;
         }
 
@@ -4370,9 +4269,7 @@
                     home_type: finalData.homeType,
                     project_type: finalData.projectType,
                     main_goal: finalData.mainGoal,
-                    material_pref: finalData.materialPref,
-                    timeline: finalData.timeline,
-                    has_estimate: finalData.hasEstimate
+                    timeline: finalData.timeline
                 };
                 
                 fbq('track', 'Lead', leadEventData, {
@@ -4380,7 +4277,7 @@
                 });
             }
             if (TESTING_MODE) {
-                console.log('[TESTING_MODE] Meta Pixel Lead event would fire with:', { homeowner_status: finalData.homeowner, home_type: finalData.homeType, project_type: finalData.projectType, main_goal: finalData.mainGoal, material_pref: finalData.materialPref, timeline: finalData.timeline, has_estimate: finalData.hasEstimate });
+                console.log('[TESTING_MODE] Meta Pixel Lead event would fire with:', { homeowner_status: finalData.homeowner, home_type: finalData.homeType, project_type: finalData.projectType, main_goal: finalData.mainGoal, timeline: finalData.timeline });
             }
             
             // Find ad by adATID from URL
@@ -4404,9 +4301,7 @@ ${emailLine}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}
 Home Type: ${getHomeTypeDisplay(finalData.homeType)}
 Project Type: ${getProjectTypeDisplay(finalData.projectType)}
 Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}
-Material Preference: ${getMaterialPrefDisplay(finalData.materialPref)}
 Timeline: ${getTimelineDisplay(finalData.timeline)}
-Already received estimate? ${getHasEstimateDisplay(finalData.hasEstimate)}
 
 Address:
 ${finalData.address.street}
@@ -4428,7 +4323,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             
             // Build HTML version of full summary
             const emailLineHTML = finalData.email ? `Email: ${finalData.email}<BR>` : '';
-            const fullSummaryHTML = `Bathroom Remodel Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Home Type: ${getHomeTypeDisplay(finalData.homeType)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR>Material Preference: ${getMaterialPrefDisplay(finalData.materialPref)}<BR>Timeline: ${getTimelineDisplay(finalData.timeline)}<BR>Already received estimate? ${getHasEstimateDisplay(finalData.hasEstimate)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
+            const fullSummaryHTML = `Bathroom Remodel Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Home Type: ${getHomeTypeDisplay(finalData.homeType)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR>Timeline: ${getTimelineDisplay(finalData.timeline)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
@@ -4483,7 +4378,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 isSubmitting = false;
                 if (phoneSubmitBtn) {
                     phoneSubmitBtn.disabled = false;
-                    phoneSubmitBtn.textContent = 'Schedule Estimate';
+                    phoneSubmitBtn.textContent = 'Get Quote';
                 }
                 return; // Exit early - don't show calendar/phone options
             }
@@ -4568,7 +4463,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 isSubmitting = false;
                 if (phoneSubmitBtn) {
                     phoneSubmitBtn.disabled = false;
-                    phoneSubmitBtn.textContent = 'Schedule Estimate';
+                    phoneSubmitBtn.textContent = 'Get Quote';
                 }
             }
         }
