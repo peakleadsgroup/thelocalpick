@@ -2298,15 +2298,7 @@
                 if (campaignClientData) {
                     clientData = campaignClientData;
 
-                    const logoUrl = campaignClientData.fields['Logo Link'];
-                    if (logoUrl) {
-                        preloadLogo(logoUrl);
-                        if (document.readyState === 'loading') {
-                            document.addEventListener('DOMContentLoaded', () => loadLogo(logoUrl));
-                        } else {
-                            loadLogo(logoUrl);
-                        }
-                    }
+                    // Home screen (step 0): always show The Local Pick logo; partner logo only after zip match in handleZipSubmit
 
                     const metaPixel = campaignClientData.fields['Meta Pixel'];
                     if (metaPixel) {
@@ -2527,12 +2519,9 @@
                 // Initial update
                 setTimeout(updateBackgroundHeight, 100);
                 
-                // If client data is already loaded, ensure logo is displayed
-                if (clientData && clientData.fields && clientData.fields['Logo Link']) {
-                    const logoImg = document.getElementById('logoImg');
-                    if (logoImg && !logoImg.src) {
-                        loadLogo(clientData.fields['Logo Link']);
-                    }
+                // Zip step: always The Local Pick mark (never swap to company logo until user passes step 0)
+                if (currentStep === 0) {
+                    applyDefaultLocalPickLogo();
                 }
                 
                 // Show reviews below form when DOM is ready (if client data already loaded)
@@ -2543,12 +2532,8 @@
             updateBackgroundHeight();
             tryShowReviewsOnLoad();
             refreshStep0Copy();
-            // If client data is already loaded, ensure logo is displayed
-            if (clientData && clientData.fields && clientData.fields['Logo Link']) {
-                const logoImg = document.getElementById('logoImg');
-                if (logoImg && !logoImg.src) {
-                    loadLogo(clientData.fields['Logo Link']);
-                }
+            if (currentStep === 0) {
+                applyDefaultLocalPickLogo();
             }
         }
 
@@ -2705,6 +2690,7 @@
                 if (currentStep === 0) {
                     const zipErr = document.getElementById('zipErrorMessage');
                     if (zipErr) zipErr.style.display = 'none';
+                    applyDefaultLocalPickLogo();
                     refreshStep0Copy();
                 }
                 // Reset homeowner step message visibility when returning to step 1
