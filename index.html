@@ -67,6 +67,15 @@
             font-weight: bold;
         }
 
+        .step-header .step-header-highlight {
+            background-color: #ffeb3b;
+            color: #000;
+            padding: 0 0.15em;
+            border-radius: 4px;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+        }
+
         .step-subheader {
             font-size: 16px;
             color: #666;
@@ -815,6 +824,11 @@
             display: block;
         }
 
+        /* Main funnel: show only Airtable Local Pick bullets; reviews stay for post-submit */
+        .reviews-section.main-funnel-local-pick-only .reviews-container {
+            display: none;
+        }
+
         .get-quote-bottom-btn {
             display: inline-block; background: #6190f2; color: white; padding: 16px 40px;
             border-radius: 12px; font-size: 18px; font-weight: 600; border: none;
@@ -1222,7 +1236,7 @@
 
         <!-- STEP 1: Homeowner -->
         <div class="form-step" id="step1">
-            <div class="step-header">Take our 30 second quiz for a fast and free estimate</div>
+            <div class="step-header">Take our 30 second quiz for a <span class="step-header-highlight">fast and free estimate</span></div>
             <div class="step-subheader">Are you the homeowner or authorized decision maker?</div>
             <div class="options">
                 <div class="option" onclick="selectOptionAndAdvance(this, 'homeowner', 'yes')">Yes</div>
@@ -3886,7 +3900,78 @@
         let reviews = [];
 
         function tryShowReviewsOnLoad() {
-            // Reviews and partner Local Pick block are shown only after form submit (see showReviewsModal).
+            refreshPartnerLocalPickSection();
+        }
+
+        /** Partner “why they’re our Local Pick” from Airtable (Local Pick 1–5) below the form during the quiz; not post-submit. */
+        function refreshPartnerLocalPickSection() {
+            if (postFormSubmitted) return;
+
+            // Zip step uses static “how we choose” copy; Airtable partner bullets only after they’ve entered a zip
+            if (!formData.initialZip) {
+                const reviewsSection = document.getElementById('reviewsSection');
+                const reviewsContainer = document.getElementById('reviewsContainer');
+                if (reviewsSection) {
+                    reviewsSection.classList.remove('active');
+                    reviewsSection.classList.remove('main-funnel-local-pick-only');
+                }
+                if (reviewsContainer) reviewsContainer.innerHTML = '';
+                setTimeout(() => {
+                    if (typeof updateBackgroundHeight === 'function') updateBackgroundHeight();
+                }, 100);
+                return;
+            }
+
+            const reviewsSection = document.getElementById('reviewsSection');
+            const reviewsContainer = document.getElementById('reviewsContainer');
+            const ctaSection = document.getElementById('ctaSection');
+            const getQuoteBtn = document.getElementById('getQuoteBottomBtn');
+
+            const activeClient = getActiveClient();
+            if (!activeClient || !activeClient.fields) {
+                if (reviewsSection) {
+                    reviewsSection.classList.remove('active');
+                    reviewsSection.classList.remove('main-funnel-local-pick-only');
+                }
+                if (reviewsContainer) reviewsContainer.innerHTML = '';
+                if (ctaSection) ctaSection.classList.remove('active');
+                setTimeout(() => {
+                    if (typeof updateBackgroundHeight === 'function') updateBackgroundHeight();
+                }, 100);
+                return;
+            }
+
+            const fields = activeClient.fields;
+            const localPickItems = [];
+            for (let i = 1; i <= 5; i++) {
+                const fieldName = `Local Pick ${i}`;
+                const text = fields[fieldName];
+                if (text && text.trim()) {
+                    localPickItems.push({ text: text.trim(), iconIndex: i });
+                }
+            }
+
+            const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
+            buildLocalPickBlock(localPickItems, partnerName);
+
+            if (localPickItems.length > 0) {
+                if (reviewsContainer) reviewsContainer.innerHTML = '';
+                if (reviewsSection) {
+                    reviewsSection.classList.add('active');
+                    reviewsSection.classList.add('main-funnel-local-pick-only');
+                }
+                if (ctaSection) ctaSection.classList.remove('active');
+                if (getQuoteBtn) getQuoteBtn.style.display = '';
+            } else {
+                if (reviewsSection) {
+                    reviewsSection.classList.remove('active');
+                    reviewsSection.classList.remove('main-funnel-local-pick-only');
+                }
+                if (ctaSection) ctaSection.classList.remove('active');
+            }
+            setTimeout(() => {
+                if (typeof updateBackgroundHeight === 'function') updateBackgroundHeight();
+            }, 100);
         }
 
         function showReviewsModal() {
@@ -3936,6 +4021,7 @@
             if (postFormSubmitted) {
                 const reviewsSection = document.getElementById('reviewsSection');
                 const ctaSection = document.getElementById('ctaSection');
+                if (reviewsSection) reviewsSection.classList.remove('main-funnel-local-pick-only');
                 if (reviews.length > 0 || localPickItems.length > 0) {
                     buildReviewBlocks();
                     if (reviewsSection) reviewsSection.classList.add('active');
@@ -3952,15 +4038,7 @@
                     }
                 }, 300);
             } else {
-                const reviewsSection = document.getElementById('reviewsSection');
-                if (reviewsSection) reviewsSection.classList.remove('active');
-                const ctaSection = document.getElementById('ctaSection');
-                if (ctaSection) ctaSection.classList.remove('active');
-                setTimeout(() => {
-                    if (typeof updateBackgroundHeight === 'function') {
-                        updateBackgroundHeight();
-                    }
-                }, 300);
+                refreshPartnerLocalPickSection();
             }
         }
 
@@ -4377,6 +4455,7 @@
                     
                     matchedClientData = await findClientByZipCode(finalData.address.zip);
                     updatePartnerNameInPrivacyPolicy();
+                    refreshPartnerLocalPickSection();
                 } catch (error) {
                     console.error('Error finding client by zip code:', error);
                 }
