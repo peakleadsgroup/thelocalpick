@@ -185,21 +185,6 @@
             background: #6190f2;
         }
 
-        .tile-message {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            background: #ffebee;
-            border-radius: 10px;
-            padding: 16px;
-            margin-top: 25px;
-            text-align: left;
-        }
-
-        .tile-message-content {
-            flex: 1;
-        }
-
         .sub-heading {
             font-size: 14px;
             color: #666;
@@ -1218,17 +1203,6 @@
         <div class="form-step" id="step6">
             <div class="step-header">Do you have any material preferences?</div>
             <div class="options" id="materialPrefOptions"></div>
-            <div class="tile-message" id="tileMessage" style="display: none;">
-                <div class="homeowner-no-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                    </svg>
-                </div>
-                <div class="tile-message-content">
-                    <div class="homeowner-no-text"><span id="tileInstallCompanyName">Peak Leads Group</span> does not install tile systems. Please select another material for your estimate.</div>
-                </div>
-            </div>
         </div>
 
         <!-- STEP 7: Timeline -->
@@ -1806,11 +1780,6 @@
                 const showMobile = currentStep === 4 && formData.homeType === 'mobile_home';
                 mobileHomeMsg.style.display = showMobile ? 'flex' : 'none';
             }
-            const tileMsg = document.getElementById('tileMessage');
-            if (tileMsg) {
-                const showTile = currentStep === 6 && formData.materialPref === 'tile' && !isTileSupported();
-                tileMsg.style.display = showTile ? 'flex' : 'none';
-            }
         }
 
         function tryRestoreFunnelProgressAfterBootstrap() {
@@ -1865,13 +1834,6 @@
             } catch (e) {
                 console.warn('Funnel resume failed:', e);
             }
-        }
-        
-        // Returns true if the active client has "Tile?" checkbox checked in Airtable (tile is allowed)
-        function isTileSupported() {
-            const activeClient = matchedClientData || campaignClientData;
-            if (!activeClient || !activeClient.fields) return false;
-            return activeClient.fields['Tile?'] === true;
         }
 
         function normalizeAirtableMultiSelectField(raw) {
@@ -2734,7 +2696,6 @@
         // Function to update partner name in privacy policy and other branded elements
         function updatePartnerNameInPrivacyPolicy() {
             const partnerNameElement = document.getElementById('partnerBusinessName');
-            const tileInstallCompanyElement = document.getElementById('tileInstallCompanyName');
             
             // Try to get partner name from matched client first, then campaign client
             let partnerName = null;
@@ -2753,11 +2714,6 @@
                 } else {
                     partnerNameElement.textContent = "Peak Leads Group and it's marketing partners";
                 }
-            }
-            
-            // Update tile install message with company name
-            if (tileInstallCompanyElement) {
-                tileInstallCompanyElement.textContent = partnerName || "Peak Leads Group";
             }
 
             // Update address service area message with company name
@@ -2929,23 +2885,6 @@
                 }
             }
             
-            // Material preferences step: show red message when "Tile" selected only if Tile? is unchecked in Airtable
-            if (field === 'materialPref') {
-                const tileMsg = document.getElementById('tileMessage');
-                if (value === 'tile') {
-                    if (isTileSupported()) {
-                        // Tile supported - allow selection, don't show message
-                        if (tileMsg) tileMsg.style.display = 'none';
-                    } else {
-                        // Tile not supported - show message, don't advance
-                        if (tileMsg) tileMsg.style.display = 'flex';
-                        return;
-                    }
-                } else {
-                    if (tileMsg) tileMsg.style.display = 'none';
-                }
-            }
-            
             setTimeout(() => {
                 nextStep();
             }, 200);
@@ -3076,12 +3015,6 @@
                 // Reset material / tile message when returning to material step (step 6)
                 if (currentStep === 6) {
                     updateMaterialStepOptions();
-                    const tileMsg = document.getElementById('tileMessage');
-                    if (formData.materialPref === 'tile' && tileMsg) {
-                        tileMsg.style.display = isTileSupported() ? 'none' : 'flex';
-                    } else if (tileMsg) {
-                        tileMsg.style.display = 'none';
-                    }
                 }
                 persistFunnelProgress();
             }
