@@ -1691,7 +1691,9 @@
         // ============================================
         const AIRTABLE_BASE_ID = 'appmBb0lzqRK9dI8v';
         const AIRTABLE_BASE_URL = `/api/airtable/v0/${AIRTABLE_BASE_ID}`;
-        
+        /** Console filter: Airtable:bathrooms */
+        const AIRTABLE_LOG_PREFIX = '[Airtable:bathrooms]';
+
         const TABLES = {
             CLIENTS: 'tblMl8Y97cMSbricC',
             CAMPAIGNS: 'tbl6uhtOFzGzA7EMu',
@@ -1858,34 +1860,128 @@
         // ============================================
         // AIRTABLE API FUNCTIONS
         // ============================================
-        
-        async function fetchAirtableData(url) {
+
+        function escapeAirtableStringForFormula(value) {
+            return String(value).replace(/"/g, '""');
+        }
+
+        /** Resolve /api/... against page origin (file:// will fail — we log a hint). */
+        function resolveAirtableFetchUrl(url) {
+            if (!url) return url;
+            if (/^https?:\/\//i.test(url)) return url;
             try {
-                const response = await fetch(url, {
+                if (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:') {
+                    console.warn(AIRTABLE_LOG_PREFIX, 'Page loaded as file:// — fetch cannot reach /api/airtable. Use deployed Pages or `npx wrangler pages dev` with functions.');
+                }
+                return new URL(url, window.location.origin).href;
+            } catch (e) {
+                console.error(AIRTABLE_LOG_PREFIX, 'resolveAirtableFetchUrl failed', url, e);
+                return url;
+            }
+        }
+
+        /** First linked client id from a Campaign record (supports common field names). */
+        function getCampaignLinkedClientRecordId(campaign) {
+            const f = campaign && campaign.fields;
+            if (!f) return null;
+            const keys = ['Client', 'Clients', 'Linked Client'];
+            for (const key of keys) {
+                const v = f[key];
+                if (Array.isArray(v) && v.length) {
+                    const id = v[0];
+                    if (typeof id === 'string' && id.startsWith('rec')) return id;
+                }
+                if (typeof v === 'string' && v.startsWith('rec')) return v;
+            }
+            return null;
+        }
+
+        async function fetchAirtableData(url) {
+            const resolved = resolveAirtableFetchUrl(url);
+            const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+            console.info(AIRTABLE_LOG_PREFIX, 'GET →', resolved);
+            try {
+                const response = await fetch(resolved, {
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 });
-                
+                const text = await response.text();
+                const ms = typeof performance !== 'undefined' ? Math.round(performance.now() - t0) : null;
+
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    const error = new Error(`Airtable API error: ${response.status} ${response.statusText}`);
-                    throw error;
+                    const snippet = text.length > 1200 ? text.slice(0, 1200) + '…' : text;
+                    console.error(AIRTABLE_LOG_PREFIX, 'GET failed', {
+                        url: resolved,
+                        status: response.status,
+                        statusText: response.statusText,
+                        ms,
+                        body: snippet
+                    });
+                    throw new Error(`Airtable API error: ${response.status} ${response.statusText} — ${snippet}`);
                 }
-                
-                return await response.json();
+
+                let data;
+                try {
+                    data = text ? JSON.parse(text) : {};
+                } catch (parseErr) {
+                    console.error(AIRTABLE_LOG_PREFIX, 'GET invalid JSON', { url: resolved, ms, textStart: text.slice(0, 500) });
+                    throw parseErr;
+                }
+
+                if (Array.isArray(data.records)) {
+                    console.info(AIRTABLE_LOG_PREFIX, 'GET ok', { url: resolved, ms, recordCount: data.records.length, offset: data.offset || null });
+                } else if (data.id) {
+                    console.info(AIRTABLE_LOG_PREFIX, 'GET ok (single record)', { url: resolved, ms, id: data.id });
+                } else {
+                    console.info(AIRTABLE_LOG_PREFIX, 'GET ok', { url: resolved, ms, keys: Object.keys(data) });
+                }
+                return data;
             } catch (error) {
-                console.error('Airtable fetch error:', error);
+                if (error && error.name === 'TypeError' && String(error.message).includes('fetch')) {
+                    console.error(AIRTABLE_LOG_PREFIX, 'GET network/CORS error', { url: resolved, message: error.message });
+                } else if (!String(error.message || '').includes('Airtable API error')) {
+                    console.error(AIRTABLE_LOG_PREFIX, 'GET error', { url: resolved, error });
+                }
                 throw error;
+            }
+        }
+
+        async function fetchAirtableMutation(url, method, bodyObject) {
+            const resolved = resolveAirtableFetchUrl(url);
+            const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+            const bodyStr = bodyObject !== undefined ? JSON.stringify(bodyObject) : undefined;
+            console.info(AIRTABLE_LOG_PREFIX, method, '→', resolved, bodyObject ? { bodyKeys: Object.keys(bodyObject) } : '');
+            const response = await fetch(resolved, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: bodyStr
+            });
+            const text = await response.text();
+            const ms = typeof performance !== 'undefined' ? Math.round(performance.now() - t0) : null;
+            if (!response.ok) {
+                const snippet = text.length > 1200 ? text.slice(0, 1200) + '…' : text;
+                console.error(AIRTABLE_LOG_PREFIX, method + ' failed', { url: resolved, status: response.status, ms, body: snippet });
+                throw new Error(`Airtable ${method} failed: ${response.status} ${response.statusText} — ${snippet}`);
+            }
+            console.info(AIRTABLE_LOG_PREFIX, method + ' ok', { url: resolved, ms });
+            try {
+                return text ? JSON.parse(text) : {};
+            } catch {
+                return {};
             }
         }
 
         async function fetchUrlParametersForClient(clientId, additionalLogData = {}) {
             try {
                 if (!clientId) {
+                    console.info(AIRTABLE_LOG_PREFIX, 'fetchUrlParametersForClient: no clientId, skipping');
                     return [];
                 }
-                
+                console.info(AIRTABLE_LOG_PREFIX, 'fetchUrlParametersForClient', { clientId, ...additionalLogData });
+
                 // Fetch URL parameters linked to this client
                 // Try multiple filter approaches for linked records
                 // First try: direct record ID match (works for single linked records)
@@ -1906,13 +2002,14 @@
                         parameter: record.fields['Parameter'] || '',
                         value: record.fields['Value'] || ''
                     }));
-                    
+                    console.info(AIRTABLE_LOG_PREFIX, 'fetchUrlParametersForClient: loaded', params.length, 'row(s)');
                     return params;
                 }
-                
+
+                console.info(AIRTABLE_LOG_PREFIX, 'fetchUrlParametersForClient: no rows for client', clientId);
                 return [];
             } catch (error) {
-                console.error('Error fetching URL parameters:', error);
+                console.error(AIRTABLE_LOG_PREFIX, 'Error fetching URL parameters:', error);
                 return [];
             }
         }
@@ -1955,52 +2052,62 @@
 
         async function loadClientFromCampaign(campaignIDParam = null) {
             try {
-                
-                // Use provided param or get from URL
                 const campaignID = campaignIDParam || initialCampaignID || new URLSearchParams(window.location.search).get('campaignID');
-                
+                console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign start', {
+                    campaignIDParam: campaignIDParam || null,
+                    initialCampaignID: initialCampaignID || null,
+                    resolvedCampaignID: campaignID || null
+                });
+
                 if (!campaignID) {
+                    console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: no campaign ID in URL/param — skip Airtable campaign load');
                     return null;
                 }
 
-                // First, try to fetch campaign by Campaign ID field
                 let campaign = null;
-                const campaignUrl = `${AIRTABLE_BASE_URL}/${TABLES.CAMPAIGNS}?filterByFormula={Campaign ID}="${campaignID}"`;
+                const filterExpr = `{Campaign ID}="${escapeAirtableStringForFormula(campaignID)}"`;
+                const campaignUrl = `${AIRTABLE_BASE_URL}/${TABLES.CAMPAIGNS}?filterByFormula=${encodeURIComponent(filterExpr)}`;
+                console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: list campaigns by formula', filterExpr);
                 const campaignData = await fetchAirtableData(campaignUrl);
-                
+
                 if (campaignData.records && campaignData.records.length > 0) {
                     campaign = campaignData.records[0];
-                    campaignRecordId = campaign.id; // Store campaign record ID for Source Campaign linking
-                    metaCampaignID = campaign.fields['Campaign ID'] || campaignID; // Store Meta campaign ID
+                    campaignRecordId = campaign.id;
+                    metaCampaignID = campaign.fields['Campaign ID'] || campaignID;
+                    console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: matched campaign by Campaign ID field', { campaignRecordId, metaCampaignID });
                 } else {
-                    // If not found by Campaign ID field, try fetching directly by record ID
+                    console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: no rows for formula; trying GET by record id (if campaignID is rec…)');
                     try {
                         const directCampaignUrl = `${AIRTABLE_BASE_URL}/${TABLES.CAMPAIGNS}/${campaignID}`;
                         const directCampaignData = await fetchAirtableData(directCampaignUrl);
                         campaign = directCampaignData;
-                        campaignRecordId = campaign.id; // Store campaign record ID for Source Campaign linking
-                        metaCampaignID = campaign.fields['Campaign ID'] || null; // Store Meta campaign ID if available
+                        campaignRecordId = campaign.id;
+                        metaCampaignID = campaign.fields['Campaign ID'] || null;
+                        console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: loaded campaign by record id', { campaignRecordId, metaCampaignID });
                     } catch (directError) {
-                        console.error('Campaign not found by record ID either:', directError);
+                        console.error(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: campaign not found by formula or record id', directError);
                         return null;
                     }
                 }
-                
-                // Get linked client record ID
-                if (!campaign.fields || !campaign.fields.Client || campaign.fields.Client.length === 0) {
-                    console.error('Campaign has no linked Client');
+
+                const clientRecordId = getCampaignLinkedClientRecordId(campaign);
+                if (!clientRecordId) {
+                    const keys = campaign.fields ? Object.keys(campaign.fields) : [];
+                    console.error(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: no linked client on campaign (expected Client / Clients / Linked Client)', {
+                        campaignRecordId: campaign.id,
+                        fieldKeys: keys
+                    });
                     return null;
                 }
-                
-                const clientRecordId = campaign.fields.Client[0];
-                
-                // Fetch client data
+
                 const clientUrl = `${AIRTABLE_BASE_URL}/${TABLES.CLIENTS}/${clientRecordId}`;
+                console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: fetching client', clientRecordId);
                 const clientData = await fetchAirtableData(clientUrl);
-                
+                const clientName = clientData && clientData.fields && clientData.fields['Name'];
+                console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: success', { clientRecordId, clientName: clientName || null });
                 return clientData;
             } catch (error) {
-                console.error('Error loading client from campaign:', error);
+                console.error(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign error', error);
                 return null;
             }
         }
@@ -2009,6 +2116,7 @@
             try {
                 const landingPageNiche = 'Bathrooms';
                 const zipStr = String(zipCode).trim();
+                console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode start', { zip: zipStr, niche: landingPageNiche });
 
                 // Fetch ALL clients (Airtable returns max 100 per request; paginate to get every record)
                 let allRecords = [];
@@ -2021,7 +2129,10 @@
                     url = page.offset ? `${AIRTABLE_BASE_URL}/${TABLES.CLIENTS}?offset=${page.offset}` : null;
                 } while (url);
 
+                console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: loaded client pages', { totalClients: allRecords.length });
+
                 if (allRecords.length === 0) {
+                    console.warn(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: zero client records from Airtable');
                     return null;
                 }
 
@@ -2059,14 +2170,17 @@
                 }
 
                 if (activeMatches.length > 0) {
+                    console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: active match', { clientId: activeMatches[0].id });
                     return activeMatches[0];
                 }
                 if (pausedMatches.length > 0) {
+                    console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: paused match', { clientId: pausedMatches[0].id });
                     return pausedMatches[0];
                 }
+                console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: no niche/zip match');
                 return null;
             } catch (error) {
-                console.error('Error finding client by zip code:', error);
+                console.error(AIRTABLE_LOG_PREFIX, 'Error finding client by zip code:', error);
                 return null;
             }
         }
@@ -2074,7 +2188,8 @@
         async function findAdByATID(adATID) {
             try {
                 if (!adATID) return null;
-                
+                console.info(AIRTABLE_LOG_PREFIX, 'findAdByATID start', adATID);
+
                 // If adATID looks like an Airtable record ID (starts with "rec"), try to fetch it directly
                 if (adATID.startsWith('rec')) {
                         try {
@@ -2088,29 +2203,46 @@
                         }
                 }
                 
-                // Fetch all ads and find by scriptATID
-                const adsUrl = `${AIRTABLE_BASE_URL}/${TABLES.B2C_ADS}`;
-                const adsData = await fetchAirtableData(adsUrl);
-                
-                if (!adsData.records || adsData.records.length === 0) {
+                // Paginate ads (Airtable max 100 per request)
+                let allAds = [];
+                let adsUrl = `${AIRTABLE_BASE_URL}/${TABLES.B2C_ADS}`;
+                console.info(AIRTABLE_LOG_PREFIX, 'findAdByATID: scanning B2C_ADS pages for scriptATID', adATID);
+                do {
+                    const adsPage = await fetchAirtableData(adsUrl);
+                    if (adsPage.records && adsPage.records.length > 0) {
+                        allAds = allAds.concat(adsPage.records);
+                    }
+                    adsUrl = adsPage.offset ? `${AIRTABLE_BASE_URL}/${TABLES.B2C_ADS}?offset=${adsPage.offset}` : null;
+                } while (adsUrl);
+
+                console.info(AIRTABLE_LOG_PREFIX, 'findAdByATID: loaded ad rows', allAds.length);
+
+                if (allAds.length === 0) {
                     return null;
                 }
-                
-                // Find ad where scriptATID matches
-                for (const ad of adsData.records) {
+
+                for (const ad of allAds) {
                     if (ad.fields.scriptATID === adATID) {
-                        return ad.id; // Return record ID
+                        console.info(AIRTABLE_LOG_PREFIX, 'findAdByATID: match', ad.id);
+                        return ad.id;
                     }
                 }
-                
+
+                console.info(AIRTABLE_LOG_PREFIX, 'findAdByATID: no scriptATID match');
                 return null;
             } catch (error) {
+                console.warn(AIRTABLE_LOG_PREFIX, 'findAdByATID error', error);
                 return null;
             }
         }
 
         async function submitLeadToAirtable(leadData) {
             try {
+                console.info(AIRTABLE_LOG_PREFIX, 'submitLeadToAirtable start', {
+                    hasMatchedClient: !!(matchedClientData && matchedClientData.id),
+                    campaignRecordId: campaignRecordId || null,
+                    adRecordId: adRecordId || null
+                });
                 // Check for duplicate: existing lead with same linked client + same phone (only if we have a linked client)
                 let isDuplicate = false;
                 const hasLinkedClient = !!(matchedClientData && matchedClientData.id);
@@ -2219,29 +2351,19 @@
                 }
                 
                 // Submit to Airtable
-                const response = await fetch(`${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ records: [record] })
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Airtable submission failed: ${response.status} ${response.statusText} - ${errorText}`);
-                }
-                
-                const result = await response.json();
+                const result = await fetchAirtableMutation(`${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}`, 'POST', { records: [record] });
                 
                 // Store the lead record ID so we can update it with appointment later
                 if (result.records && result.records.length > 0) {
                     leadRecordId = result.records[0].id;
+                    console.info(AIRTABLE_LOG_PREFIX, 'submitLeadToAirtable: new lead id', leadRecordId);
+                } else {
+                    console.warn(AIRTABLE_LOG_PREFIX, 'submitLeadToAirtable: POST ok but no records in response', result);
                 }
-                
+
                 return result;
             } catch (error) {
-                console.error('Error submitting lead to Airtable:', error);
+                console.error(AIRTABLE_LOG_PREFIX, 'Error submitting lead to Airtable:', error);
                 throw error;
             }
         }
@@ -2320,11 +2442,22 @@
         // Initialize immediately - start fetching as soon as script runs
         (async function() {
             try {
+                console.info(AIRTABLE_LOG_PREFIX, 'Page bootstrap', {
+                    pageUrl: typeof window !== 'undefined' ? window.location.href : '',
+                    proxyBase: resolveAirtableFetchUrl(AIRTABLE_BASE_URL),
+                    baseId: AIRTABLE_BASE_ID,
+                    campaignIDFromUrl: initialCampaignID || null
+                });
+
                 // Load client from campaign ID (use pre-fetched value if available)
                 campaignClientData = await loadClientFromCampaign(initialCampaignID);
-                
+
                 if (campaignClientData) {
                     clientData = campaignClientData;
+                    console.info(AIRTABLE_LOG_PREFIX, 'Bootstrap: campaign client ready', {
+                        clientId: campaignClientData.id,
+                        name: (campaignClientData.fields && campaignClientData.fields['Name']) || null
+                    });
                     
                     // Show reviews below form immediately when client data has reviews
                     tryShowReviewsOnLoad();
@@ -2344,7 +2477,7 @@
                             loadLogo(logoUrl);
                         }
                     } else {
-                        console.warn('No Logo Link found in client data');
+                        console.warn(AIRTABLE_LOG_PREFIX, 'No Logo Link on client record; using default Local Pick logo');
                         scheduleWhenDomReady(applyDefaultLocalPickLogo);
                     }
                     
@@ -2359,7 +2492,7 @@
                     // Update material step options (e.g. Composite stone visibility)
                     updateMaterialStepOptions();
                 } else {
-                    console.warn('No client data loaded from campaign');
+                    console.warn(AIRTABLE_LOG_PREFIX, 'No campaign client (missing/invalid campaignID or Airtable load failed — see logs above)');
                     // Initialize default Meta Pixel (if needed)
                     // For now, we'll just track PageView without pixel ID
                     if (typeof fbq !== 'undefined') {
@@ -2371,7 +2504,7 @@
                     updateMaterialStepOptions();
                 }
             } catch (error) {
-                console.error('Error initializing page:', error);
+                console.error(AIRTABLE_LOG_PREFIX, 'Error initializing page:', error);
                 scheduleWhenDomReady(applyDefaultLocalPickLogo);
                 // Update partner name with default on error
                 updatePartnerNameInPrivacyPolicy();
@@ -3203,8 +3336,10 @@
             try {
                 // Only count appointments for this client's leads; otherwise we'd block slots used by other clients
                 if (!linkedClientId) {
+                    console.info(AIRTABLE_LOG_PREFIX, 'getBookedAppointments: no linkedClientId, skip');
                     return [];
                 }
+                console.info(AIRTABLE_LOG_PREFIX, 'getBookedAppointments', { linkedClientId, date: date && date.toISOString && date.toISOString() });
                 const month = (date.getMonth() + 1).toString().padStart(2, '0');
                 const day = date.getDate().toString().padStart(2, '0');
                 const monthUnpadded = (date.getMonth() + 1).toString();
@@ -3241,9 +3376,10 @@
                     }
                 });
                 
+                console.info(AIRTABLE_LOG_PREFIX, 'getBookedAppointments: booked slot count', bookedTimes.length);
                 return bookedTimes;
             } catch (error) {
-                console.error('Error fetching booked appointments:', error);
+                console.error(AIRTABLE_LOG_PREFIX, 'Error fetching booked appointments:', error);
                 return [];
             }
         }
@@ -3526,27 +3662,15 @@
                     const fullSummaryWithAppt = `Appointment: ${appointmentText}\n\n${baseSummary}`;
                     const fullSummaryHTMLWithAppt = `Appointment: ${appointmentText}<BR><BR>${baseSummaryHTML}`;
 
-                    const updateResponse = await fetch(`${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}/${leadRecordId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            fields: {
-                                'Appt': appointmentText,
-                                'Full Summary': fullSummaryWithAppt,
-                                'Full Summary HTML': fullSummaryHTMLWithAppt
-                            }
-                        })
+                    await fetchAirtableMutation(`${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}/${leadRecordId}`, 'PATCH', {
+                        fields: {
+                            'Appt': appointmentText,
+                            'Full Summary': fullSummaryWithAppt,
+                            'Full Summary HTML': fullSummaryHTMLWithAppt
+                        }
                     });
-                    
-                    if (!updateResponse.ok) {
-                        const errorText = await updateResponse.text();
-                        const error = new Error(`Failed to update appointment: ${errorText}`);
-                        throw error;
-                    }
                 } catch (error) {
-                    console.error('Error updating appointment in Airtable:', error);
+                    console.error(AIRTABLE_LOG_PREFIX, 'Error updating appointment in Airtable:', error);
                 }
             } else {
                 if (TESTING_MODE) {
@@ -4469,21 +4593,27 @@
             try {
                 const adATID = urlParams.get('adATID');
                 const adsetID = urlParams.get('adsetID');
+                console.info(AIRTABLE_LOG_PREFIX, 'Submit flow: ad/adset URL params', { adATID: adATID || null, adsetID: adsetID || null });
 
                 if (adATID) {
                     adRecordId = await findAdByATID(adATID);
+                    console.info(AIRTABLE_LOG_PREFIX, 'Submit flow: adRecordId', adRecordId || null);
                 }
 
                 if (adsetID) {
-                    const adsetFilterFormula = encodeURIComponent(`{Adset ID}="${adsetID}"`);
-                    const adsetUrl = `${AIRTABLE_BASE_URL}/${TABLES.ADSET}?filterByFormula=${adsetFilterFormula}`;
+                    const adsetFormula = `{Adset ID}="${escapeAirtableStringForFormula(adsetID)}"`;
+                    const adsetUrl = `${AIRTABLE_BASE_URL}/${TABLES.ADSET}?filterByFormula=${encodeURIComponent(adsetFormula)}`;
+                    console.info(AIRTABLE_LOG_PREFIX, 'Submit flow: ADSET lookup', adsetFormula);
                     const adsetData = await fetchAirtableData(adsetUrl);
                     if (adsetData.records && adsetData.records.length > 0) {
                         adsetRecordId = adsetData.records[0].id;
+                        console.info(AIRTABLE_LOG_PREFIX, 'Submit flow: adsetRecordId', adsetRecordId);
+                    } else {
+                        console.info(AIRTABLE_LOG_PREFIX, 'Submit flow: no ADSET row for formula');
                     }
                 }
             } catch (error) {
-                console.log('Ad/adset lookup failed:', error.message);
+                console.warn(AIRTABLE_LOG_PREFIX, 'Ad/adset lookup failed:', error && error.message ? error.message : error);
             }
             
             // Build full summary
