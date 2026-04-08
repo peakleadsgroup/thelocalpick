@@ -1144,8 +1144,8 @@
             <div class="step-header">Take our 30 second quiz for a <span class="step-header-highlight">fast and free estimate</span></div>
             <div class="step-subheader">Are you the homeowner or authorized decision maker?</div>
             <div class="options">
-                <div class="option" onclick="selectOptionAndAdvance(this, 'homeowner', 'yes')">Yes</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'homeowner', 'no')">No</div>
+                <div class="option" data-quiz-field="homeowner" data-quiz-value="yes" onclick="selectOptionAndAdvance(this, 'homeowner', 'yes')">Yes</div>
+                <div class="option" data-quiz-field="homeowner" data-quiz-value="no" onclick="selectOptionAndAdvance(this, 'homeowner', 'no')">No</div>
             </div>
             <div class="homeowner-no-message" id="homeownerNoMessage" style="display: none;">
                 <div class="homeowner-no-icon">
@@ -1155,7 +1155,7 @@
                     </svg>
                 </div>
                 <div class="homeowner-no-content">
-                    <div class="homeowner-no-text">By law, we can only upgrade your bathroom if you are the homeowner or authorized decision maker.</div>
+                    <div class="homeowner-no-text">By law, you can only make a bathroom upgrade if you are the homeowner or authorized decision maker</div>
                 </div>
             </div>
         </div>
@@ -1164,8 +1164,8 @@
         <div class="form-step" id="step2">
             <div class="step-header">When was your bathroom last updated?</div>
             <div class="options">
-                <div class="option" onclick="selectOptionAndAdvance(this, 'bathroomLastUpdated', 'more_than_10_years')">More than 10 years ago</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'bathroomLastUpdated', 'less_than_10_years')">Less than 10 years ago</div>
+                <div class="option" data-quiz-field="bathroomLastUpdated" data-quiz-value="more_than_10_years" onclick="selectOptionAndAdvance(this, 'bathroomLastUpdated', 'more_than_10_years')">More than 10 years ago</div>
+                <div class="option" data-quiz-field="bathroomLastUpdated" data-quiz-value="less_than_10_years" onclick="selectOptionAndAdvance(this, 'bathroomLastUpdated', 'less_than_10_years')">Less than 10 years ago</div>
             </div>
         </div>
 
@@ -1173,10 +1173,10 @@
         <div class="form-step" id="step3">
             <div class="step-header">My goal is to...</div>
             <div class="options">
-                <div class="option" onclick="selectOptionAndAdvance(this, 'mainGoal', 'accessibility_safety')">Improve accessibility/safety</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'mainGoal', 'look_function')">Improve look/function</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'mainGoal', 'home_value')">Increase home value</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'mainGoal', 'repair_damage')">Repair damage</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="accessibility_safety" onclick="selectOptionAndAdvance(this, 'mainGoal', 'accessibility_safety')">Improve accessibility/safety</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="look_function" onclick="selectOptionAndAdvance(this, 'mainGoal', 'look_function')">Improve look/function</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="home_value" onclick="selectOptionAndAdvance(this, 'mainGoal', 'home_value')">Increase home value</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="repair_damage" onclick="selectOptionAndAdvance(this, 'mainGoal', 'repair_damage')">Repair damage</div>
             </div>
             <div class="mobile-home-message" id="repairDamageMessage" style="display: none;">
                 <div class="why-we-ask-icon">
@@ -1236,10 +1236,10 @@
             <div class="step-header">How soon would you like this project to be completed?</div>
             <div class="step-subheader">Estimates can only be given for projects that can start soon so pricing is accurate</div>
             <div class="options">
-                <div class="option" onclick="selectOptionAndAdvance(this, 'timeline', 'asap')">ASAP</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'timeline', 'within_month')">Within a month</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'timeline', 'within_3_months')">Within 3 months</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'timeline', 'within_6_months')">Within 6 months</div>
+                <div class="option" data-quiz-field="timeline" data-quiz-value="asap" onclick="selectOptionAndAdvance(this, 'timeline', 'asap')">ASAP</div>
+                <div class="option" data-quiz-field="timeline" data-quiz-value="within_month" onclick="selectOptionAndAdvance(this, 'timeline', 'within_month')">Within a month</div>
+                <div class="option" data-quiz-field="timeline" data-quiz-value="within_3_months" onclick="selectOptionAndAdvance(this, 'timeline', 'within_3_months')">Within 3 months</div>
+                <div class="option" data-quiz-field="timeline" data-quiz-value="within_6_months" onclick="selectOptionAndAdvance(this, 'timeline', 'within_6_months')">Within 6 months</div>
             </div>
         </div>
 
@@ -1311,7 +1311,7 @@
                 <button class="nav-btn" onclick="submitFinalForm()" id="phoneSubmitBtn" disabled>Get Quote</button>
             </div>
             <div class="privacy-policy-text" id="privacyPolicyText">
-                <p>By clicking "NEXT STEP" and submitting this form, (i) I agree that <span id="partnerBusinessName">Peak Leads Group and it's marketing partners</span> may use automated technology to call or text my phone number (provided above) or email me regarding my request, and I may revoke this consent at any time, and (ii) I agree to the <a href="privacypolicy.html" target="_blank">Terms & Conditions and Privacy Policy</a>.</p>
+                <p>By clicking "NEXT STEP" and submitting this form, (i) I agree that <span id="partnerBusinessName">Peak Leads Group and it's marketing partners</span> may use automated technology to call or text my phone number (provided above) or email me regarding my request, and I may revoke this consent at any time, and (ii) I agree to the <a href="privacypolicy.html" class="privacy-policy-funnel-link" target="_blank" rel="noopener noreferrer">Terms & Conditions and Privacy Policy</a>.</p>
                 <p>I understand that my authorization to receive calls, texts, and emails via automated technology is not a condition of purchasing any goods or services. Message frequency may vary. Msg & data rates may apply. Reply STOP to cancel. Reply HELP for assistance.</p>
             </div>
         </div>
@@ -1727,6 +1727,145 @@
         let mainFunnelLocalPickSuppressed = false; // After first quiz step, hide "Here's why..." below form until back navigation
         let appointmentTimeSelected = false; // True after user selects a time (so bottom shows confirmation, not calendar)
         let lastAppointmentText = ''; // Formatted appointment date/time for confirmation message
+
+        const FUNNEL_RESUME_STORAGE_KEY = 'localpick_funnel_resume_v1';
+        const FUNNEL_PAGE_FILE = 'bathrooms.html';
+        let funnelResumeRestored = false;
+        let phoneValidationListenersAttached = false;
+
+        function funnelUrlTrackingMatches(savedSearch, currentSearch) {
+            const sig = (q) => {
+                const p = new URLSearchParams(String(q || '').replace(/^\?/, ''));
+                return [p.get('campaignID') || '', p.get('adATID') || '', p.get('adsetID') || ''].join('\x1e');
+            };
+            return sig(savedSearch) === sig(currentSearch);
+        }
+
+        function buildFunnelInputSnapshot() {
+            const ids = ['firstName', 'lastName', 'street', 'city', 'state', 'zip', 'phone', 'email'];
+            const out = {};
+            ids.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) out[id] = el.value;
+            });
+            const pd = document.getElementById('phone_digits');
+            if (pd) out.phone_digits = pd.value;
+            return out;
+        }
+
+        function applyFunnelInputSnapshot(snap) {
+            if (!snap) return;
+            Object.keys(snap).forEach((k) => {
+                const el = document.getElementById(k);
+                if (el && typeof snap[k] === 'string') el.value = snap[k];
+            });
+        }
+
+        function persistFunnelProgress() {
+            try {
+                const payload = {
+                    v: 1,
+                    page: FUNNEL_PAGE_FILE,
+                    search: typeof location !== 'undefined' ? (location.search || '') : '',
+                    step: currentStep,
+                    formData: JSON.parse(JSON.stringify(formData)),
+                    inputs: buildFunnelInputSnapshot(),
+                    mainFunnelLocalPickSuppressed: !!mainFunnelLocalPickSuppressed
+                };
+                localStorage.setItem(FUNNEL_RESUME_STORAGE_KEY, JSON.stringify(payload));
+            } catch (e) { /* storage full or disabled */ }
+        }
+
+        function clearPersistedFunnelProgress() {
+            try {
+                const raw = localStorage.getItem(FUNNEL_RESUME_STORAGE_KEY);
+                if (!raw) return;
+                const s = JSON.parse(raw);
+                if (s && s.page === FUNNEL_PAGE_FILE) localStorage.removeItem(FUNNEL_RESUME_STORAGE_KEY);
+            } catch (e) {}
+        }
+
+        function refreshQuizOptionHighlights() {
+            document.querySelectorAll('.form-step .option[data-quiz-field]').forEach((el) => {
+                const f = el.getAttribute('data-quiz-field');
+                const v = el.getAttribute('data-quiz-value');
+                el.classList.toggle('selected', formData[f] === v);
+            });
+        }
+
+        function syncAuxiliaryStepMessages() {
+            const homeownerNoMsg = document.getElementById('homeownerNoMessage');
+            if (homeownerNoMsg) homeownerNoMsg.style.display = formData.homeowner === 'no' ? 'flex' : 'none';
+            const repairDamageMsg = document.getElementById('repairDamageMessage');
+            if (repairDamageMsg) {
+                const showRepairPanel = currentStep === 3 && formData.mainGoal === 'repair_damage';
+                repairDamageMsg.style.display = showRepairPanel ? 'flex' : 'none';
+            }
+            const mobileHomeMsg = document.getElementById('mobileHomeMessage');
+            if (mobileHomeMsg) {
+                const showMobile = currentStep === 4 && formData.homeType === 'mobile_home';
+                mobileHomeMsg.style.display = showMobile ? 'flex' : 'none';
+            }
+            const tileMsg = document.getElementById('tileMessage');
+            if (tileMsg) {
+                const showTile = currentStep === 6 && formData.materialPref === 'tile' && !isTileSupported();
+                tileMsg.style.display = showTile ? 'flex' : 'none';
+            }
+        }
+
+        function tryRestoreFunnelProgressAfterBootstrap() {
+            if (funnelResumeRestored) return;
+            let raw;
+            try {
+                raw = localStorage.getItem(FUNNEL_RESUME_STORAGE_KEY);
+            } catch (e) {
+                return;
+            }
+            if (!raw) return;
+            let s;
+            try {
+                s = JSON.parse(raw);
+            } catch (e) {
+                return;
+            }
+            if (s.page !== FUNNEL_PAGE_FILE) return;
+            if (!funnelUrlTrackingMatches(s.search, location.search || '')) return;
+
+            funnelResumeRestored = true;
+
+            try {
+                Object.assign(formData, s.formData || {});
+                currentStep = Math.min(TOTAL_STEPS, Math.max(1, parseInt(s.step, 10) || 1));
+                if (typeof s.mainFunnelLocalPickSuppressed === 'boolean') {
+                    mainFunnelLocalPickSuppressed = s.mainFunnelLocalPickSuppressed;
+                }
+
+                for (let i = 1; i <= TOTAL_STEPS; i++) {
+                    const el = document.getElementById('step' + i);
+                    if (el) el.classList.toggle('active', i === currentStep);
+                }
+
+                applyFunnelInputSnapshot(s.inputs);
+                updateMaterialStepOptions();
+                refreshQuizOptionHighlights();
+                syncAuxiliaryStepMessages();
+
+                if (mainFunnelLocalPickSuppressed) {
+                    if (typeof hideMainFunnelPartnerWhySection === 'function') hideMainFunnelPartnerWhySection();
+                } else if (typeof refreshPartnerLocalPickSection === 'function') {
+                    refreshPartnerLocalPickSection();
+                }
+
+                updateProgress();
+                updateBackButtonVisibility();
+                validateNameForm();
+                validateAddressForm();
+                if (typeof validatePhones === 'function') validatePhones();
+                if (currentStep === 10 && typeof setupPhoneValidation === 'function') setupPhoneValidation();
+            } catch (e) {
+                console.warn('Funnel resume failed:', e);
+            }
+        }
         
         // Returns true if the active client has "Tile?" checkbox checked in Airtable (tile is allowed)
         function isTileSupported() {
@@ -1825,6 +1964,8 @@
             choices.forEach((c) => {
                 const div = document.createElement('div');
                 div.className = 'option';
+                div.setAttribute('data-quiz-field', 'projectType');
+                div.setAttribute('data-quiz-value', c.value);
                 div.textContent = c.label;
                 const value = c.value;
                 div.addEventListener('click', function () {
@@ -1890,6 +2031,8 @@
             choices.forEach((c) => {
                 const div = document.createElement('div');
                 div.className = 'option';
+                div.setAttribute('data-quiz-field', 'materialPref');
+                div.setAttribute('data-quiz-value', c.value);
                 div.textContent = c.label;
                 const value = c.value;
                 div.addEventListener('click', function () {
@@ -1908,6 +2051,8 @@
             choices.forEach((c) => {
                 const div = document.createElement('div');
                 div.className = 'option';
+                div.setAttribute('data-quiz-field', 'homeType');
+                div.setAttribute('data-quiz-value', c.value);
                 div.textContent = c.label;
                 const value = c.value;
                 div.addEventListener('click', function () {
@@ -2562,6 +2707,7 @@
                     updatePartnerNameInPrivacyPolicy();
                     // Update material step options (e.g. Composite stone visibility)
                     updateMaterialStepOptions();
+                    tryRestoreFunnelProgressAfterBootstrap();
                 } else {
                     console.warn(AIRTABLE_LOG_PREFIX, 'No campaign client (missing/invalid campaignID or Airtable load failed — see logs above)');
                     // Initialize default Meta Pixel (if needed)
@@ -2573,6 +2719,7 @@
                     // Update partner name with default
                     updatePartnerNameInPrivacyPolicy();
                     updateMaterialStepOptions();
+                    tryRestoreFunnelProgressAfterBootstrap();
                 }
             } catch (error) {
                 console.error(AIRTABLE_LOG_PREFIX, 'Error initializing page:', error);
@@ -2580,6 +2727,7 @@
                 // Update partner name with default on error
                 updatePartnerNameInPrivacyPolicy();
                 updateMaterialStepOptions();
+                tryRestoreFunnelProgressAfterBootstrap();
             }
         })();
         
@@ -2687,6 +2835,15 @@
                 // Show reviews below form when DOM is ready (if client data already loaded)
                 tryShowReviewsOnLoad();
                 updateMaterialStepOptions();
+
+                document.querySelectorAll('a.privacy-policy-funnel-link').forEach(function (a) {
+                    a.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        persistFunnelProgress();
+                        var returnTarget = FUNNEL_PAGE_FILE + (window.location.search || '') + (window.location.hash || '');
+                        window.open('privacypolicy.html?return=' + encodeURIComponent(returnTarget), '_blank', 'noopener,noreferrer');
+                    });
+                });
             });
         } else {
             updateBackgroundHeight();
@@ -2699,6 +2856,15 @@
                     loadLogo(clientData.fields['Logo Link']);
                 }
             }
+
+            document.querySelectorAll('a.privacy-policy-funnel-link').forEach(function (a) {
+                a.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    persistFunnelProgress();
+                    var returnTarget = FUNNEL_PAGE_FILE + (window.location.search || '') + (window.location.hash || '');
+                    window.open('privacypolicy.html?return=' + encodeURIComponent(returnTarget), '_blank', 'noopener,noreferrer');
+                });
+            });
         }
 
         // ============================================
@@ -2715,7 +2881,8 @@
             
             element.classList.add('selected');
             formData[field] = value;
-            
+            persistFunnelProgress();
+
             if (!hasTrackedEngagement) {
                 if (!TESTING_MODE && typeof fbq !== 'undefined' && clientData && clientData.fields['Meta Pixel']) {
                     fbq('track', 'ViewContent', {
@@ -2788,12 +2955,14 @@
             const mobileHomeMsg = document.getElementById('mobileHomeMessage');
             if (mobileHomeMsg) mobileHomeMsg.style.display = 'none';
             nextStep();
+            persistFunnelProgress();
         }
 
         function continueRepairDamageGoal() {
             const repairDamageMsg = document.getElementById('repairDamageMessage');
             if (repairDamageMsg) repairDamageMsg.style.display = 'none';
             nextStep();
+            persistFunnelProgress();
         }
 
         function validateAddressForm() {
@@ -2843,6 +3012,7 @@
                     delete formData.address;
                 }
             }
+            persistFunnelProgress();
         }
 
         function updateProgress() {
@@ -2913,6 +3083,7 @@
                         tileMsg.style.display = 'none';
                     }
                 }
+                persistFunnelProgress();
             }
         }
 
@@ -2930,6 +3101,7 @@
                     mainFunnelLocalPickSuppressed = true;
                     hideMainFunnelPartnerWhySection();
                 }
+                persistFunnelProgress();
             }
         }
 
@@ -2953,6 +3125,7 @@
                 formData.firstName = firstName;
                 formData.lastName = lastName;
             }
+            persistFunnelProgress();
         }
 
         function goToStep10() {
@@ -3180,9 +3353,15 @@
             if (phoneSubmitBtn) {
                 phoneSubmitBtn.disabled = !buttonShouldEnable;
             }
+            persistFunnelProgress();
         }
 
         function setupPhoneValidation() {
+            if (phoneValidationListenersAttached) {
+                validatePhones();
+                return;
+            }
+            phoneValidationListenersAttached = true;
             const phoneInput = document.getElementById('phone');
             const emailInput = document.getElementById('email');
             
@@ -3202,6 +3381,7 @@
                     validatePhones();
                 });
             }
+            validatePhones();
         }
 
         // ============================================
@@ -4800,6 +4980,8 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 showConfirmationScreen();
                 return;
             }
+
+            clearPersistedFunnelProgress();
             
             // Determine which submit screen to show
             // Use matched client first, but fall back to campaign client if matched client doesn't have Submit Screen
