@@ -2347,12 +2347,27 @@
                     }
                 }
 
+                function getClientCreatedMs(client) {
+                    if (client && client.createdTime) {
+                        const t = Date.parse(client.createdTime);
+                        if (!Number.isNaN(t)) return t;
+                    }
+                    const raw = client && client.fields && client.fields['Created'];
+                    if (raw != null && raw !== '') {
+                        const t = Date.parse(String(raw));
+                        if (!Number.isNaN(t)) return t;
+                    }
+                    return Number.MAX_SAFE_INTEGER;
+                }
+
                 if (activeMatches.length > 0) {
-                    console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: active match', { clientId: activeMatches[0].id });
+                    activeMatches.sort((a, b) => getClientCreatedMs(a) - getClientCreatedMs(b));
+                    console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: active match', { clientId: activeMatches[0].id, tieCount: activeMatches.length });
                     return activeMatches[0];
                 }
                 if (pausedMatches.length > 0) {
-                    console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: paused match', { clientId: pausedMatches[0].id });
+                    pausedMatches.sort((a, b) => getClientCreatedMs(a) - getClientCreatedMs(b));
+                    console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: paused match', { clientId: pausedMatches[0].id, tieCount: pausedMatches.length });
                     return pausedMatches[0];
                 }
                 console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: no niche/zip match');

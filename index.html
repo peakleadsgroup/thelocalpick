@@ -2177,10 +2177,25 @@
                     }
                 }
 
+                function getClientCreatedMs(client) {
+                    if (client && client.createdTime) {
+                        const t = Date.parse(client.createdTime);
+                        if (!Number.isNaN(t)) return t;
+                    }
+                    const raw = client && client.fields && client.fields['Created'];
+                    if (raw != null && raw !== '') {
+                        const t = Date.parse(String(raw));
+                        if (!Number.isNaN(t)) return t;
+                    }
+                    return Number.MAX_SAFE_INTEGER;
+                }
+
                 if (activeMatches.length > 0) {
+                    activeMatches.sort((a, b) => getClientCreatedMs(a) - getClientCreatedMs(b));
                     return activeMatches[0];
                 }
                 if (pausedMatches.length > 0) {
+                    pausedMatches.sort((a, b) => getClientCreatedMs(a) - getClientCreatedMs(b));
                     return pausedMatches[0];
                 }
                 return null;
