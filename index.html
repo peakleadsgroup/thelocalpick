@@ -1242,17 +1242,6 @@
                 <div class="option" onclick="selectOptionAndAdvance(this, 'homeowner', 'yes')">Yes</div>
                 <div class="option" onclick="selectOptionAndAdvance(this, 'homeowner', 'no')">No</div>
             </div>
-            <div class="why-we-ask" id="whyWeAsk">
-                <div class="why-we-ask-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/>
-                    </svg>
-                </div>
-                <div class="why-we-ask-content">
-                    <div class="why-we-ask-header">Why do we ask?</div>
-                    <div class="why-we-ask-text">Because legally, only the property owner—or someone they've authorized—can approve changes to the property.</div>
-                </div>
-            </div>
             <div class="homeowner-no-message" id="homeownerNoMessage" style="display: none;">
                 <div class="homeowner-no-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2582,14 +2571,11 @@
             
             // Homeowner step: show red message when "No" selected, don't advance
             if (field === 'homeowner') {
-                const whyWeAsk = document.getElementById('whyWeAsk');
                 const homeownerNoMsg = document.getElementById('homeownerNoMessage');
                 if (value === 'no') {
-                    if (whyWeAsk) whyWeAsk.style.display = 'none';
                     if (homeownerNoMsg) homeownerNoMsg.style.display = 'flex';
                     return;
                 } else {
-                    if (whyWeAsk) whyWeAsk.style.display = 'flex';
                     if (homeownerNoMsg) homeownerNoMsg.style.display = 'none';
                 }
             }
@@ -2690,8 +2676,7 @@
         }
 
         function scrollToForm() {
-            const formSection = document.getElementById('formSection');
-            if (formSection) formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function prevStep() {
@@ -2710,13 +2695,10 @@
                 }
                 // Reset homeowner step message visibility when returning to step 1
                 if (currentStep === 1) {
-                    const whyWeAsk = document.getElementById('whyWeAsk');
                     const homeownerNoMsg = document.getElementById('homeownerNoMessage');
                     if (formData.homeowner === 'no') {
-                        if (whyWeAsk) whyWeAsk.style.display = 'none';
                         if (homeownerNoMsg) homeownerNoMsg.style.display = 'flex';
                     } else {
-                        if (whyWeAsk) whyWeAsk.style.display = 'flex';
                         if (homeownerNoMsg) homeownerNoMsg.style.display = 'none';
                     }
                 }
