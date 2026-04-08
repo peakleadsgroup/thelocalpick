@@ -1140,10 +1140,10 @@
 <body>
     <div class="logo-container">
         <img id="logoImg" 
-             src="" 
-             alt="" 
+             src="images/TheLocalPick-FlatLeftAligned.svg" 
+             alt="The Local Pick" 
              class="logo-img"
-             style="display: none;">
+             style="display: block;">
     </div>
 
     <div class="form-wrapper" id="formSection">
@@ -1178,13 +1178,7 @@
         <!-- STEP 2: Home Type -->
         <div class="form-step" id="step2">
             <div class="step-header">What type of home is this?</div>
-            <div class="options">
-                <div class="option" onclick="selectOptionAndAdvance(this, 'homeType', 'single_family')">Single family home</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'homeType', 'town_home')">Town home</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'homeType', 'apartment')">Apartment</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'homeType', 'vacation_home')">Vacation home</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'homeType', 'mobile_home')">Mobile home</div>
-            </div>
+            <div class="options" id="homeTypeOptions"></div>
             <div class="mobile-home-message" id="mobileHomeMessage" style="display: none;">
                 <div class="why-we-ask-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1232,12 +1226,7 @@
         <!-- STEP 5: Material Preferences -->
         <div class="form-step" id="step5">
             <div class="step-header">Do you have any material preferences?</div>
-            <div class="options">
-                <div class="option" onclick="selectOptionAndAdvance(this, 'materialPref', 'acrylic')">Acrylic</div>
-                <div class="option" id="compositeStoneOption" onclick="selectOptionAndAdvance(this, 'materialPref', 'composite_stone')">Composite stone</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'materialPref', 'tile')">Tile</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'materialPref', 'not_sure')">Not sure</div>
-            </div>
+            <div class="options" id="materialPrefOptions"></div>
             <div class="tile-message" id="tileMessage" style="display: none;">
                 <div class="homeowner-no-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1741,6 +1730,7 @@
         let isSubmitting = false; // Flag to prevent duplicate submissions
         let currentSubmitScreenType = null; // Store the current submit screen type
         let postFormSubmitted = false; // When true, reviews/Local Pick block show after submit (not on main page)
+        let mainFunnelLocalPickSuppressed = false; // After first quiz step, hide "Here's why..." below form until back navigation
         let appointmentTimeSelected = false; // True after user selects a time (so bottom shows confirmation, not calendar)
         let lastAppointmentText = ''; // Formatted appointment date/time for confirmation message
         
@@ -1751,23 +1741,119 @@
             return activeClient.fields['Tile?'] === true;
         }
 
-        // Returns true if the active client has "Composite Stone?" checkbox checked in Airtable
-        function isCompositeStoneSupported() {
+        function normalizeAirtableMultiSelectField(raw) {
+            if (raw == null) return [];
+            if (Array.isArray(raw)) return raw.map(s => String(s).trim()).filter(Boolean);
+            const s = String(raw).trim();
+            if (!s) return [];
+            return s.split(/[,;]+/).map(p => p.trim()).filter(Boolean);
+        }
+
+        /** Maps Airtable "Home Types" multi-select to form values; order follows field list. */
+        function getHomeTypeChoicesForClient(activeClient) {
+            const ORDER = [
+                { match: (t) => /^single\s*family\s*home$/i.test(t), value: 'single_family', label: 'Single Family Home' },
+                { match: (t) => /^town\s*home\s*\/\s*condo$/i.test(t) || /^town\s*home$/i.test(t) || /^condo$/i.test(t), value: 'town_home', label: 'Town Home/Condo' },
+                { match: (t) => /^vacation\s*home$/i.test(t), value: 'vacation_home', label: 'Vacation Home' },
+                { match: (t) => /^apartment$/i.test(t), value: 'apartment', label: 'Apartment' },
+                { match: (t) => /^mobile\s*home$/i.test(t), value: 'mobile_home', label: 'Mobile Home' }
+            ];
+            const labels = normalizeAirtableMultiSelectField(activeClient && activeClient.fields && activeClient.fields['Home Types']);
+            if (!labels.length) {
+                return ORDER.map((d) => ({ value: d.value, label: d.label }));
+            }
+            const matched = new Set();
+            for (const lbl of labels) {
+                const t = lbl.trim();
+                for (const def of ORDER) {
+                    if (def.match(t)) {
+                        matched.add(def.value);
+                        break;
+                    }
+                }
+            }
+            if (matched.size === 0) {
+                return ORDER.map((d) => ({ value: d.value, label: d.label }));
+            }
+            return ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
+        }
+
+        /** Maps Airtable "Materials" multi-select; "Not sure" is always appended last. */
+        function getMaterialChoicesForClient(activeClient) {
+            const ORDER = [
+                { match: (t) => /^acrylic$/i.test(t), value: 'acrylic', label: 'Acrylic' },
+                { match: (t) => /^tile$/i.test(t), value: 'tile', label: 'Tile' },
+                { match: (t) => /^composite\s*stone$/i.test(t), value: 'composite_stone', label: 'Composite Stone' }
+            ];
+            const labels = normalizeAirtableMultiSelectField(activeClient && activeClient.fields && activeClient.fields['Materials']);
+            let materialChoices;
+            if (!labels.length) {
+                materialChoices = ORDER.map((d) => ({ value: d.value, label: d.label }));
+            } else {
+                const matched = new Set();
+                for (const lbl of labels) {
+                    const t = lbl.trim();
+                    for (const def of ORDER) {
+                        if (def.match(t)) {
+                            matched.add(def.value);
+                            break;
+                        }
+                    }
+                }
+                if (matched.size === 0) {
+                    materialChoices = ORDER.map((d) => ({ value: d.value, label: d.label }));
+                } else {
+                    materialChoices = ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
+                }
+            }
+            return materialChoices.concat([{ value: 'not_sure', label: 'Not sure' }]);
+        }
+
+        function updateMaterialPrefStepOptions() {
+            const container = document.getElementById('materialPrefOptions');
+            if (!container) return;
             const activeClient = matchedClientData || campaignClientData;
-            if (!activeClient || !activeClient.fields) return false;
-            return activeClient.fields['Composite Stone?'] === true;
+            const choices = getMaterialChoicesForClient(activeClient);
+            container.replaceChildren();
+            choices.forEach((c) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = c.label;
+                const value = c.value;
+                div.addEventListener('click', function () {
+                    selectOptionAndAdvance(div, 'materialPref', value);
+                });
+                container.appendChild(div);
+            });
+        }
+
+        function updateHomeTypeStepOptions() {
+            const container = document.getElementById('homeTypeOptions');
+            if (!container) return;
+            const activeClient = matchedClientData || campaignClientData;
+            const choices = getHomeTypeChoicesForClient(activeClient);
+            container.replaceChildren();
+            choices.forEach((c) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = c.label;
+                const value = c.value;
+                div.addEventListener('click', function () {
+                    selectOptionAndAdvance(div, 'homeType', value);
+                });
+                container.appendChild(div);
+            });
         }
 
         function updateMaterialStepOptions() {
-            const compositeStoneOpt = document.getElementById('compositeStoneOption');
-            if (compositeStoneOpt) {
-                compositeStoneOpt.style.display = isCompositeStoneSupported() ? '' : 'none';
-            }
+            updateMaterialPrefStepOptions();
+            updateHomeTypeStepOptions();
         }
         
         // Get campaign ID immediately from URL (before DOM is ready)
         const urlParams = new URLSearchParams(window.location.search);
         const initialCampaignID = urlParams.get('campaignID');
+        const DEFAULT_LOGO_SRC = 'images/TheLocalPick-FlatLeftAligned.svg';
 
         // ============================================
         // AIRTABLE API FUNCTIONS
@@ -2201,11 +2287,32 @@
                 logoImg.src = logoUrl;
                 logoImg.style.display = 'block';
                 
-                // Handle logo load errors
+                // Handle logo load errors — fall back to default Local Pick logo
                 logoImg.onerror = function() {
                     console.error('Failed to load logo image:', logoUrl);
-                    logoImg.style.display = 'none';
+                    logoImg.src = DEFAULT_LOGO_SRC;
+                    logoImg.onerror = null;
                 };
+            }
+        }
+
+        function applyDefaultLocalPickLogo() {
+            const logoImg = document.getElementById('logoImg');
+            if (!logoImg) return;
+            logoImg.onerror = function() {
+                logoImg.style.display = 'block';
+                logoImg.onerror = null;
+            };
+            logoImg.src = DEFAULT_LOGO_SRC;
+            logoImg.alt = 'The Local Pick';
+            logoImg.style.display = 'block';
+        }
+
+        function scheduleWhenDomReady(fn) {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', fn);
+            } else {
+                fn();
             }
         }
 
@@ -2238,6 +2345,7 @@
                         }
                     } else {
                         console.warn('No Logo Link found in client data');
+                        scheduleWhenDomReady(applyDefaultLocalPickLogo);
                     }
                     
                     // Initialize Meta Pixel
@@ -2257,12 +2365,14 @@
                     if (typeof fbq !== 'undefined') {
                         fbq('track', 'PageView');
                     }
+                    scheduleWhenDomReady(applyDefaultLocalPickLogo);
                     // Update partner name with default
                     updatePartnerNameInPrivacyPolicy();
                     updateMaterialStepOptions();
                 }
             } catch (error) {
                 console.error('Error initializing page:', error);
+                scheduleWhenDomReady(applyDefaultLocalPickLogo);
                 // Update partner name with default on error
                 updatePartnerNameInPrivacyPolicy();
                 updateMaterialStepOptions();
@@ -2378,10 +2488,12 @@
                 
                 // Show reviews below form when DOM is ready (if client data already loaded)
                 tryShowReviewsOnLoad();
+                updateMaterialStepOptions();
             });
         } else {
             updateBackgroundHeight();
             tryShowReviewsOnLoad();
+            updateMaterialStepOptions();
             // If client data is already loaded, ensure logo is displayed
             if (clientData && clientData.fields && clientData.fields['Logo Link']) {
                 const logoImg = document.getElementById('logoImg');
@@ -2561,9 +2673,12 @@
                     } else {
                         if (homeownerNoMsg) homeownerNoMsg.style.display = 'none';
                     }
+                    mainFunnelLocalPickSuppressed = false;
+                    refreshPartnerLocalPickSection();
                 }
                 // Reset mobile home message visibility when returning to step 2
                 if (currentStep === 2) {
+                    updateMaterialStepOptions();
                     const mobileHomeMsg = document.getElementById('mobileHomeMessage');
                     if (formData.homeType === 'mobile_home' && mobileHomeMsg) {
                         mobileHomeMsg.style.display = 'flex';
@@ -2601,6 +2716,11 @@
                 updateProgress();
                 updateBackButtonVisibility();
                 if (currentStep === 5) updateMaterialStepOptions();
+                // First quiz step completed — hide Airtable "Here's why..." block below the form
+                if (currentStep === 2) {
+                    mainFunnelLocalPickSuppressed = true;
+                    hideMainFunnelPartnerWhySection();
+                }
             }
         }
 
@@ -3750,9 +3870,29 @@
             refreshPartnerLocalPickSection();
         }
 
+        function hideMainFunnelPartnerWhySection() {
+            const reviewsSection = document.getElementById('reviewsSection');
+            const reviewsContainer = document.getElementById('reviewsContainer');
+            const ctaSection = document.getElementById('ctaSection');
+            if (reviewsSection) {
+                reviewsSection.classList.remove('active');
+                reviewsSection.classList.remove('main-funnel-local-pick-only');
+            }
+            if (reviewsContainer) reviewsContainer.innerHTML = '';
+            if (ctaSection) ctaSection.classList.remove('active');
+            setTimeout(() => {
+                if (typeof updateBackgroundHeight === 'function') updateBackgroundHeight();
+            }, 100);
+        }
+
         /** Partner “why they’re our Local Pick” from Airtable (Local Pick 1–5) below the form during the quiz; reviews stay post-submit. */
         function refreshPartnerLocalPickSection() {
             if (postFormSubmitted) return;
+
+            if (mainFunnelLocalPickSuppressed) {
+                hideMainFunnelPartnerWhySection();
+                return;
+            }
 
             const reviewsSection = document.getElementById('reviewsSection');
             const reviewsContainer = document.getElementById('reviewsContainer');
@@ -4216,11 +4356,11 @@
         }
         function getHomeTypeDisplay(value) {
             const options = {
-                'single_family': 'Single family home',
-                'town_home': 'Town home',
+                'single_family': 'Single Family Home',
+                'town_home': 'Town Home/Condo',
                 'apartment': 'Apartment',
-                'vacation_home': 'Vacation home',
-                'mobile_home': 'Mobile home'
+                'vacation_home': 'Vacation Home',
+                'mobile_home': 'Mobile Home'
             };
             return options[value] || value;
         }
@@ -4243,7 +4383,7 @@
             return options[value] || value;
         }
         function getMaterialPrefDisplay(value) {
-            const options = { 'acrylic': 'Acrylic', 'composite_stone': 'Composite stone', 'tile': 'Tile', 'not_sure': 'Not sure' };
+            const options = { 'acrylic': 'Acrylic', 'composite_stone': 'Composite Stone', 'tile': 'Tile', 'not_sure': 'Not sure' };
             return options[value] || value;
         }
         function getTimelineDisplay(value) {
@@ -4297,6 +4437,7 @@
                 // Update partner name in privacy policy if client was matched
                 updatePartnerNameInPrivacyPolicy();
                 refreshPartnerLocalPickSection();
+                updateMaterialStepOptions();
             } catch (error) {
                 console.error('Error finding client by zip code:', error);
             }
