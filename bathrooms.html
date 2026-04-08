@@ -1142,7 +1142,7 @@
 
         <!-- STEP 1: Homeowner -->
         <div class="form-step active" id="step1">
-            <div class="step-header">Let's see what your remodel could cost</div>
+            <div class="step-header">Take our 30 second quiz for a fast and free estimate</div>
             <div class="step-subheader">Are you the homeowner or authorized decision maker?</div>
             <div class="options">
                 <div class="option" onclick="selectOptionAndAdvance(this, 'homeowner', 'yes')">Yes</div>
@@ -1260,17 +1260,8 @@
             </div>
         </div>
 
-        <!-- STEP 7: Has Estimate -->
+        <!-- STEP 7: NAME -->
         <div class="form-step" id="step7">
-            <div class="step-header">Have you already received an estimate?</div>
-            <div class="options">
-                <div class="option" onclick="selectOptionAndAdvance(this, 'hasEstimate', 'yes')">Yes</div>
-                <div class="option" onclick="selectOptionAndAdvance(this, 'hasEstimate', 'no')">No</div>
-            </div>
-        </div>
-
-        <!-- STEP 8: NAME -->
-        <div class="form-step" id="step8">
             <div class="step-header">What is your name?</div>
             <div class="name-grid">
                 <div class="address-field">
@@ -1283,12 +1274,12 @@
                 </div>
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="goToStep9()" id="nameNextBtn" disabled>Next</button>
+                <button class="nav-btn" onclick="goToStep8()" id="nameNextBtn" disabled>Next</button>
             </div>
         </div>
 
-        <!-- STEP 9: Address -->
-        <div class="form-step" id="step9">
+        <!-- STEP 8: Address -->
+        <div class="form-step" id="step8">
             <div class="step-header">What is the location of this project?</div>
             <div class="step-subheader">Please make sure your address is full and accurate so we can confirm you are within <span id="addressServiceAreaCompany">Peak Leads Group</span>'s service area</div>
             <div class="address-grid">
@@ -1315,12 +1306,12 @@
                 </div>
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="goToStep10()" id="submitFormBtn" disabled>Next</button>
+                <button class="nav-btn" onclick="goToStep9()" id="submitFormBtn" disabled>Next</button>
             </div>
         </div>
 
-        <!-- STEP 10: PHONE -->
-        <div class="form-step" id="step10">
+        <!-- STEP 9: PHONE -->
+        <div class="form-step" id="step9">
             <div class="step-header">Where can <span id="contactReachCompany">Peak Leads Group</span> reach you with your estimate?</div>
             <div class="row">
                 <div id="phoneWrap" class="address-field">
@@ -1746,6 +1737,7 @@
         let clientMinHoursInAdvance = 48; // Default: 48; can be overridden by client field
         let isSubmitting = false; // Flag to prevent duplicate submissions
         let currentSubmitScreenType = null; // Store the current submit screen type
+        let postFormSubmitted = false; // When true, reviews/Local Pick block show after submit (not on main page)
         let appointmentTimeSelected = false; // True after user selects a time (so bottom shows confirmation, not calendar)
         let lastAppointmentText = ''; // Formatted appointment date/time for confirmation message
         
@@ -2539,7 +2531,7 @@
 
         function updateProgress() {
             const progressFill = document.getElementById('progressFill');
-            const percentage = (currentStep / 10) * 100;
+            const percentage = (currentStep / 9) * 100;
             progressFill.style.width = percentage + '%';
         }
 
@@ -2606,7 +2598,7 @@
         }
 
         function nextStep() {
-            if (currentStep < 10) {
+            if (currentStep < 9) {
                 document.getElementById('step' + currentStep).classList.remove('active');
                 currentStep++;
                 document.getElementById('step' + currentStep).classList.add('active');
@@ -2616,7 +2608,7 @@
             }
         }
 
-        function goToStep9() {
+        function goToStep8() {
             validateNameForm();
             if (formData.firstName && formData.lastName) {
                 nextStep();
@@ -2638,7 +2630,7 @@
             }
         }
 
-        function goToStep10() {
+        function goToStep9() {
             validateAddressForm();
             if (formData.address) {
                 nextStep();
@@ -3492,7 +3484,8 @@
         }
         
         async function showCalendarScreen() {
-            const step10El = document.getElementById('step10');
+            postFormSubmitted = true;
+            const step9El = document.getElementById('step9');
             const calendarStep = document.getElementById('calendarStep');
             const progressArea = document.getElementById('progressArea');
             
@@ -3560,7 +3553,7 @@
                 }
             }
             
-            if (step10El) step10El.classList.remove('active');
+            if (step9El) step9El.classList.remove('active');
             if (calendarStep) {
                 calendarStep.classList.add('active');
             } else {
@@ -3634,13 +3627,14 @@
         }
 
         function showContactAddContactScreen() {
+            postFormSubmitted = true;
             const activeClient = matchedClientData || campaignClientData;
             if (!activeClient) {
                 showConfirmationScreen();
                 return;
             }
 
-            document.getElementById('step10').classList.remove('active');
+            document.getElementById('step9').classList.remove('active');
             document.getElementById('contactStep').classList.remove('active');
             document.getElementById('contactStepAddContact').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
@@ -3651,6 +3645,7 @@
         }
 
         function showContactScreen(submitScreenType) {
+            postFormSubmitted = true;
             // Set "Ready to get started now?" subtitle based on screen type
             const contactReadySubtitle = document.getElementById('contactReadySubtitle');
             if (contactReadySubtitle) {
@@ -3718,7 +3713,7 @@
             }
             
             // Show the contact screen
-            document.getElementById('step10').classList.remove('active');
+            document.getElementById('step9').classList.remove('active');
             document.getElementById('contactStepAddContact').classList.remove('active');
             document.getElementById('contactStep').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
@@ -3732,6 +3727,7 @@
         const checkMarkIconHtml = '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#6190f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; display: block;"><circle cx="12" cy="12" r="10" fill="#e8ecfb"/><path d="M9 12l2 2 4-4" stroke="#6190f2" stroke-width="3"/></svg>';
         const exclamationIconHtml = '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#F9A825" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; display: block;"><circle cx="12" cy="12" r="10" fill="#FFF9C4" stroke="#F9A825"/><path d="M12 7 v6" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.5" fill="#F9A825"/></svg>';
         function showConfirmationScreen() {
+            postFormSubmitted = true;
             // Show the confirmation/thank you screen (default state: show "Ready to get started now?", hide appointment block)
             const confirmationCtaBlock = document.getElementById('confirmationCtaBlock');
             const confirmationAppointmentBlock = document.getElementById('confirmationAppointmentBlock');
@@ -3741,7 +3737,7 @@
             if (confirmationReadySubtitle) {
                 confirmationReadySubtitle.textContent = "Can't wait to hear from us? We'll give you a call soon to schedule your free estimate.";
             }
-            document.getElementById('step10').classList.remove('active');
+            document.getElementById('step9').classList.remove('active');
             document.getElementById('confirmationStep').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
             
@@ -3755,9 +3751,7 @@
         let reviews = [];
 
         function tryShowReviewsOnLoad() {
-            if (campaignClientData && document.getElementById('reviewsSection')) {
-                showReviewsModal();
-            }
+            // Reviews and partner Local Pick block are shown only after form submit (see showReviewsModal).
         }
 
         function showReviewsModal() {
@@ -3805,8 +3799,26 @@
                 }
             }
 
-            // Post-submit: hide reviews/pictures, don't show duplicate CTA below
-            if (currentSubmitScreenType) {
+            // After submit: show reviews + partner Local Pick below the post-submit screen; duplicate CTA under that
+            if (postFormSubmitted) {
+                const reviewsSection = document.getElementById('reviewsSection');
+                const ctaSection = document.getElementById('ctaSection');
+                if (reviews.length > 0 || localPickItems.length > 0) {
+                    buildReviewBlocks();
+                    if (reviewsSection) reviewsSection.classList.add('active');
+                    const getQuoteBtn = document.getElementById('getQuoteBottomBtn');
+                    if (getQuoteBtn) getQuoteBtn.style.display = 'none';
+                    showDuplicateCallToAction();
+                } else {
+                    if (reviewsSection) reviewsSection.classList.remove('active');
+                    if (ctaSection) ctaSection.classList.remove('active');
+                }
+                setTimeout(() => {
+                    if (typeof updateBackgroundHeight === 'function') {
+                        updateBackgroundHeight();
+                    }
+                }, 300);
+            } else {
                 const reviewsSection = document.getElementById('reviewsSection');
                 if (reviewsSection) reviewsSection.classList.remove('active');
                 const ctaSection = document.getElementById('ctaSection');
@@ -3816,23 +3828,6 @@
                         updateBackgroundHeight();
                     }
                 }, 300);
-            } else if (reviews.length > 0 || localPickItems.length > 0) {
-                // Page load: show reviews section (with Local Pick block and/or reviews)
-                buildReviewBlocks();
-                document.getElementById('reviewsSection').classList.add('active');
-                const ctaSection = document.getElementById('ctaSection');
-                if (ctaSection) ctaSection.classList.remove('active');
-                setTimeout(() => {
-                    if (typeof updateBackgroundHeight === 'function') {
-                        updateBackgroundHeight();
-                    }
-                }, 300);
-            } else {
-                // Hide duplicate call to action section if no reviews
-                const ctaSection = document.getElementById('ctaSection');
-                if (ctaSection) {
-                    ctaSection.classList.remove('active');
-                }
             }
         }
 
@@ -4213,10 +4208,6 @@
             };
             return options[value] || value;
         }
-        function getHasEstimateDisplay(value) {
-            const options = { 'yes': 'Yes', 'no': 'No' };
-            return options[value] || value;
-        }
 
         async function submitFinalForm() {
             // Prevent duplicate submissions
@@ -4274,8 +4265,7 @@
                     project_type: finalData.projectType,
                     main_goal: finalData.mainGoal,
                     material_pref: finalData.materialPref,
-                    timeline: finalData.timeline,
-                    has_estimate: finalData.hasEstimate
+                    timeline: finalData.timeline
                 };
                 
                 fbq('track', 'Lead', leadEventData, {
@@ -4283,7 +4273,7 @@
                 });
             }
             if (TESTING_MODE) {
-                console.log('[TESTING_MODE] Meta Pixel Lead event would fire with:', { homeowner_status: finalData.homeowner, home_type: finalData.homeType, project_type: finalData.projectType, main_goal: finalData.mainGoal, material_pref: finalData.materialPref, timeline: finalData.timeline, has_estimate: finalData.hasEstimate });
+                console.log('[TESTING_MODE] Meta Pixel Lead event would fire with:', { homeowner_status: finalData.homeowner, home_type: finalData.homeType, project_type: finalData.projectType, main_goal: finalData.mainGoal, material_pref: finalData.materialPref, timeline: finalData.timeline });
             }
             
             // Find ad and adset from URL
@@ -4319,7 +4309,6 @@ Project Type: ${getProjectTypeDisplay(finalData.projectType)}
 Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}
 Material Preference: ${getMaterialPrefDisplay(finalData.materialPref)}
 Timeline: ${getTimelineDisplay(finalData.timeline)}
-Already received estimate? ${getHasEstimateDisplay(finalData.hasEstimate)}
 
 Address:
 ${finalData.address.street}
@@ -4341,7 +4330,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             
             // Build HTML version of full summary
             const emailLineHTML = finalData.email ? `Email: ${finalData.email}<BR>` : '';
-            const fullSummaryHTML = `Bathroom Remodel Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Home Type: ${getHomeTypeDisplay(finalData.homeType)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR>Material Preference: ${getMaterialPrefDisplay(finalData.materialPref)}<BR>Timeline: ${getTimelineDisplay(finalData.timeline)}<BR>Already received estimate? ${getHasEstimateDisplay(finalData.hasEstimate)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
+            const fullSummaryHTML = `Bathroom Remodel Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Home Type: ${getHomeTypeDisplay(finalData.homeType)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR>Material Preference: ${getMaterialPrefDisplay(finalData.materialPref)}<BR>Timeline: ${getTimelineDisplay(finalData.timeline)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
