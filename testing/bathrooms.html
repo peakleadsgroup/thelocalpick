@@ -842,28 +842,6 @@
             margin: 0;
         }
 
-        /* Step 0 (zip): icons above, center-aligned */
-        .local-pick-block-intro .local-pick-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            font-size: 16px;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .local-pick-block-intro .local-pick-item .local-pick-text {
-            text-align: center;
-            width: 100%;
-        }
-
-        .local-pick-block-intro .local-pick-icon {
-            width: 64px;
-            height: 64px;
-        }
-
         /* Post-zip (partner): icons left, like bathrooms.html */
         .local-pick-block-partner .local-pick-item {
             display: flex;
@@ -1178,15 +1156,12 @@
         <!-- STEP 0: Zip Code (find Local Pick) -->
         <div class="form-step active" id="step0">
             <div class="step-header">Take our 30 second quiz to get a <span class="step-header-highlight">fast and free quote</span></div>
-            <div class="step-subheader" id="step0Subheader">What is your zip code?</div>
+            <div class="step-subheader" id="step0Subheader">We've found the best bathroom remodeler in your area so you don't have to</div>
             <div class="zip-input-wrap" style="margin-bottom: 20px;">
                 <input type="text" id="zipCodeInput" class="address-input" placeholder="Enter zip code" maxlength="5" pattern="[0-9]*" inputmode="numeric" style="max-width: 200px; margin: 0 auto 15px; text-align: center; font-size: 18px;" oninput="persistFunnelProgress()" onkeypress="if(event.key==='Enter'){event.preventDefault();handleZipSubmit();}">
             </div>
             <button type="button" class="nav-btn" id="seeLocalPickBtn" onclick="handleZipSubmit()">Let's Go!</button>
             <div class="zip-error-message" id="zipErrorMessage" style="display: none; margin-top: 20px; padding: 16px; background: #ffebee; border-radius: 10px; color: #c62828; font-size: 14px;"></div>
-            <div class="local-pick-block local-pick-block-intro" style="margin-top: 30px;">
-                <div class="local-pick-title">We've found the best bathroom remodeler in your area so you don't have to</div>
-            </div>
         </div>
 
         <!-- STEP 1: Homeowner -->
@@ -2484,7 +2459,7 @@
                 sub.textContent = "We're still expanding coverage. Enter your zip to continue—your request goes to our vetted contractor network.";
                 btn.textContent = 'Continue';
             } else {
-                sub.textContent = 'What is your zip code?';
+                sub.textContent = "We've found the best bathroom remodeler in your area so you don't have to";
                 btn.textContent = "Let's Go!";
             }
         }
