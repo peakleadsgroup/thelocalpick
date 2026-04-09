@@ -1234,13 +1234,10 @@
             </div>
         </div>
 
-        <!-- STEP 3: Project Type -->
+        <!-- STEP 3: Project Type (options from Client "Project Type" multi-select, same pattern as Home Types) -->
         <div class="form-step" id="step3">
             <div class="step-header">What type of project is this?</div>
-            <div class="options">
-                <div class="option" data-quiz-field="projectType" data-quiz-value="shower_replacement" onclick="selectOptionAndAdvance(this, 'projectType', 'shower_replacement')">Shower replacement</div>
-                <div class="option" data-quiz-field="projectType" data-quiz-value="tub_replacement" onclick="selectOptionAndAdvance(this, 'projectType', 'tub_replacement')">Tub replacement</div>
-            </div>
+            <div class="options" id="projectTypeOptions"></div>
         </div>
 
         <!-- STEP 4: Main Goal -->
@@ -2263,7 +2260,8 @@
                             'Zip': leadData.zip,
                             'IP': leadData.ip || '',
                             'Email': leadData.email || '',
-                            'Unique ID': leadData.uniqueId
+                            'Unique ID': leadData.uniqueId,
+                            'Project Type': getProjectTypeAirtableMultiSelect(leadData.projectType)
                         }
                     });
                     return { records: [{ id: 'test-record-id' }] };
@@ -2329,6 +2327,11 @@
                 // Add Unique ID (used for Meta lead deduplication) if provided
                 if (leadData.uniqueId) {
                     record.fields['Unique ID'] = leadData.uniqueId;
+                }
+
+                const projectTypeForAirtable = getProjectTypeAirtableMultiSelect(leadData.projectType);
+                if (projectTypeForAirtable.length) {
+                    record.fields['Project Type'] = projectTypeForAirtable;
                 }
                 
                 // Submit to Airtable
@@ -2453,6 +2456,48 @@
             return ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
         }
 
+        /** Maps Airtable Client "Project Type" multi-select to form values; options must match B2C lead field options. */
+        function getProjectTypeChoicesForClient(activeClient) {
+            const ORDER = [
+                { match: (t) => /^shower\s*replacement$/i.test(t), value: 'shower_replacement', label: 'Shower replacement' },
+                { match: (t) => /^tub\s*replacement$/i.test(t), value: 'tub_replacement', label: 'Tub replacement' },
+                { match: (t) => /^full\s*remodel$/i.test(t), value: 'full_remodel', label: 'Full remodel' }
+            ];
+            const f = activeClient && activeClient.fields;
+            const raw = (f && (f['Project Type'] != null ? f['Project Type'] : f['Project Types'])) != null
+                ? (f['Project Type'] != null ? f['Project Type'] : f['Project Types'])
+                : null;
+            const labels = normalizeAirtableMultiSelectField(raw);
+            if (!labels.length) {
+                return ORDER.map((d) => ({ value: d.value, label: d.label }));
+            }
+            const matched = new Set();
+            for (const lbl of labels) {
+                const t = lbl.trim();
+                for (const def of ORDER) {
+                    if (def.match(t)) {
+                        matched.add(def.value);
+                        break;
+                    }
+                }
+            }
+            if (matched.size === 0) {
+                return ORDER.map((d) => ({ value: d.value, label: d.label }));
+            }
+            return ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
+        }
+
+        /** Values for B2C Leads "Project Type" multi-select (exact Airtable option strings). */
+        function getProjectTypeAirtableMultiSelect(internalValue) {
+            const map = {
+                shower_replacement: 'Shower replacement',
+                tub_replacement: 'Tub replacement',
+                full_remodel: 'Full remodel'
+            };
+            const label = map[internalValue];
+            return label ? [label] : [];
+        }
+
         function updateHomeTypeStepOptions() {
             const container = document.getElementById('homeTypeOptions');
             if (!container) return;
@@ -2467,6 +2512,26 @@
                 const value = c.value;
                 div.addEventListener('click', function () {
                     selectOptionAndAdvance(div, 'homeType', value);
+                });
+                container.appendChild(div);
+            });
+            updateProjectTypeStepOptions();
+        }
+
+        function updateProjectTypeStepOptions() {
+            const container = document.getElementById('projectTypeOptions');
+            if (!container) return;
+            const choices = getProjectTypeChoicesForClient(getActiveClient());
+            container.replaceChildren();
+            choices.forEach((c) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.setAttribute('data-quiz-field', 'projectType');
+                div.setAttribute('data-quiz-value', c.value);
+                div.textContent = c.label;
+                const value = c.value;
+                div.addEventListener('click', function () {
+                    selectOptionAndAdvance(div, 'projectType', value);
                 });
                 container.appendChild(div);
             });
@@ -4662,7 +4727,8 @@
                 'tub_to_shower': 'Tub to shower conversion',
                 'shower_to_tub': 'Shower to tub conversion',
                 'shower_replacement': 'Shower replacement',
-                'tub_replacement': 'Tub replacement'
+                'tub_replacement': 'Tub replacement',
+                'full_remodel': 'Full remodel'
             };
             return options[value] || value;
         }
@@ -4846,7 +4912,8 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 city: finalData.address.city || '',
                 state: finalData.address.state || '',
                 zip: finalData.address.zip || '',
-                uniqueId: eventId
+                uniqueId: eventId,
+                projectType: finalData.projectType
             };
 
             // Capture client IP at submit time for Airtable "IP" field.
