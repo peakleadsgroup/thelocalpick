@@ -1216,7 +1216,7 @@
             <button type="button" class="nav-btn" id="seeLocalPickBtn" onclick="handleZipSubmit()">Let's Go!</button>
             <div class="zip-error-message" id="zipErrorMessage" style="display: none; margin-top: 20px; padding: 16px; background: #ffebee; border-radius: 10px; color: #c62828; font-size: 14px;"></div>
             <div class="local-pick-block local-pick-block-intro" style="margin-top: 30px;">
-                <div class="local-pick-title">Here's how we choose our<br><span class="local-pick-highlight">Local Pick</span></div>
+                <div class="local-pick-title">We've found the best bathroom remodeler in your area so you don't have to<br><span style="display:block; font-size: 20px; font-weight: 600; margin-top: 6px;">Here's how...</span></div>
                 <ul class="local-pick-list">
                     <li class="local-pick-item">
                         <span class="local-pick-icon"><img src="icons/1.svg" alt=""></span>
@@ -1641,7 +1641,7 @@
                 <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
                     <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
                 </div>
-                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick in <span id="localPickZipCode">ZIP CODE ENTERED</span></span></div>
+                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
                 <ul class="local-pick-list" id="localPickList">
                     <!-- Local Pick items will be dynamically added here -->
                 </ul>
@@ -2723,7 +2723,7 @@
             }
 
             if (localPickTitleEl) {
-                localPickTitleEl.innerHTML = 'Here\'s why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick in <span id="localPickZipCode">ZIP CODE ENTERED</span></span>';
+                localPickTitleEl.innerHTML = 'Here\'s why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
             }
             
             // Try to get partner name from matched client first, then campaign client
@@ -4800,20 +4800,24 @@
                     email: emailValue
                 };
             
-            // Re-match by project zip only when not in generic flow (generic = no Local Pick for initial zip; keep unlinked lead)
-            if (!genericLeadFlow) {
-                try {
-                    if (!finalData.address || !finalData.address.zip) {
-                        throw new Error('Address data is missing or incomplete. Address object: ' + JSON.stringify(finalData.address));
-                    }
-                    
-                    matchedClientData = await findClientByZipCode(finalData.address.zip);
-                    updatePartnerNameInPrivacyPolicy();
-                    refreshPartnerLocalPickSection();
-                    updateHomeTypeStepOptions();
-                } catch (error) {
-                    console.error('Error finding client by zip code:', error);
+            // Final linked client is always determined by the project-location zip (step 7).
+            // Selection order is preserved in findClientByZipCode: Active first (oldest Created first), then Paused.
+            try {
+                if (!finalData.address || !finalData.address.zip) {
+                    throw new Error('Address data is missing or incomplete. Address object: ' + JSON.stringify(finalData.address));
                 }
+
+                matchedClientData = await findClientByZipCode(finalData.address.zip);
+                genericLeadFlow = !matchedClientData;
+                if (!matchedClientData) {
+                    clientData = null;
+                    campaignClientData = null;
+                }
+                updatePartnerNameInPrivacyPolicy();
+                refreshPartnerLocalPickSection();
+                updateHomeTypeStepOptions();
+            } catch (error) {
+                console.error('Error finding client by project zip code:', error);
             }
             
             // Track Meta Pixel Lead event - only when matching zip code is found
