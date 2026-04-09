@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="https://peakleadsgroup.com/Images/PLG%20FAVICON%20(3).png">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <title>Find Your Local Pick - Bathroom Remodel</title>
     <base href="../">
@@ -863,6 +864,14 @@
             line-height: 1.4;
         }
 
+        .local-pick-intro-subtext {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            margin-top: 8px;
+        }
+
         .local-pick-highlight {
             color: #6190f2;
         }
@@ -1216,7 +1225,7 @@
             <button type="button" class="nav-btn" id="seeLocalPickBtn" onclick="handleZipSubmit()">Let's Go!</button>
             <div class="zip-error-message" id="zipErrorMessage" style="display: none; margin-top: 20px; padding: 16px; background: #ffebee; border-radius: 10px; color: #c62828; font-size: 14px;"></div>
             <div class="local-pick-block local-pick-block-intro" style="margin-top: 30px;">
-                <div class="local-pick-title">We've found the best bathroom remodeler in your area so you don't have to<br><span style="display:block; font-size: 20px; font-weight: 600; margin-top: 6px;">Here's how...</span></div>
+                <div class="local-pick-title">We've found the best bathroom remodeler in your area so you don't have to<span class="local-pick-intro-subtext">Here's how...</span></div>
                 <ul class="local-pick-list">
                     <li class="local-pick-item">
                         <span class="local-pick-icon"><img src="icons/1.svg" alt=""></span>
@@ -1343,7 +1352,7 @@
         <!-- STEP 7: Address -->
         <div class="form-step" id="step7">
             <div class="step-header">What is the location of this project?</div>
-            <div class="step-subheader" id="step7AddressSubheader">Please make sure your address is full and accurate so we can confirm you are within <span id="addressServiceAreaCompany">Peak Leads Group</span>'s service area</div>
+            <div class="step-subheader" id="step7AddressSubheader">Please make sure your address is full and accurate</div>
             <div class="address-grid">
                 <div class="address-field">
                     <label class="address-label" for="street">Street Address</label>
@@ -1381,9 +1390,9 @@
                     <input id="phone" name="phone" type="tel" inputmode="tel" placeholder="(___) ___-____" required autocomplete="tel" class="address-input">
                     <input type="hidden" id="phone_digits" name="phone_digits" value="">
                 </div>
-                <div id="emailWrap" style="display:none">
-                    <label for="email">Email</label>
-                    <input id="email" name="email" type="email" inputmode="email" placeholder="your@email.com" autocomplete="email" required>
+                <div id="emailWrap" class="address-field" style="display:none">
+                    <label class="address-label" for="email">Email</label>
+                    <input id="email" name="email" type="email" inputmode="email" placeholder="your@email.com" autocomplete="email" required class="address-input">
                 </div>
             </div>
             <div class="nav-buttons">
@@ -1406,7 +1415,7 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title">We'll Call You</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                         </div>
                         <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
@@ -1422,11 +1431,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="contactReadySubtitle">Can't wait to hear from us? Call or text us below to schedule your free estimate.</p>
+                        <p class="post-submit-cta-subtitle" id="contactReadySubtitle">Can't wait to hear from <span class="post-submit-company-name">COMPANY</span>? Click the button below to call them now.</p>
                         <a id="callButtonLink" href="#" class="contact-button call-button" style="display: none;">
                     <svg class="phone-icon" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
@@ -1458,7 +1467,7 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title">We'll Call You</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                         </div>
                         <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
@@ -1474,11 +1483,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="contactAddReadySubtitle">We'll call you soon to schedule your free estimate.</p>
+                        <p class="post-submit-cta-subtitle" id="contactAddReadySubtitle"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</p>
                     </div>
                 </div>
             </div>
@@ -1495,7 +1504,7 @@
                 <div class="post-submit-step">
                     <div class="post-submit-step-header">
                         <span class="post-submit-step-num">1</span>
-                        <h3 class="post-submit-step-title">We'll Call You</h3>
+                        <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                     </div>
                     <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                 </div>
@@ -1511,7 +1520,7 @@
                         <span class="post-submit-step-num">3</span>
                         <h3 class="post-submit-step-title">Approval & Installation</h3>
                     </div>
-                    <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                    <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                 </div>
                 <div class="post-submit-cta-block">
                     <h3 class="post-submit-cta-title">Ready to get started now?</h3>
@@ -1564,7 +1573,7 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title">We'll Call You</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                         </div>
                         <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
@@ -1580,11 +1589,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" id="confirmationCtaBlock">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="confirmationReadySubtitle">Can't wait to hear from us? We'll give you a call soon to schedule your free estimate.</p>
+                        <p class="post-submit-cta-subtitle" id="confirmationReadySubtitle"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</p>
                     </div>
                     <div class="post-submit-cta-block" id="confirmationAppointmentBlock" style="display: none; margin-top: 28px;">
                         <div id="confirmationAppointmentIcon" style="margin-bottom: 20px;"></div>
@@ -1623,8 +1632,8 @@
             <!-- DUPLICATE CONTACT SCREEN -->
             <div class="form-step cta-block" id="contactStepBelow">
                 <div style="text-align: center;">
-                    <div style="font-size: 24px; color: #000; margin-bottom: 20px; font-weight: bold;">We'll call you soon to schedule your free estimate!</div>
-                    <div style="font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 30px;">Or if you're ready to schedule now you can contact us by clicking one of the buttons below</div>
+                    <div id="contactStepBelowHeadline" style="font-size: 24px; color: #000; margin-bottom: 20px; font-weight: bold;"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</div>
+                    <div id="contactStepBelowSubtext" style="font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 30px;">Or if you're ready to schedule now you can contact <span class="post-submit-company-name">COMPANY</span> by clicking below</div>
                     
                     <a id="callButtonLinkBelow" href="#" class="contact-button call-button" style="display: none;">
                         <svg class="phone-icon" fill="currentColor" viewBox="0 0 24 24">
@@ -2700,7 +2709,7 @@
                 }
                 const step7AddressSubheader = document.getElementById('step7AddressSubheader');
                 if (step7AddressSubheader) {
-                    step7AddressSubheader.textContent = 'Please make sure your address is full and accurate so we can match you with a contractor who serves your area.';
+                    step7AddressSubheader.textContent = 'Please make sure your address is full and accurate';
                 }
                 const contactReachElement = document.getElementById('contactReachCompany');
                 if (contactReachElement) {
@@ -2749,15 +2758,14 @@
                 repairCompanyElement.textContent = partnerName || "Peak Leads Group";
             }
 
-            // Update address step subheader (company-specific possessive)
+            // Keep address step subheader simple and non-branded.
             const step7AddressSubheader = document.getElementById('step7AddressSubheader');
-            const nm = partnerName || 'Peak Leads Group';
             const localPickZipCodeElement = document.getElementById('localPickZipCode');
             if (localPickZipCodeElement) {
                 localPickZipCodeElement.textContent = formData.initialZip || 'ZIP CODE ENTERED';
             }
             if (step7AddressSubheader) {
-                step7AddressSubheader.innerHTML = `Please make sure your address is full and accurate so we can confirm you are within <span id="addressServiceAreaCompany">${escapeHtml(nm)}</span>'s service area`;
+                step7AddressSubheader.textContent = 'Please make sure your address is full and accurate';
             }
 
             // Update contact step header with company name
@@ -2765,6 +2773,9 @@
             if (contactReachElement) {
                 contactReachElement.textContent = partnerName || "Peak Leads Group";
             }
+            document.querySelectorAll('.post-submit-company-name').forEach((el) => {
+                el.textContent = partnerName || 'COMPANY';
+            });
 
             // Update Get Estimate button with company name
             const getQuoteCompanyElement = document.getElementById('getQuoteCompanyName');
@@ -4130,10 +4141,13 @@
             // Set "Ready to get started now?" subtitle based on screen type
             const contactReadySubtitle = document.getElementById('contactReadySubtitle');
             if (contactReadySubtitle) {
+                const companyName = (getActiveClient() && getActiveClient().fields && getActiveClient().fields['Name'])
+                    ? String(getActiveClient().fields['Name']).trim()
+                    : 'COMPANY';
                 const subtitles = {
-                    'Phone': "Can't wait to hear from us? Click the button below to call us now.",
-                    'Text': "Can't wait to hear from us? Text us below to schedule your free estimate.",
-                    'Phone/Text': "Can't wait to hear from us? Call or text us below to schedule your free estimate."
+                    'Phone': `Can't wait to hear from ${companyName}? Click the button below to call them now.`,
+                    'Text': `Can't wait to hear from ${companyName}? Text them below to schedule your free estimate.`,
+                    'Phone/Text': `Can't wait to hear from ${companyName}? Call or text them below to schedule your free estimate.`
                 };
                 contactReadySubtitle.textContent = subtitles[submitScreenType] || subtitles['Phone/Text'];
             }
@@ -4216,7 +4230,11 @@
             if (confirmationAppointmentBlock) confirmationAppointmentBlock.style.display = 'none';
             const confirmationReadySubtitle = document.getElementById('confirmationReadySubtitle');
             if (confirmationReadySubtitle) {
-                confirmationReadySubtitle.textContent = "Can't wait to hear from us? We'll give you a call soon to schedule your free estimate.";
+                const activeClient = getActiveClient();
+                const companyName = (activeClient && activeClient.fields && activeClient.fields['Name'])
+                    ? String(activeClient.fields['Name']).trim()
+                    : 'COMPANY';
+                confirmationReadySubtitle.textContent = `${companyName} will call you soon to schedule your free estimate!`;
             }
             document.getElementById('step8').classList.remove('active');
             document.getElementById('confirmationStep').classList.add('active');
