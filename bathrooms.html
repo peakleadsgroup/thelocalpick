@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="favicon-local-pick-48.png?v=4">
-    <title>Bathroom Remodel Qualification</title>
+    <title>Find Your Local Pick - Bathroom Remodel</title>
     
     <!-- Meta Pixel -->
     <script>
@@ -47,15 +47,15 @@
         .logo-container {
             margin-top: 30px;
             margin-bottom: 30px;
-            height: 80px;
+            height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .logo-img {
-            max-width: 200px;
-            max-height: 80px;
+            max-width: 300px;
+            max-height: 120px;
             object-fit: contain;
         }
 
@@ -81,6 +81,11 @@
             color: #666;
             margin-bottom: 25px;
             font-weight: 500;
+        }
+
+        .step-subheader strong {
+            font-weight: 700;
+            color: #444;
         }
 
         .why-we-ask {
@@ -183,6 +188,21 @@
 
         .mobile-home-continue-btn:hover {
             background: #6190f2;
+        }
+
+        .repair-damage-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: #ffebee;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        .repair-damage-content {
+            flex: 1;
         }
 
         .sub-heading {
@@ -353,6 +373,34 @@
             transform: none;
         }
 
+        .nav-btn.is-loading,
+        .nav-btn.is-loading:disabled {
+            background: #6190f2;
+            cursor: wait;
+            opacity: 0.95;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transform: none;
+        }
+
+        .nav-btn-loading-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: nav-btn-spin 0.65s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes nav-btn-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         .privacy-policy-text {
             margin-top: 20px;
             font-size: 10px;
@@ -465,36 +513,6 @@
             font-weight: 700;
             margin-top: 20px;
             letter-spacing: 1px;
-        }
-
-        /* Add Contact Button (Contact submit screen) */
-        .add-contact-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            background: #6190f2;
-            color: white;
-            border: none;
-            padding: 18px 40px;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            max-width: 320px;
-            box-shadow: 0 4px 15px rgba(97, 144, 242, 0.4);
-        }
-
-        .add-contact-button:hover {
-            background: #6190f2;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(97, 144, 242, 0.5);
-        }
-
-        .add-contact-button:active {
-            transform: translateY(0);
         }
 
         .person-icon {
@@ -770,15 +788,6 @@
         .post-submit-step-num { width: 28px; height: 28px; min-width: 28px; background: #6190f2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0; }
         .post-submit-step-title { font-size: 16px; font-weight: bold; color: #000; margin: 0; }
         .post-submit-step-desc { font-size: 16px; color: #666; line-height: 1.5; font-weight: 500; margin: 0 0 16px 0; text-align: center; max-width: 400px; }
-        .save-contact-btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 12px;
-            background: #6190f2; color: white; padding: 16px 40px;
-            border-radius: 12px; font-size: 18px; font-weight: 600; border: none;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .save-contact-btn-wrap { display: flex; justify-content: center; width: 100%; margin-top: 16px; }
-        .save-contact-btn-wrap .save-contact-btn { margin: 0; }
-        .save-contact-btn:hover { background: #6190f2; transform: translateY(-2px); }
         .post-submit-cta-block { margin-top: 28px; padding-top: 24px; border-top: 1px solid #e9ecef; }
         .post-submit-cta-title { font-size: 16px; font-weight: bold; color: #000; margin-bottom: 8px; }
         .post-submit-cta-subtitle { font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 20px; font-weight: 500; }
@@ -805,6 +814,15 @@
             cursor: pointer; transition: all 0.2s;
         }
         .get-quote-bottom-btn:hover { background: #6190f2; transform: translateY(-2px); }
+
+        .page-bottom-local-pick-cta {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 24px 20px 56px;
+            text-align: center;
+            box-sizing: border-box;
+        }
 
         .reviews-content {
             max-width: 500px;
@@ -838,6 +856,14 @@
             line-height: 1.4;
         }
 
+        .local-pick-intro-subtext {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            margin-top: 8px;
+        }
+
         .local-pick-highlight {
             color: #6190f2;
         }
@@ -848,7 +874,8 @@
             margin: 0;
         }
 
-        .local-pick-item {
+        /* Post-zip (partner): icons left, like bathrooms.html */
+        .local-pick-block-partner .local-pick-item {
             display: flex;
             align-items: flex-start;
             gap: 16px;
@@ -856,6 +883,33 @@
             font-size: 16px;
             color: #666;
             line-height: 1.5;
+        }
+
+        .local-pick-block-partner .local-pick-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .local-pick-block-partner .local-pick-icon {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+        }
+
+        .local-pick-block-partner .local-pick-item .local-pick-text {
+            text-align: left;
+        }
+
+        .partner-logo-wrap {
+            text-align: center;
+            margin: 0 0 18px;
+        }
+
+        .partner-logo-img {
+            max-width: 260px;
+            max-height: 90px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
         }
 
         .local-pick-item:last-child {
@@ -872,6 +926,13 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+        }
+
+        .local-pick-item-title {
+            display: block;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 4px;
         }
 
         .reviews-container {
@@ -1119,15 +1180,25 @@
     <div class="form-wrapper" id="formSection">
         <div class="progress-area" id="progressArea">
             <div class="progress-bar" id="progressBarContainer">
-                <div class="progress-fill" id="progressFill" style="width: 10%"></div>
+                <div class="progress-fill" id="progressFill" style="width: 9%"></div>
             </div>
             <button type="button" class="back-button" id="backButton" onclick="prevStep()" style="display: none;">← Back</button>
         </div>
 
+        <!-- STEP 0: Zip Code (find Local Pick) -->
+        <div class="form-step active" id="step0">
+            <div class="step-header">Take our 30 second quiz to get a <span class="step-header-highlight">fast and free quote</span></div>
+            <div class="step-subheader" id="step0Subheader">We've found the <strong>single best bathroom remodeler</strong> in your area so you don't have to</div>
+            <div class="zip-input-wrap" style="margin-bottom: 20px;">
+                <input type="text" id="zipCodeInput" class="address-input" placeholder="Enter zip code" maxlength="5" pattern="[0-9]*" inputmode="numeric" style="max-width: 200px; margin: 0 auto 15px; text-align: center; font-size: 18px;" oninput="persistFunnelProgress()" onkeypress="if(event.key==='Enter'){event.preventDefault();handleZipSubmit();}">
+            </div>
+            <button type="button" class="nav-btn" id="seeLocalPickBtn" onclick="handleZipSubmit()">Let's Go!</button>
+            <div class="zip-error-message" id="zipErrorMessage" style="display: none; margin-top: 20px; padding: 16px; background: #ffebee; border-radius: 10px; color: #c62828; font-size: 14px;"></div>
+        </div>
+
         <!-- STEP 1: Homeowner -->
-        <div class="form-step active" id="step1">
-            <div class="step-header">Take our 30 second quiz for a <span class="step-header-highlight">fast and free estimate</span></div>
-            <div class="step-subheader">Are you the homeowner or authorized decision maker?</div>
+        <div class="form-step" id="step1">
+            <div class="step-header">Are you the homeowner or authorized decision maker?</div>
             <div class="options">
                 <div class="option" data-quiz-field="homeowner" data-quiz-value="yes" onclick="selectOptionAndAdvance(this, 'homeowner', 'yes')">Yes</div>
                 <div class="option" data-quiz-field="homeowner" data-quiz-value="no" onclick="selectOptionAndAdvance(this, 'homeowner', 'no')">No</div>
@@ -1145,39 +1216,8 @@
             </div>
         </div>
 
-        <!-- STEP 2: Bathroom last updated -->
+        <!-- STEP 2: Home Type -->
         <div class="form-step" id="step2">
-            <div class="step-header">When was your bathroom last updated?</div>
-            <div class="options">
-                <div class="option" data-quiz-field="bathroomLastUpdated" data-quiz-value="more_than_10_years" onclick="selectOptionAndAdvance(this, 'bathroomLastUpdated', 'more_than_10_years')">More than 10 years ago</div>
-                <div class="option" data-quiz-field="bathroomLastUpdated" data-quiz-value="less_than_10_years" onclick="selectOptionAndAdvance(this, 'bathroomLastUpdated', 'less_than_10_years')">Less than 10 years ago</div>
-            </div>
-        </div>
-
-        <!-- STEP 3: Main Goal -->
-        <div class="form-step" id="step3">
-            <div class="step-header">My goal is to...</div>
-            <div class="options">
-                <div class="option" data-quiz-field="mainGoal" data-quiz-value="accessibility_safety" onclick="selectOptionAndAdvance(this, 'mainGoal', 'accessibility_safety')">Improve accessibility/safety</div>
-                <div class="option" data-quiz-field="mainGoal" data-quiz-value="look_function" onclick="selectOptionAndAdvance(this, 'mainGoal', 'look_function')">Improve look/function</div>
-                <div class="option" data-quiz-field="mainGoal" data-quiz-value="home_value" onclick="selectOptionAndAdvance(this, 'mainGoal', 'home_value')">Increase home value</div>
-                <div class="option" data-quiz-field="mainGoal" data-quiz-value="repair_damage" onclick="selectOptionAndAdvance(this, 'mainGoal', 'repair_damage')">Repair damage</div>
-            </div>
-            <div class="mobile-home-message" id="repairDamageMessage" style="display: none;">
-                <div class="why-we-ask-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/>
-                    </svg>
-                </div>
-                <div class="mobile-home-content">
-                    <div class="why-we-ask-text">Only full conversions are offered. Small repairs are not available.</div>
-                    <button type="button" class="mobile-home-continue-btn" onclick="continueRepairDamageGoal()">Continue</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- STEP 4: Home Type -->
-        <div class="form-step" id="step4">
             <div class="step-header">What type of home is this?</div>
             <div class="options" id="homeTypeOptions"></div>
             <div class="mobile-home-message" id="mobileHomeMessage" style="display: none;">
@@ -1193,20 +1233,39 @@
             </div>
         </div>
 
-        <!-- STEP 5: Project Type (options from Airtable multi-select, same pattern as Home Types / Materials) -->
-        <div class="form-step" id="step5">
+        <!-- STEP 3: Project Type -->
+        <div class="form-step" id="step3">
             <div class="step-header">What type of project is this?</div>
-            <div class="options" id="projectTypeOptions"></div>
+            <div class="options">
+                <div class="option" data-quiz-field="projectType" data-quiz-value="shower_replacement" onclick="selectOptionAndAdvance(this, 'projectType', 'shower_replacement')">Shower replacement</div>
+                <div class="option" data-quiz-field="projectType" data-quiz-value="tub_replacement" onclick="selectOptionAndAdvance(this, 'projectType', 'tub_replacement')">Tub replacement</div>
+            </div>
         </div>
 
-        <!-- STEP 6: Material Preferences -->
-        <div class="form-step" id="step6">
-            <div class="step-header">Do you have any material preferences?</div>
-            <div class="options" id="materialPrefOptions"></div>
+        <!-- STEP 4: Main Goal -->
+        <div class="form-step" id="step4">
+            <div class="step-header">My goal is to...</div>
+            <div class="options">
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="accessibility_safety" onclick="selectOptionAndAdvance(this, 'mainGoal', 'accessibility_safety')">Improve accessibility/safety</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="look_function" onclick="selectOptionAndAdvance(this, 'mainGoal', 'look_function')">Improve look/function</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="home_value" onclick="selectOptionAndAdvance(this, 'mainGoal', 'home_value')">Increase home value</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="repair_damage" onclick="selectOptionAndAdvance(this, 'mainGoal', 'repair_damage')">Repair damage</div>
+            </div>
+            <div class="repair-damage-message" id="repairDamageMessage" style="display: none;">
+                <div class="homeowner-no-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                </div>
+                <div class="repair-damage-content">
+                    <div class="homeowner-no-text"><span id="repairCompanyName">Peak Leads Group</span> doesn't offer small repairs.  They specialize exclusively in full replacements and conversions</div>
+                </div>
+            </div>
         </div>
 
-        <!-- STEP 7: Timeline -->
-        <div class="form-step" id="step7">
+        <!-- STEP 5: Timeline -->
+        <div class="form-step" id="step5">
             <div class="step-header">How soon would you like this project to be completed?</div>
             <div class="step-subheader">Estimates can only be given for projects that can start soon so pricing is accurate</div>
             <div class="options">
@@ -1217,8 +1276,8 @@
             </div>
         </div>
 
-        <!-- STEP 8: NAME -->
-        <div class="form-step" id="step8">
+        <!-- STEP 6: NAME -->
+        <div class="form-step" id="step6">
             <div class="step-header">What is your name?</div>
             <div class="name-grid">
                 <div class="address-field">
@@ -1231,14 +1290,14 @@
                 </div>
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="goToStep9()" id="nameNextBtn" disabled>Next</button>
+                <button class="nav-btn" onclick="goToStep7()" id="nameNextBtn" disabled>Next</button>
             </div>
         </div>
 
-        <!-- STEP 9: Address -->
-        <div class="form-step" id="step9">
+        <!-- STEP 7: Address -->
+        <div class="form-step" id="step7">
             <div class="step-header">What is the location of this project?</div>
-            <div class="step-subheader">Please make sure your address is full and accurate so we can confirm you are within <span id="addressServiceAreaCompany">Peak Leads Group</span>'s service area</div>
+            <div class="step-subheader" id="step7AddressSubheader">Please make sure your address is full and accurate</div>
             <div class="address-grid">
                 <div class="address-field">
                     <label class="address-label" for="street">Street Address</label>
@@ -1263,12 +1322,12 @@
                 </div>
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="goToStep10()" id="submitFormBtn" disabled>Next</button>
+                <button class="nav-btn" onclick="goToStep8()" id="submitFormBtn" disabled>Next</button>
             </div>
         </div>
 
-        <!-- STEP 10: PHONE -->
-        <div class="form-step" id="step10">
+        <!-- STEP 8: PHONE -->
+        <div class="form-step" id="step8">
             <div class="step-header">Where can <span id="contactReachCompany">Peak Leads Group</span> reach you with your estimate?</div>
             <div class="row">
                 <div id="phoneWrap" class="address-field">
@@ -1276,9 +1335,9 @@
                     <input id="phone" name="phone" type="tel" inputmode="tel" placeholder="(___) ___-____" required autocomplete="tel" class="address-input">
                     <input type="hidden" id="phone_digits" name="phone_digits" value="">
                 </div>
-                <div id="emailWrap" style="display:none">
-                    <label for="email">Email</label>
-                    <input id="email" name="email" type="email" inputmode="email" placeholder="your@email.com" autocomplete="email" required>
+                <div id="emailWrap" class="address-field" style="display:none">
+                    <label class="address-label" for="email">Email</label>
+                    <input id="email" name="email" type="email" inputmode="email" placeholder="your@email.com" autocomplete="email" required class="address-input">
                 </div>
             </div>
             <div class="nav-buttons">
@@ -1301,17 +1360,9 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title">Save our contact</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                         </div>
-                        <p class="post-submit-step-desc">We'll call soon to schedule your in-home estimate. Tap the button below, then press "Create Contact" (iPhone) or "Save" (Android) so you know it's us.</p>
-                        <div class="save-contact-btn-wrap">
-                            <button type="button" class="save-contact-btn" onclick="addContact()">
-                                <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;">
-                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                </svg>
-                                Save Contact
-                            </button>
-                        </div>
+                        <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
@@ -1325,11 +1376,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="contactReadySubtitle">Can't wait to hear from us? Call or text us below to schedule your free estimate.</p>
+                        <p class="post-submit-cta-subtitle" id="contactReadySubtitle">Can't wait to hear from <span class="post-submit-company-name">COMPANY</span>? Click the button below to call them now.</p>
                         <a id="callButtonLink" href="#" class="contact-button call-button" style="display: none;">
                     <svg class="phone-icon" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
@@ -1361,17 +1412,9 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title">Save our contact</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                         </div>
-                        <p class="post-submit-step-desc">We'll call soon to schedule your in-home estimate. Tap the button below, then press "Create Contact" (iPhone) or "Save" (Android) so you know it's us.</p>
-                        <div class="save-contact-btn-wrap">
-                            <button type="button" class="save-contact-btn" onclick="addContact()">
-                                <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;">
-                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                </svg>
-                                Save Contact
-                            </button>
-                        </div>
+                        <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
@@ -1385,17 +1428,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="contactAddReadySubtitle">Can't wait to hear from us? Save our contact below so we can reach you.</p>
-                        <button type="button" class="add-contact-button" id="addContactBtn" onclick="addContact()">
-                    <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                    Add Contact
-                </button>
+                        <p class="post-submit-cta-subtitle" id="contactAddReadySubtitle"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</p>
                     </div>
                 </div>
             </div>
@@ -1412,17 +1449,9 @@
                 <div class="post-submit-step">
                     <div class="post-submit-step-header">
                         <span class="post-submit-step-num">1</span>
-                        <h3 class="post-submit-step-title">Save our contact</h3>
+                        <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                     </div>
-                    <p class="post-submit-step-desc">We'll call soon to schedule your in-home estimate. Tap the button below, then press "Create Contact" (iPhone) or "Save" (Android) so you know it's us.</p>
-                    <div class="save-contact-btn-wrap">
-                        <button type="button" class="save-contact-btn" onclick="addContact()">
-                            <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                            </svg>
-                            Save Contact
-                        </button>
-                    </div>
+                    <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                 </div>
                 <div class="post-submit-step">
                     <div class="post-submit-step-header">
@@ -1436,7 +1465,7 @@
                         <span class="post-submit-step-num">3</span>
                         <h3 class="post-submit-step-title">Approval & Installation</h3>
                     </div>
-                    <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                    <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                 </div>
                 <div class="post-submit-cta-block">
                     <h3 class="post-submit-cta-title">Ready to get started now?</h3>
@@ -1489,17 +1518,9 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title">Save our contact</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                         </div>
-                        <p class="post-submit-step-desc">We'll call soon to schedule your in-home estimate. Tap the button below, then press "Create Contact" (iPhone) or "Save" (Android) so you know it's us.</p>
-                        <div class="save-contact-btn-wrap">
-                            <button type="button" class="save-contact-btn" onclick="addContact()">
-                                <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;">
-                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                </svg>
-                                Save Contact
-                            </button>
-                        </div>
+                        <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
@@ -1513,11 +1534,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" id="confirmationCtaBlock">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="confirmationReadySubtitle">Can't wait to hear from us? We'll give you a call soon to schedule your free estimate.</p>
+                        <p class="post-submit-cta-subtitle" id="confirmationReadySubtitle"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</p>
                     </div>
                     <div class="post-submit-cta-block" id="confirmationAppointmentBlock" style="display: none; margin-top: 28px;">
                         <div id="confirmationAppointmentIcon" style="margin-bottom: 20px;"></div>
@@ -1532,8 +1553,11 @@
     <div class="reviews-section" id="reviewsSection">
         <div class="reviews-content">
             <!-- LOCAL PICK BLOCK (above reviews) -->
-            <div class="local-pick-block" id="localPickBlock" style="display: none;">
-                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span></div>
+            <div class="local-pick-block local-pick-block-partner" id="localPickBlock" style="display: none;">
+                <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
+                    <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
+                </div>
+                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
                 <ul class="local-pick-list" id="localPickList">
                     <!-- Local Pick items will be dynamically added here -->
                 </ul>
@@ -1553,8 +1577,8 @@
             <!-- DUPLICATE CONTACT SCREEN -->
             <div class="form-step cta-block" id="contactStepBelow">
                 <div style="text-align: center;">
-                    <div style="font-size: 24px; color: #000; margin-bottom: 20px; font-weight: bold;">We'll call you soon to schedule your free estimate!</div>
-                    <div style="font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 30px;">Or if you're ready to schedule now you can contact us by clicking one of the buttons below</div>
+                    <div id="contactStepBelowHeadline" style="font-size: 24px; color: #000; margin-bottom: 20px; font-weight: bold;"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</div>
+                    <div id="contactStepBelowSubtext" style="font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 30px;">Or if you're ready to schedule now you can contact <span class="post-submit-company-name">COMPANY</span> by clicking below</div>
                     
                     <a id="callButtonLinkBelow" href="#" class="contact-button call-button" style="display: none;">
                         <svg class="phone-icon" fill="currentColor" viewBox="0 0 24 24">
@@ -1579,12 +1603,7 @@
                 <div style="text-align: center;">
                     <div style="font-size: 24px; color: #000; margin-bottom: 20px; font-weight: bold;">Don't Miss Our Call! Save This Number Now</div>
                     <div style="font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 30px;">Tap the button below, then press "Create Contact" (iPhone) or "Save" (Android). We'll give you a call ASAP to schedule your free estimate!</div>
-                    <button type="button" class="add-contact-button" id="addContactBtnBelow" onclick="addContact()">
-                        <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                        </svg>
-                        Add Contact
-                    </button>
+
                 </div>
             </div>
 
@@ -1656,9 +1675,7 @@
         // ============================================
         const AIRTABLE_BASE_ID = 'appmBb0lzqRK9dI8v';
         const AIRTABLE_BASE_URL = `/api/airtable/v0/${AIRTABLE_BASE_ID}`;
-        /** Console filter: Airtable:bathrooms */
-        const AIRTABLE_LOG_PREFIX = '[Airtable:bathrooms]';
-
+        
         const TABLES = {
             CLIENTS: 'tblMl8Y97cMSbricC',
             CAMPAIGNS: 'tbl6uhtOFzGzA7EMu',
@@ -1677,8 +1694,8 @@
         };
         // ============================================
 
-        let currentStep = 1;
-        const TOTAL_STEPS = 10;
+        let currentStep = 0;
+        const TOTAL_STEPS = 9;
         let formData = {};
         let eventId = null;
         let hasTrackedEngagement = false;
@@ -1701,9 +1718,14 @@
         let mainFunnelLocalPickSuppressed = false; // After first quiz step, hide "Here's why..." below form until back navigation
         let appointmentTimeSelected = false; // True after user selects a time (so bottom shows confirmation, not calendar)
         let lastAppointmentText = ''; // Formatted appointment date/time for confirmation message
+        let clientIpAddress = null; // Cached client IP for lead submission
+        /** True when zip had no Local Pick match—use network-wide copy and default logo; lead still submits. */
+        let genericLeadFlow = false;
+        const DEFAULT_LOGO_SRC = 'images/TheLocalPick-FlatLeftAligned.svg';
 
         const FUNNEL_RESUME_STORAGE_KEY = 'localpick_funnel_resume_v1';
         const FUNNEL_PAGE_FILE = 'bathrooms.html';
+        const DISABLE_FUNNEL_PROGRESS_PERSIST = false; // Live: allow resume from localStorage
         let funnelResumeRestored = false;
         let phoneValidationListenersAttached = false;
 
@@ -1716,7 +1738,7 @@
         }
 
         function buildFunnelInputSnapshot() {
-            const ids = ['firstName', 'lastName', 'street', 'city', 'state', 'zip', 'phone', 'email'];
+            const ids = ['zipCodeInput', 'firstName', 'lastName', 'street', 'city', 'state', 'zip', 'phone', 'email'];
             const out = {};
             ids.forEach((id) => {
                 const el = document.getElementById(id);
@@ -1736,6 +1758,10 @@
         }
 
         function persistFunnelProgress() {
+            if (DISABLE_FUNNEL_PROGRESS_PERSIST) {
+                clearPersistedFunnelProgress();
+                return;
+            }
             try {
                 const payload = {
                     v: 1,
@@ -1744,7 +1770,8 @@
                     step: currentStep,
                     formData: JSON.parse(JSON.stringify(formData)),
                     inputs: buildFunnelInputSnapshot(),
-                    mainFunnelLocalPickSuppressed: !!mainFunnelLocalPickSuppressed
+                    mainFunnelLocalPickSuppressed: !!mainFunnelLocalPickSuppressed,
+                    genericLeadFlow: !!genericLeadFlow
                 };
                 localStorage.setItem(FUNNEL_RESUME_STORAGE_KEY, JSON.stringify(payload));
             } catch (e) { /* storage full or disabled */ }
@@ -1769,20 +1796,25 @@
 
         function syncAuxiliaryStepMessages() {
             const homeownerNoMsg = document.getElementById('homeownerNoMessage');
-            if (homeownerNoMsg) homeownerNoMsg.style.display = formData.homeowner === 'no' ? 'flex' : 'none';
+            if (homeownerNoMsg) {
+                homeownerNoMsg.style.display = (currentStep === 1 && formData.homeowner === 'no') ? 'flex' : 'none';
+            }
             const repairDamageMsg = document.getElementById('repairDamageMessage');
             if (repairDamageMsg) {
-                const showRepairPanel = currentStep === 3 && formData.mainGoal === 'repair_damage';
-                repairDamageMsg.style.display = showRepairPanel ? 'flex' : 'none';
+                repairDamageMsg.style.display = (currentStep === 4 && formData.mainGoal === 'repair_damage') ? 'flex' : 'none';
             }
             const mobileHomeMsg = document.getElementById('mobileHomeMessage');
             if (mobileHomeMsg) {
-                const showMobile = currentStep === 4 && formData.homeType === 'mobile_home';
-                mobileHomeMsg.style.display = showMobile ? 'flex' : 'none';
+                mobileHomeMsg.style.display = (currentStep === 2 && formData.homeType === 'mobile_home') ? 'flex' : 'none';
             }
         }
 
-        function tryRestoreFunnelProgressAfterBootstrap() {
+        async function tryRestoreFunnelProgressAfterBootstrap() {
+            if (DISABLE_FUNNEL_PROGRESS_PERSIST) {
+                clearPersistedFunnelProgress();
+                funnelResumeRestored = true;
+                return;
+            }
             if (funnelResumeRestored) return;
             let raw;
             try {
@@ -1804,18 +1836,53 @@
 
             try {
                 Object.assign(formData, s.formData || {});
-                currentStep = Math.min(TOTAL_STEPS, Math.max(1, parseInt(s.step, 10) || 1));
+                const maxStep = TOTAL_STEPS - 1;
+                currentStep = Math.min(maxStep, Math.max(0, parseInt(s.step, 10) || 0));
                 if (typeof s.mainFunnelLocalPickSuppressed === 'boolean') {
                     mainFunnelLocalPickSuppressed = s.mainFunnelLocalPickSuppressed;
                 }
+                if (typeof s.genericLeadFlow === 'boolean') {
+                    genericLeadFlow = s.genericLeadFlow;
+                }
 
-                for (let i = 1; i <= TOTAL_STEPS; i++) {
+                if (currentStep >= 1 && formData.initialZip) {
+                    const zip = String(formData.initialZip).trim();
+                    if (zip.length === 5 && /^\d{5}$/.test(zip)) {
+                        matchedClientData = await findClientByZipCode(zip);
+                        if (matchedClientData) {
+                            genericLeadFlow = false;
+                            clientData = matchedClientData;
+                            campaignClientData = matchedClientData;
+                            const logoUrl = matchedClientData.fields && matchedClientData.fields['Logo Link'];
+                            if (logoUrl) {
+                                setPartnerLogoForWhySection(logoUrl);
+                            }
+                            const metaPixel = matchedClientData.fields && matchedClientData.fields['Meta Pixel'];
+                            if (metaPixel) {
+                                initializeMetaPixel(metaPixel);
+                            }
+                        } else {
+                            genericLeadFlow = true;
+                            matchedClientData = null;
+                            clientData = null;
+                            campaignClientData = null;
+                            applyDefaultLocalPickLogo();
+                        }
+                        updatePartnerNameInPrivacyPolicy();
+                        tryShowReviewsOnLoad();
+                    }
+                } else if (currentStep === 0) {
+                    refreshStep0Copy();
+                    updatePartnerNameInPrivacyPolicy();
+                }
+
+                for (let i = 0; i < TOTAL_STEPS; i++) {
                     const el = document.getElementById('step' + i);
                     if (el) el.classList.toggle('active', i === currentStep);
                 }
 
                 applyFunnelInputSnapshot(s.inputs);
-                updateMaterialStepOptions();
+                updateHomeTypeStepOptions();
                 refreshQuizOptionHighlights();
                 syncAuxiliaryStepMessages();
 
@@ -1827,339 +1894,89 @@
 
                 updateProgress();
                 updateBackButtonVisibility();
+                updateBottomLocalPickCtaVisibility();
                 validateNameForm();
                 validateAddressForm();
                 if (typeof validatePhones === 'function') validatePhones();
-                if (currentStep === 10 && typeof setupPhoneValidation === 'function') setupPhoneValidation();
+                if (currentStep === 8 && typeof setupPhoneValidation === 'function') setupPhoneValidation();
             } catch (e) {
                 console.warn('Funnel resume failed:', e);
             }
         }
-
-        function normalizeAirtableMultiSelectField(raw) {
-            if (raw == null) return [];
-            if (Array.isArray(raw)) return raw.map(s => String(s).trim()).filter(Boolean);
-            const s = String(raw).trim();
-            if (!s) return [];
-            return s.split(/[,;]+/).map(p => p.trim()).filter(Boolean);
-        }
-
-        /** Maps Airtable "Home Types" multi-select to form values; order follows field list. */
-        function getHomeTypeChoicesForClient(activeClient) {
-            const ORDER = [
-                { match: (t) => /^single\s*family\s*home$/i.test(t), value: 'single_family', label: 'Single Family Home' },
-                { match: (t) => /^town\s*home\s*\/\s*condo$/i.test(t) || /^town\s*home$/i.test(t) || /^condo$/i.test(t), value: 'town_home', label: 'Town Home/Condo' },
-                { match: (t) => /^vacation\s*home$/i.test(t), value: 'vacation_home', label: 'Vacation Home' },
-                { match: (t) => /^apartment$/i.test(t), value: 'apartment', label: 'Apartment' },
-                { match: (t) => /^mobile\s*home$/i.test(t), value: 'mobile_home', label: 'Mobile Home' }
-            ];
-            const labels = normalizeAirtableMultiSelectField(activeClient && activeClient.fields && activeClient.fields['Home Types']);
-            if (!labels.length) {
-                return ORDER.map((d) => ({ value: d.value, label: d.label }));
-            }
-            const matched = new Set();
-            for (const lbl of labels) {
-                const t = lbl.trim();
-                for (const def of ORDER) {
-                    if (def.match(t)) {
-                        matched.add(def.value);
-                        break;
-                    }
-                }
-            }
-            if (matched.size === 0) {
-                return ORDER.map((d) => ({ value: d.value, label: d.label }));
-            }
-            return ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
-        }
-
-        /** Labels from Client "Project Type" multi-select (Airtable); falls back to similar field names. */
-        function getProjectTypesFieldLabels(activeClient) {
-            const f = activeClient && activeClient.fields;
-            if (!f) return { labels: [], source: null };
-            const keys = ['Project Type', 'Project Types', 'Bathroom Project Types'];
-            for (const key of keys) {
-                if (f[key] == null || f[key] === '') continue;
-                const labels = normalizeAirtableMultiSelectField(f[key]);
-                if (labels.length > 0) return { labels, source: key };
-            }
-            return { labels: [], source: null };
-        }
-
-        /** Maps Airtable "Project Type" multi-select to form values; order matches typical Airtable option list. */
-        function getProjectTypeChoicesForClient(activeClient) {
-            const ORDER = [
-                { match: (t) => /^shower\s+replacement$/i.test(t), value: 'shower_replacement', label: 'Shower replacement' },
-                { match: (t) => /^tub\s+replacement$/i.test(t), value: 'tub_replacement', label: 'Tub replacement' },
-                { match: (t) => /^full\s+remodel$/i.test(t), value: 'full_remodel', label: 'Full remodel' }
-            ];
-            const { labels, source } = getProjectTypesFieldLabels(activeClient);
-            if (!labels.length) {
-                console.info(AIRTABLE_LOG_PREFIX, 'Project Type: field empty or missing — showing all default options', { clientId: activeClient && activeClient.id });
-                return ORDER.map((d) => ({ value: d.value, label: d.label }));
-            }
-            const matched = new Set();
-            for (const lbl of labels) {
-                const t = lbl.trim();
-                for (const def of ORDER) {
-                    if (def.match(t)) {
-                        matched.add(def.value);
-                        break;
-                    }
-                }
-            }
-            if (matched.size === 0) {
-                console.warn(AIRTABLE_LOG_PREFIX, 'Project Type: labels did not match Shower replacement / Tub replacement / Full remodel — showing all defaults.', { source, labels });
-                return ORDER.map((d) => ({ value: d.value, label: d.label }));
-            }
-            const choices = ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
-            console.info(AIRTABLE_LOG_PREFIX, 'Project Type: loaded from client', { source, labels, choices: choices.map((c) => c.value) });
-            return choices;
-        }
-
-        function updateProjectTypeStepOptions() {
-            const container = document.getElementById('projectTypeOptions');
-            if (!container) return;
-            const activeClient = matchedClientData || campaignClientData;
-            const choices = getProjectTypeChoicesForClient(activeClient);
-            container.replaceChildren();
-            choices.forEach((c) => {
-                const div = document.createElement('div');
-                div.className = 'option';
-                div.setAttribute('data-quiz-field', 'projectType');
-                div.setAttribute('data-quiz-value', c.value);
-                div.textContent = c.label;
-                const value = c.value;
-                div.addEventListener('click', function () {
-                    selectOptionAndAdvance(div, 'projectType', value);
-                });
-                container.appendChild(div);
-            });
-        }
-
-        /** Labels from Client "Material" or "Materials" multi-select (Airtable). */
-        function getMaterialFieldLabels(activeClient) {
-            const f = activeClient && activeClient.fields;
-            if (!f) return { labels: [], source: null };
-            const keys = ['Material', 'Materials'];
-            for (const key of keys) {
-                if (f[key] == null || f[key] === '') continue;
-                const labels = normalizeAirtableMultiSelectField(f[key]);
-                if (labels.length > 0) return { labels, source: key };
-            }
-            return { labels: [], source: null };
-        }
-
-        /** Maps Airtable Material(s) multi-select; "Not sure" is always appended last. */
-        function getMaterialChoicesForClient(activeClient) {
-            const ORDER = [
-                { match: (t) => /^acrylic$/i.test(t), value: 'acrylic', label: 'Acrylic' },
-                { match: (t) => /^tile$/i.test(t), value: 'tile', label: 'Tile' },
-                { match: (t) => /^composite\s*stone$/i.test(t), value: 'composite_stone', label: 'Composite Stone' }
-            ];
-            const { labels, source } = getMaterialFieldLabels(activeClient);
-            let materialChoices;
-            if (!labels.length) {
-                console.info(AIRTABLE_LOG_PREFIX, 'Material: field empty or missing — showing all default options', { clientId: activeClient && activeClient.id });
-                materialChoices = ORDER.map((d) => ({ value: d.value, label: d.label }));
-            } else {
-                const matched = new Set();
-                for (const lbl of labels) {
-                    const t = lbl.trim();
-                    for (const def of ORDER) {
-                        if (def.match(t)) {
-                            matched.add(def.value);
-                            break;
-                        }
-                    }
-                }
-                if (matched.size === 0) {
-                    console.warn(AIRTABLE_LOG_PREFIX, 'Material: labels did not match Acrylic / Tile / Composite Stone — showing all defaults.', { source, labels });
-                    materialChoices = ORDER.map((d) => ({ value: d.value, label: d.label }));
-                } else {
-                    materialChoices = ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
-                    console.info(AIRTABLE_LOG_PREFIX, 'Material: loaded from client', { source, labels, choices: materialChoices.map((c) => c.value) });
-                }
-            }
-            return materialChoices.concat([{ value: 'not_sure', label: 'Not sure' }]);
-        }
-
-        function updateMaterialPrefStepOptions() {
-            const container = document.getElementById('materialPrefOptions');
-            if (!container) return;
-            const activeClient = matchedClientData || campaignClientData;
-            const choices = getMaterialChoicesForClient(activeClient);
-            container.replaceChildren();
-            choices.forEach((c) => {
-                const div = document.createElement('div');
-                div.className = 'option';
-                div.setAttribute('data-quiz-field', 'materialPref');
-                div.setAttribute('data-quiz-value', c.value);
-                div.textContent = c.label;
-                const value = c.value;
-                div.addEventListener('click', function () {
-                    selectOptionAndAdvance(div, 'materialPref', value);
-                });
-                container.appendChild(div);
-            });
-        }
-
-        function updateHomeTypeStepOptions() {
-            const container = document.getElementById('homeTypeOptions');
-            if (!container) return;
-            const activeClient = matchedClientData || campaignClientData;
-            const choices = getHomeTypeChoicesForClient(activeClient);
-            container.replaceChildren();
-            choices.forEach((c) => {
-                const div = document.createElement('div');
-                div.className = 'option';
-                div.setAttribute('data-quiz-field', 'homeType');
-                div.setAttribute('data-quiz-value', c.value);
-                div.textContent = c.label;
-                const value = c.value;
-                div.addEventListener('click', function () {
-                    selectOptionAndAdvance(div, 'homeType', value);
-                });
-                container.appendChild(div);
-            });
-        }
-
-        function updateMaterialStepOptions() {
-            updateProjectTypeStepOptions();
-            updateMaterialPrefStepOptions();
-            updateHomeTypeStepOptions();
-        }
         
-        // Get campaign ID immediately from URL (before DOM is ready)
+        // URL tracking: campaignID (Meta / Airtable campaign), adATID, adsetID (synced to lead in Airtable)
         const urlParams = new URLSearchParams(window.location.search);
         const initialCampaignID = urlParams.get('campaignID');
-        const DEFAULT_LOGO_SRC = 'images/TheLocalPick-FlatLeftAligned.svg';
 
         // ============================================
         // AIRTABLE API FUNCTIONS
         // ============================================
-
-        function escapeAirtableStringForFormula(value) {
-            return String(value).replace(/"/g, '""');
-        }
-
-        /** Resolve /api/... against page origin (file:// will fail — we log a hint). */
-        function resolveAirtableFetchUrl(url) {
-            if (!url) return url;
-            if (/^https?:\/\//i.test(url)) return url;
-            try {
-                if (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:') {
-                    console.warn(AIRTABLE_LOG_PREFIX, 'Page loaded as file:// — fetch cannot reach /api/airtable. Use deployed Pages or `npx wrangler pages dev` with functions.');
-                }
-                return new URL(url, window.location.origin).href;
-            } catch (e) {
-                console.error(AIRTABLE_LOG_PREFIX, 'resolveAirtableFetchUrl failed', url, e);
-                return url;
-            }
-        }
-
-        /** First linked client id from a Campaign record (supports common field names). */
-        function getCampaignLinkedClientRecordId(campaign) {
-            const f = campaign && campaign.fields;
-            if (!f) return null;
-            const keys = ['Client', 'Clients', 'Linked Client'];
-            for (const key of keys) {
-                const v = f[key];
-                if (Array.isArray(v) && v.length) {
-                    const id = v[0];
-                    if (typeof id === 'string' && id.startsWith('rec')) return id;
-                }
-                if (typeof v === 'string' && v.startsWith('rec')) return v;
-            }
-            return null;
-        }
-
+        
         async function fetchAirtableData(url) {
-            const resolved = resolveAirtableFetchUrl(url);
-            const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
-            console.info(AIRTABLE_LOG_PREFIX, 'GET →', resolved);
             try {
-                const response = await fetch(resolved, {
+                const response = await fetch(url, {
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 });
-                const text = await response.text();
-                const ms = typeof performance !== 'undefined' ? Math.round(performance.now() - t0) : null;
-
+                
                 if (!response.ok) {
-                    const snippet = text.length > 1200 ? text.slice(0, 1200) + '…' : text;
-                    console.error(AIRTABLE_LOG_PREFIX, 'GET failed', {
-                        url: resolved,
-                        status: response.status,
-                        statusText: response.statusText,
-                        ms,
-                        body: snippet
-                    });
-                    throw new Error(`Airtable API error: ${response.status} ${response.statusText} — ${snippet}`);
+                    const errorText = await response.text();
+                    const error = new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+                    throw error;
                 }
-
-                let data;
-                try {
-                    data = text ? JSON.parse(text) : {};
-                } catch (parseErr) {
-                    console.error(AIRTABLE_LOG_PREFIX, 'GET invalid JSON', { url: resolved, ms, textStart: text.slice(0, 500) });
-                    throw parseErr;
-                }
-
-                if (Array.isArray(data.records)) {
-                    console.info(AIRTABLE_LOG_PREFIX, 'GET ok', { url: resolved, ms, recordCount: data.records.length, offset: data.offset || null });
-                } else if (data.id) {
-                    console.info(AIRTABLE_LOG_PREFIX, 'GET ok (single record)', { url: resolved, ms, id: data.id });
-                } else {
-                    console.info(AIRTABLE_LOG_PREFIX, 'GET ok', { url: resolved, ms, keys: Object.keys(data) });
-                }
-                return data;
+                
+                return await response.json();
             } catch (error) {
-                if (error && error.name === 'TypeError' && String(error.message).includes('fetch')) {
-                    console.error(AIRTABLE_LOG_PREFIX, 'GET network/CORS error', { url: resolved, message: error.message });
-                } else if (!String(error.message || '').includes('Airtable API error')) {
-                    console.error(AIRTABLE_LOG_PREFIX, 'GET error', { url: resolved, error });
-                }
+                console.error('Airtable fetch error:', error);
                 throw error;
             }
         }
 
-        async function fetchAirtableMutation(url, method, bodyObject) {
-            const resolved = resolveAirtableFetchUrl(url);
-            const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
-            const bodyStr = bodyObject !== undefined ? JSON.stringify(bodyObject) : undefined;
-            console.info(AIRTABLE_LOG_PREFIX, method, '→', resolved, bodyObject ? { bodyKeys: Object.keys(bodyObject) } : '');
-            const response = await fetch(resolved, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: bodyStr
-            });
-            const text = await response.text();
-            const ms = typeof performance !== 'undefined' ? Math.round(performance.now() - t0) : null;
-            if (!response.ok) {
-                const snippet = text.length > 1200 ? text.slice(0, 1200) + '…' : text;
-                console.error(AIRTABLE_LOG_PREFIX, method + ' failed', { url: resolved, status: response.status, ms, body: snippet });
-                throw new Error(`Airtable ${method} failed: ${response.status} ${response.statusText} — ${snippet}`);
+        function isLikelyIpAddress(value) {
+            const v = String(value || '').trim();
+            if (!v) return false;
+            // Accept IPv4 or IPv6 textual forms.
+            return /^(\d{1,3}\.){3}\d{1,3}$/.test(v) || v.includes(':');
+        }
+
+        async function fetchClientIpAddress() {
+            if (clientIpAddress) return clientIpAddress;
+            const endpoints = [
+                'https://api64.ipify.org?format=json',
+                'https://api.ipify.org?format=json',
+                'https://api.ipify.org?format=text'
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    const res = await fetch(endpoint, { cache: 'no-store' });
+                    if (!res.ok) continue;
+                    const contentType = String(res.headers.get('content-type') || '').toLowerCase();
+                    let ip = '';
+                    if (contentType.includes('application/json')) {
+                        const data = await res.json();
+                        ip = data && data.ip ? String(data.ip).trim() : '';
+                    } else {
+                        ip = String(await res.text()).trim();
+                    }
+                    if (isLikelyIpAddress(ip)) {
+                        clientIpAddress = ip;
+                        return clientIpAddress;
+                    }
+                } catch (e) {
+                    // Try next endpoint.
+                }
             }
-            console.info(AIRTABLE_LOG_PREFIX, method + ' ok', { url: resolved, ms });
-            try {
-                return text ? JSON.parse(text) : {};
-            } catch {
-                return {};
-            }
+            return '';
         }
 
         async function fetchUrlParametersForClient(clientId, additionalLogData = {}) {
             try {
                 if (!clientId) {
-                    console.info(AIRTABLE_LOG_PREFIX, 'fetchUrlParametersForClient: no clientId, skipping');
                     return [];
                 }
-                console.info(AIRTABLE_LOG_PREFIX, 'fetchUrlParametersForClient', { clientId, ...additionalLogData });
-
+                
                 // Fetch URL parameters linked to this client
                 // Try multiple filter approaches for linked records
                 // First try: direct record ID match (works for single linked records)
@@ -2180,14 +1997,13 @@
                         parameter: record.fields['Parameter'] || '',
                         value: record.fields['Value'] || ''
                     }));
-                    console.info(AIRTABLE_LOG_PREFIX, 'fetchUrlParametersForClient: loaded', params.length, 'row(s)');
+                    
                     return params;
                 }
-
-                console.info(AIRTABLE_LOG_PREFIX, 'fetchUrlParametersForClient: no rows for client', clientId);
+                
                 return [];
             } catch (error) {
-                console.error(AIRTABLE_LOG_PREFIX, 'Error fetching URL parameters:', error);
+                console.error('Error fetching URL parameters:', error);
                 return [];
             }
         }
@@ -2230,62 +2046,52 @@
 
         async function loadClientFromCampaign(campaignIDParam = null) {
             try {
+                
+                // Use provided param or get from URL
                 const campaignID = campaignIDParam || initialCampaignID || new URLSearchParams(window.location.search).get('campaignID');
-                console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign start', {
-                    campaignIDParam: campaignIDParam || null,
-                    initialCampaignID: initialCampaignID || null,
-                    resolvedCampaignID: campaignID || null
-                });
-
+                
                 if (!campaignID) {
-                    console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: no campaign ID in URL/param — skip Airtable campaign load');
                     return null;
                 }
 
+                // First, try to fetch campaign by Campaign ID field
                 let campaign = null;
-                const filterExpr = `{Campaign ID}="${escapeAirtableStringForFormula(campaignID)}"`;
-                const campaignUrl = `${AIRTABLE_BASE_URL}/${TABLES.CAMPAIGNS}?filterByFormula=${encodeURIComponent(filterExpr)}`;
-                console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: list campaigns by formula', filterExpr);
+                const campaignUrl = `${AIRTABLE_BASE_URL}/${TABLES.CAMPAIGNS}?filterByFormula={Campaign ID}="${campaignID}"`;
                 const campaignData = await fetchAirtableData(campaignUrl);
-
+                
                 if (campaignData.records && campaignData.records.length > 0) {
                     campaign = campaignData.records[0];
-                    campaignRecordId = campaign.id;
-                    metaCampaignID = campaign.fields['Campaign ID'] || campaignID;
-                    console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: matched campaign by Campaign ID field', { campaignRecordId, metaCampaignID });
+                    campaignRecordId = campaign.id; // Store campaign record ID for Source Campaign linking
+                    metaCampaignID = campaign.fields['Campaign ID'] || campaignID; // Store Meta campaign ID
                 } else {
-                    console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: no rows for formula; trying GET by record id (if campaignID is rec…)');
+                    // If not found by Campaign ID field, try fetching directly by record ID
                     try {
                         const directCampaignUrl = `${AIRTABLE_BASE_URL}/${TABLES.CAMPAIGNS}/${campaignID}`;
                         const directCampaignData = await fetchAirtableData(directCampaignUrl);
                         campaign = directCampaignData;
-                        campaignRecordId = campaign.id;
-                        metaCampaignID = campaign.fields['Campaign ID'] || null;
-                        console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: loaded campaign by record id', { campaignRecordId, metaCampaignID });
+                        campaignRecordId = campaign.id; // Store campaign record ID for Source Campaign linking
+                        metaCampaignID = campaign.fields['Campaign ID'] || null; // Store Meta campaign ID if available
                     } catch (directError) {
-                        console.error(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: campaign not found by formula or record id', directError);
+                        console.error('Campaign not found by record ID either:', directError);
                         return null;
                     }
                 }
-
-                const clientRecordId = getCampaignLinkedClientRecordId(campaign);
-                if (!clientRecordId) {
-                    const keys = campaign.fields ? Object.keys(campaign.fields) : [];
-                    console.error(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: no linked client on campaign (expected Client / Clients / Linked Client)', {
-                        campaignRecordId: campaign.id,
-                        fieldKeys: keys
-                    });
+                
+                // Get linked client record ID
+                if (!campaign.fields || !campaign.fields.Client || campaign.fields.Client.length === 0) {
+                    console.error('Campaign has no linked Client');
                     return null;
                 }
-
+                
+                const clientRecordId = campaign.fields.Client[0];
+                
+                // Fetch client data
                 const clientUrl = `${AIRTABLE_BASE_URL}/${TABLES.CLIENTS}/${clientRecordId}`;
-                console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: fetching client', clientRecordId);
                 const clientData = await fetchAirtableData(clientUrl);
-                const clientName = clientData && clientData.fields && clientData.fields['Name'];
-                console.info(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign: success', { clientRecordId, clientName: clientName || null });
+                
                 return clientData;
             } catch (error) {
-                console.error(AIRTABLE_LOG_PREFIX, 'loadClientFromCampaign error', error);
+                console.error('Error loading client from campaign:', error);
                 return null;
             }
         }
@@ -2294,7 +2100,6 @@
             try {
                 const landingPageNiche = 'Bathrooms';
                 const zipStr = String(zipCode).trim();
-                console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode start', { zip: zipStr, niche: landingPageNiche });
 
                 // Fetch ALL clients (Airtable returns max 100 per request; paginate to get every record)
                 let allRecords = [];
@@ -2307,10 +2112,7 @@
                     url = page.offset ? `${AIRTABLE_BASE_URL}/${TABLES.CLIENTS}?offset=${page.offset}` : null;
                 } while (url);
 
-                console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: loaded client pages', { totalClients: allRecords.length });
-
                 if (allRecords.length === 0) {
-                    console.warn(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: zero client records from Airtable');
                     return null;
                 }
 
@@ -2362,18 +2164,15 @@
 
                 if (activeMatches.length > 0) {
                     activeMatches.sort((a, b) => getClientCreatedMs(a) - getClientCreatedMs(b));
-                    console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: active match', { clientId: activeMatches[0].id, tieCount: activeMatches.length });
                     return activeMatches[0];
                 }
                 if (pausedMatches.length > 0) {
                     pausedMatches.sort((a, b) => getClientCreatedMs(a) - getClientCreatedMs(b));
-                    console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: paused match', { clientId: pausedMatches[0].id, tieCount: pausedMatches.length });
                     return pausedMatches[0];
                 }
-                console.info(AIRTABLE_LOG_PREFIX, 'findClientByZipCode: no niche/zip match');
                 return null;
             } catch (error) {
-                console.error(AIRTABLE_LOG_PREFIX, 'Error finding client by zip code:', error);
+                console.error('Error finding client by zip code:', error);
                 return null;
             }
         }
@@ -2381,8 +2180,7 @@
         async function findAdByATID(adATID) {
             try {
                 if (!adATID) return null;
-                console.info(AIRTABLE_LOG_PREFIX, 'findAdByATID start', adATID);
-
+                
                 // If adATID looks like an Airtable record ID (starts with "rec"), try to fetch it directly
                 if (adATID.startsWith('rec')) {
                         try {
@@ -2396,63 +2194,50 @@
                         }
                 }
                 
-                // Paginate ads (Airtable max 100 per request)
-                let allAds = [];
-                let adsUrl = `${AIRTABLE_BASE_URL}/${TABLES.B2C_ADS}`;
-                console.info(AIRTABLE_LOG_PREFIX, 'findAdByATID: scanning B2C_ADS pages for scriptATID', adATID);
-                do {
-                    const adsPage = await fetchAirtableData(adsUrl);
-                    if (adsPage.records && adsPage.records.length > 0) {
-                        allAds = allAds.concat(adsPage.records);
-                    }
-                    adsUrl = adsPage.offset ? `${AIRTABLE_BASE_URL}/${TABLES.B2C_ADS}?offset=${adsPage.offset}` : null;
-                } while (adsUrl);
-
-                console.info(AIRTABLE_LOG_PREFIX, 'findAdByATID: loaded ad rows', allAds.length);
-
-                if (allAds.length === 0) {
+                // Fetch all ads and find by scriptATID
+                const adsUrl = `${AIRTABLE_BASE_URL}/${TABLES.B2C_ADS}`;
+                const adsData = await fetchAirtableData(adsUrl);
+                
+                if (!adsData.records || adsData.records.length === 0) {
                     return null;
                 }
-
-                for (const ad of allAds) {
+                
+                // Find ad where scriptATID matches
+                for (const ad of adsData.records) {
                     if (ad.fields.scriptATID === adATID) {
-                        console.info(AIRTABLE_LOG_PREFIX, 'findAdByATID: match', ad.id);
-                        return ad.id;
+                        return ad.id; // Return record ID
                     }
                 }
-
-                console.info(AIRTABLE_LOG_PREFIX, 'findAdByATID: no scriptATID match');
+                
                 return null;
             } catch (error) {
-                console.warn(AIRTABLE_LOG_PREFIX, 'findAdByATID error', error);
                 return null;
             }
         }
 
         async function submitLeadToAirtable(leadData) {
             try {
-                console.info(AIRTABLE_LOG_PREFIX, 'submitLeadToAirtable start', {
-                    hasMatchedClient: !!(matchedClientData && matchedClientData.id),
-                    campaignRecordId: campaignRecordId || null,
-                    adRecordId: adRecordId || null
-                });
-                // Check for duplicate: existing lead with same linked client + same phone (only if we have a linked client)
+                // Check for duplicate: same phone with any lead created in last 90 days (regardless of linked client).
                 let isDuplicate = false;
-                const hasLinkedClient = !!(matchedClientData && matchedClientData.id);
                 const hasPhone = !!leadData.phone;
-                if (hasLinkedClient && hasPhone) {
+                if (hasPhone) {
                     try {
                         const phoneDigits = String(leadData.phone).replace(/\D/g, '');
                         const filterFormula = `REGEX_REPLACE({Phone}, "[^0-9]", "") = "${phoneDigits}"`;
                         const dupUrl = `${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}?filterByFormula=${encodeURIComponent(filterFormula)}`;
                         const dupData = await fetchAirtableData(dupUrl);
                         if (dupData.records && dupData.records.length > 0) {
-                            const clientId = matchedClientData.id;
-                            isDuplicate = dupData.records.some(rec => {
-                                const linked = rec.fields['Linked Client'];
-                                return Array.isArray(linked) && linked.includes(clientId);
+                            const nowMs = Date.now();
+                            const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+                            isDuplicate = dupData.records.some((rec) => {
+                                const createdRaw = rec.createdTime || (rec.fields && rec.fields['Created']) || '';
+                                const createdMs = Date.parse(String(createdRaw));
+                                if (Number.isNaN(createdMs)) return false;
+                                return (nowMs - createdMs) <= ninetyDaysMs;
                             });
-                            if (isDuplicate) console.log('[Duplicate] Found existing lead for same client + phone, submitting without linked client and Error: DUPLICATE');
+                            if (isDuplicate) {
+                                console.log('[Duplicate] Found lead with same phone created within 90 days; submitting with Error: DUPLICATE');
+                            }
                         }
                     } catch (dupErr) {
                         console.warn('Duplicate check failed, proceeding with normal submission:', dupErr);
@@ -2475,6 +2260,7 @@
                             'City': leadData.city,
                             'State': leadData.state,
                             'Zip': leadData.zip,
+                            'IP': leadData.ip || '',
                             'Email': leadData.email || '',
                             'Unique ID': leadData.uniqueId
                         }
@@ -2500,7 +2286,8 @@
                         'Address': leadData.address,
                         'City': leadData.city,
                         'State': leadData.state,
-                        'Zip': leadData.zip
+                        'Zip': leadData.zip,
+                        'IP': leadData.ip || ''
                     }
                 };
                 
@@ -2544,19 +2331,29 @@
                 }
                 
                 // Submit to Airtable
-                const result = await fetchAirtableMutation(`${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}`, 'POST', { records: [record] });
+                const response = await fetch(`${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ records: [record] })
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Airtable submission failed: ${response.status} ${response.statusText} - ${errorText}`);
+                }
+                
+                const result = await response.json();
                 
                 // Store the lead record ID so we can update it with appointment later
                 if (result.records && result.records.length > 0) {
                     leadRecordId = result.records[0].id;
-                    console.info(AIRTABLE_LOG_PREFIX, 'submitLeadToAirtable: new lead id', leadRecordId);
-                } else {
-                    console.warn(AIRTABLE_LOG_PREFIX, 'submitLeadToAirtable: POST ok but no records in response', result);
                 }
-
+                
                 return result;
             } catch (error) {
-                console.error(AIRTABLE_LOG_PREFIX, 'Error submitting lead to Airtable:', error);
+                console.error('Error submitting lead to Airtable:', error);
                 throw error;
             }
         }
@@ -2593,22 +2390,85 @@
             }
         }
 
-        function loadLogo(logoUrl) {
-            const logoImg = document.getElementById('logoImg');
-            if (logoUrl && logoImg) {
-                // Preload first for faster display
-                preloadLogo(logoUrl);
-                
-                logoImg.src = logoUrl;
-                logoImg.style.display = 'block';
-                
-                // Handle logo load errors — fall back to default Local Pick logo
-                logoImg.onerror = function() {
-                    console.error('Failed to load logo image:', logoUrl);
-                    logoImg.src = DEFAULT_LOGO_SRC;
-                    logoImg.onerror = null;
-                };
+        function setPartnerLogoForWhySection(logoUrl) {
+            const wrap = document.getElementById('partnerLogoWrap');
+            const img = document.getElementById('partnerLogoImg');
+            if (!wrap || !img) return;
+
+            if (!logoUrl) {
+                img.removeAttribute('src');
+                wrap.style.display = 'none';
+                return;
             }
+
+            preloadLogo(logoUrl);
+            img.src = logoUrl;
+            wrap.style.display = 'block';
+            img.onerror = function() {
+                wrap.style.display = 'none';
+                img.onerror = null;
+            };
+        }
+
+        function getActiveClient() {
+            if (genericLeadFlow) return null;
+            return matchedClientData || campaignClientData;
+        }
+
+        function normalizeAirtableMultiSelectField(raw) {
+            if (raw == null) return [];
+            if (Array.isArray(raw)) return raw.map(s => String(s).trim()).filter(Boolean);
+            const s = String(raw).trim();
+            if (!s) return [];
+            return s.split(/[,;]+/).map(p => p.trim()).filter(Boolean);
+        }
+
+        /** Maps Airtable "Home Types" multi-select to form values; order follows field list. */
+        function getHomeTypeChoicesForClient(activeClient) {
+            const ORDER = [
+                { match: (t) => /^single\s*family\s*home$/i.test(t), value: 'single_family', label: 'Single Family Home' },
+                { match: (t) => /^town\s*home\s*\/\s*condo$/i.test(t) || /^town\s*home$/i.test(t) || /^condo$/i.test(t), value: 'town_home', label: 'Town Home/Condo' },
+                { match: (t) => /^vacation\s*home$/i.test(t), value: 'vacation_home', label: 'Vacation Home' },
+                { match: (t) => /^apartment$/i.test(t), value: 'apartment', label: 'Apartment' },
+                { match: (t) => /^mobile\s*home$/i.test(t), value: 'mobile_home', label: 'Mobile Home' }
+            ];
+            const labels = normalizeAirtableMultiSelectField(activeClient && activeClient.fields && activeClient.fields['Home Types']);
+            if (!labels.length) {
+                return ORDER.map((d) => ({ value: d.value, label: d.label }));
+            }
+            const matched = new Set();
+            for (const lbl of labels) {
+                const t = lbl.trim();
+                for (const def of ORDER) {
+                    if (def.match(t)) {
+                        matched.add(def.value);
+                        break;
+                    }
+                }
+            }
+            if (matched.size === 0) {
+                return ORDER.map((d) => ({ value: d.value, label: d.label }));
+            }
+            return ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
+        }
+
+        function updateHomeTypeStepOptions() {
+            const container = document.getElementById('homeTypeOptions');
+            if (!container) return;
+            const choices = getHomeTypeChoicesForClient(getActiveClient());
+            container.replaceChildren();
+            choices.forEach((c) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.setAttribute('data-quiz-field', 'homeType');
+                div.setAttribute('data-quiz-value', c.value);
+                div.textContent = c.label;
+                const value = c.value;
+                div.addEventListener('click', function () {
+                    selectOptionAndAdvance(div, 'homeType', value);
+                });
+                container.appendChild(div);
+            });
         }
 
         function applyDefaultLocalPickLogo() {
@@ -2619,98 +2479,193 @@
                 logoImg.onerror = null;
             };
             logoImg.src = DEFAULT_LOGO_SRC;
-            logoImg.alt = 'The Local Pick';
             logoImg.style.display = 'block';
+            setPartnerLogoForWhySection(null);
         }
 
-        function scheduleWhenDomReady(fn) {
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', fn);
+        function refreshStep0Copy() {
+            const sub = document.getElementById('step0Subheader');
+            const btn = document.getElementById('seeLocalPickBtn');
+            if (!sub || !btn) return;
+            if (genericLeadFlow) {
+                sub.textContent = "We're still expanding coverage. Enter your zip to continue—your request goes to our vetted contractor network.";
+                btn.textContent = 'Continue';
             } else {
-                fn();
+                sub.innerHTML = "We've found the <strong>single best bathroom remodeler</strong> in your area so you don't have to";
+                btn.textContent = "Let's Go!";
             }
         }
 
-        // Start loading client data immediately (don't wait for DOM)
-        // Initialize immediately - start fetching as soon as script runs
+        // Load campaign from URL when present (Source Campaign + Meta campaignID for redirects); zip step still selects service-area client
         (async function() {
             try {
-                console.info(AIRTABLE_LOG_PREFIX, 'Page bootstrap', {
-                    pageUrl: typeof window !== 'undefined' ? window.location.href : '',
-                    proxyBase: resolveAirtableFetchUrl(AIRTABLE_BASE_URL),
-                    baseId: AIRTABLE_BASE_ID,
-                    campaignIDFromUrl: initialCampaignID || null
-                });
+                const loadedCampaignClient = await loadClientFromCampaign(initialCampaignID);
 
-                // Load client from campaign ID (use pre-fetched value if available)
-                campaignClientData = await loadClientFromCampaign(initialCampaignID);
+                if (genericLeadFlow) {
+                    campaignClientData = null;
+                    clientData = null;
+                    applyDefaultLocalPickLogo();
+                    updatePartnerNameInPrivacyPolicy();
+                    updateHomeTypeStepOptions();
+                    await tryRestoreFunnelProgressAfterBootstrap();
+                    return;
+                }
+                if (matchedClientData) {
+                    campaignClientData = matchedClientData;
+                    clientData = matchedClientData;
+                    updateHomeTypeStepOptions();
+                    await tryRestoreFunnelProgressAfterBootstrap();
+                    return;
+                }
 
+                campaignClientData = loadedCampaignClient;
                 if (campaignClientData) {
                     clientData = campaignClientData;
-                    console.info(AIRTABLE_LOG_PREFIX, 'Bootstrap: campaign client ready', {
-                        clientId: campaignClientData.id,
-                        name: (campaignClientData.fields && campaignClientData.fields['Name']) || null
-                    });
-                    
-                    // Show reviews below form immediately when client data has reviews
-                    tryShowReviewsOnLoad();
-                    
-                    // Load logo immediately when we get the URL
-                    const logoUrl = campaignClientData.fields['Logo Link'];
-                    if (logoUrl) {
-                        // Preload immediately, even before DOM is ready
-                        preloadLogo(logoUrl);
-                        
-                        // Load logo when DOM is ready
-                        if (document.readyState === 'loading') {
-                            document.addEventListener('DOMContentLoaded', () => {
-                                loadLogo(logoUrl);
-                            });
-                        } else {
-                            loadLogo(logoUrl);
-                        }
-                    } else {
-                        console.warn(AIRTABLE_LOG_PREFIX, 'No Logo Link on client record; using default Local Pick logo');
-                        scheduleWhenDomReady(applyDefaultLocalPickLogo);
-                    }
-                    
-                    // Initialize Meta Pixel
+
+                    // Home screen (step 0): always show The Local Pick logo; partner logo only after zip match in handleZipSubmit
+
                     const metaPixel = campaignClientData.fields['Meta Pixel'];
                     if (metaPixel) {
                         initializeMetaPixel(metaPixel);
                     }
-                    
-                    // Update partner name in privacy policy
                     updatePartnerNameInPrivacyPolicy();
-                    // Update material step options (e.g. Composite stone visibility)
-                    updateMaterialStepOptions();
-                    tryRestoreFunnelProgressAfterBootstrap();
+                    updateHomeTypeStepOptions();
                 } else {
-                    console.warn(AIRTABLE_LOG_PREFIX, 'No campaign client (missing/invalid campaignID or Airtable load failed — see logs above)');
-                    // Initialize default Meta Pixel (if needed)
-                    // For now, we'll just track PageView without pixel ID
                     if (typeof fbq !== 'undefined') {
                         fbq('track', 'PageView');
                     }
-                    scheduleWhenDomReady(applyDefaultLocalPickLogo);
-                    // Update partner name with default
+                    applyDefaultLocalPickLogo();
                     updatePartnerNameInPrivacyPolicy();
-                    updateMaterialStepOptions();
-                    tryRestoreFunnelProgressAfterBootstrap();
+                    updateHomeTypeStepOptions();
                 }
+                await tryRestoreFunnelProgressAfterBootstrap();
             } catch (error) {
-                console.error(AIRTABLE_LOG_PREFIX, 'Error initializing page:', error);
-                scheduleWhenDomReady(applyDefaultLocalPickLogo);
-                // Update partner name with default on error
+                console.error('Error initializing page:', error);
+                if (typeof fbq !== 'undefined') {
+                    fbq('track', 'PageView');
+                }
+                applyDefaultLocalPickLogo();
                 updatePartnerNameInPrivacyPolicy();
-                updateMaterialStepOptions();
-                tryRestoreFunnelProgressAfterBootstrap();
+                updateHomeTypeStepOptions();
+                await tryRestoreFunnelProgressAfterBootstrap();
             }
         })();
+
+        async function handleZipSubmit() {
+            const zipInput = document.getElementById('zipCodeInput');
+            const zipErr = document.getElementById('zipErrorMessage');
+            const btn = document.getElementById('seeLocalPickBtn');
+            if (!zipInput || !zipErr || !btn) return;
+
+            const zip = String(zipInput.value || '').trim();
+            if (zip.length !== 5 || !/^\d{5}$/.test(zip)) {
+                zipErr.textContent = 'Please enter a valid 5-digit zip code.';
+                zipErr.style.display = 'block';
+                return;
+            }
+
+            zipErr.style.display = 'none';
+            btn.classList.add('is-loading');
+            btn.disabled = true;
+            btn.setAttribute('aria-busy', 'true');
+            btn.innerHTML = '<span class="nav-btn-loading-spinner" aria-hidden="true"></span><span>Finding Your Local Pick</span>';
+
+            try {
+                matchedClientData = await findClientByZipCode(zip);
+                if (matchedClientData) {
+                    genericLeadFlow = false;
+                    clientData = matchedClientData;
+                    campaignClientData = matchedClientData;
+                    formData.initialZip = zip;
+
+                    const logoUrl = matchedClientData.fields && matchedClientData.fields['Logo Link'];
+                    setPartnerLogoForWhySection(logoUrl);
+                    const metaPixel = matchedClientData.fields && matchedClientData.fields['Meta Pixel'];
+                    if (metaPixel) {
+                        initializeMetaPixel(metaPixel);
+                    }
+                    updatePartnerNameInPrivacyPolicy();
+                    tryShowReviewsOnLoad();
+                    updateHomeTypeStepOptions();
+                    refreshStep0Copy();
+
+                    document.getElementById('step0').classList.remove('active');
+                    currentStep = 1;
+                    document.getElementById('step1').classList.add('active');
+                    updateBottomLocalPickCtaVisibility();
+                    updateProgress();
+                    updateBackButtonVisibility();
+                    persistFunnelProgress();
+                } else {
+                    genericLeadFlow = true;
+                    matchedClientData = null;
+                    clientData = null;
+                    campaignClientData = null;
+                    formData.initialZip = zip;
+                    zipErr.style.display = 'none';
+                    applyDefaultLocalPickLogo();
+                    updatePartnerNameInPrivacyPolicy();
+                    updateHomeTypeStepOptions();
+                    refreshStep0Copy();
+
+                    document.getElementById('step0').classList.remove('active');
+                    currentStep = 1;
+                    document.getElementById('step1').classList.add('active');
+                    updateBottomLocalPickCtaVisibility();
+                    updateProgress();
+                    updateBackButtonVisibility();
+                    persistFunnelProgress();
+                }
+            } catch (error) {
+                console.error('Error finding client by zip:', error);
+                zipErr.textContent = 'Something went wrong. Please try again.';
+                zipErr.style.display = 'block';
+            } finally {
+                btn.classList.remove('is-loading');
+                btn.removeAttribute('aria-busy');
+                btn.disabled = false;
+                refreshStep0Copy();
+            }
+        }
         
         // Function to update partner name in privacy policy and other branded elements
         function updatePartnerNameInPrivacyPolicy() {
             const partnerNameElement = document.getElementById('partnerBusinessName');
+            const localPickTitleEl = document.getElementById('localPickTitle');
+
+            if (genericLeadFlow) {
+                if (partnerNameElement) {
+                    partnerNameElement.textContent = "Peak Leads Group and it's marketing partners";
+                }
+                const repairCompanyElement = document.getElementById('repairCompanyName');
+                if (repairCompanyElement) {
+                    repairCompanyElement.textContent = 'A contractor from our network';
+                }
+                const step7AddressSubheader = document.getElementById('step7AddressSubheader');
+                if (step7AddressSubheader) {
+                    step7AddressSubheader.textContent = 'Please make sure your address is full and accurate';
+                }
+                const contactReachElement = document.getElementById('contactReachCompany');
+                if (contactReachElement) {
+                    contactReachElement.textContent = 'we';
+                }
+                const getQuoteCompanyElement = document.getElementById('getQuoteCompanyName');
+                if (getQuoteCompanyElement) {
+                    getQuoteCompanyElement.textContent = 'The Local Pick';
+                }
+                if (localPickTitleEl) {
+                    localPickTitleEl.innerHTML = 'How we choose every <span class="local-pick-highlight">Local Pick</span>';
+                }
+                const localPickBlock = document.getElementById('localPickBlock');
+                if (localPickBlock) {
+                    localPickBlock.style.display = 'none';
+                }
+                return;
+            }
+
+            if (localPickTitleEl) {
+                localPickTitleEl.innerHTML = 'Here\'s why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
+            }
             
             // Try to get partner name from matched client first, then campaign client
             let partnerName = null;
@@ -2731,10 +2686,20 @@
                 }
             }
 
-            // Update address service area message with company name
-            const addressServiceAreaElement = document.getElementById('addressServiceAreaCompany');
-            if (addressServiceAreaElement) {
-                addressServiceAreaElement.textContent = partnerName || "Peak Leads Group";
+            // Update repair message with company name
+            const repairCompanyElement = document.getElementById('repairCompanyName');
+            if (repairCompanyElement) {
+                repairCompanyElement.textContent = partnerName || "Peak Leads Group";
+            }
+
+            // Keep address step subheader simple and non-branded.
+            const step7AddressSubheader = document.getElementById('step7AddressSubheader');
+            const localPickZipCodeElement = document.getElementById('localPickZipCode');
+            if (localPickZipCodeElement) {
+                localPickZipCodeElement.textContent = formData.initialZip || 'ZIP CODE ENTERED';
+            }
+            if (step7AddressSubheader) {
+                step7AddressSubheader.textContent = 'Please make sure your address is full and accurate';
             }
 
             // Update contact step header with company name
@@ -2742,6 +2707,9 @@
             if (contactReachElement) {
                 contactReachElement.textContent = partnerName || "Peak Leads Group";
             }
+            document.querySelectorAll('.post-submit-company-name').forEach((el) => {
+                el.textContent = partnerName || 'COMPANY';
+            });
 
             // Update Get Estimate button with company name
             const getQuoteCompanyElement = document.getElementById('getQuoteCompanyName');
@@ -2795,17 +2763,15 @@
                 // Initial update
                 setTimeout(updateBackgroundHeight, 100);
                 
-                // If client data is already loaded, ensure logo is displayed
-                if (clientData && clientData.fields && clientData.fields['Logo Link']) {
-                    const logoImg = document.getElementById('logoImg');
-                    if (logoImg && !logoImg.src) {
-                        loadLogo(clientData.fields['Logo Link']);
-                    }
+                // Zip step: always The Local Pick mark (never swap to company logo until user passes step 0)
+                if (currentStep === 0) {
+                    applyDefaultLocalPickLogo();
                 }
                 
                 // Show reviews below form when DOM is ready (if client data already loaded)
                 tryShowReviewsOnLoad();
-                updateMaterialStepOptions();
+                updateHomeTypeStepOptions();
+                refreshStep0Copy();
 
                 document.querySelectorAll('a.privacy-policy-funnel-link').forEach(function (a) {
                     a.addEventListener('click', function (e) {
@@ -2819,13 +2785,10 @@
         } else {
             updateBackgroundHeight();
             tryShowReviewsOnLoad();
-            updateMaterialStepOptions();
-            // If client data is already loaded, ensure logo is displayed
-            if (clientData && clientData.fields && clientData.fields['Logo Link']) {
-                const logoImg = document.getElementById('logoImg');
-                if (logoImg && !logoImg.src) {
-                    loadLogo(clientData.fields['Logo Link']);
-                }
+            updateHomeTypeStepOptions();
+            refreshStep0Copy();
+            if (currentStep === 0) {
+                applyDefaultLocalPickLogo();
             }
 
             document.querySelectorAll('a.privacy-policy-funnel-link').forEach(function (a) {
@@ -2853,9 +2816,9 @@
             element.classList.add('selected');
             formData[field] = value;
             persistFunnelProgress();
-
+            
             if (!hasTrackedEngagement) {
-                if (!TESTING_MODE && typeof fbq !== 'undefined' && clientData && clientData.fields['Meta Pixel']) {
+                if (!TESTING_MODE && typeof fbq !== 'undefined' && !genericLeadFlow && clientData && clientData.fields['Meta Pixel']) {
                     fbq('track', 'ViewContent', {
                         content_category: 'home_improvement',
                         content_name: 'bathroom_remodel_quiz_start'
@@ -2889,7 +2852,7 @@
                 }
             }
             
-            // Main goal step: info + Continue when "Repair damage" (same pattern as mobile home)
+            // Main goal step: show red message when "Repair damage" selected, don't advance
             if (field === 'mainGoal') {
                 const repairDamageMsg = document.getElementById('repairDamageMessage');
                 if (value === 'repair_damage') {
@@ -2909,14 +2872,6 @@
             const mobileHomeMsg = document.getElementById('mobileHomeMessage');
             if (mobileHomeMsg) mobileHomeMsg.style.display = 'none';
             nextStep();
-            persistFunnelProgress();
-        }
-
-        function continueRepairDamageGoal() {
-            const repairDamageMsg = document.getElementById('repairDamageMessage');
-            if (repairDamageMsg) repairDamageMsg.style.display = 'none';
-            nextStep();
-            persistFunnelProgress();
         }
 
         function validateAddressForm() {
@@ -2971,14 +2926,16 @@
 
         function updateProgress() {
             const progressFill = document.getElementById('progressFill');
-            const percentage = (currentStep / TOTAL_STEPS) * 100;
+            const percentage = ((currentStep + 1) / TOTAL_STEPS) * 100;
             progressFill.style.width = percentage + '%';
         }
 
         function updateBackButtonVisibility() {
             const backBtn = document.getElementById('backButton');
             if (backBtn) {
-                backBtn.style.display = currentStep > 1 ? 'flex' : 'none';
+                // Once zip is submitted, lock the zip choice by removing back navigation.
+                const zipLocked = !!(formData && formData.initialZip);
+                backBtn.style.display = currentStep > 0 && !zipLocked ? 'flex' : 'none';
             }
         }
 
@@ -2986,13 +2943,33 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function updateBottomLocalPickCtaVisibility() {
+            const footerCta = document.getElementById('pageBottomLocalPickCta');
+            if (!footerCta) return;
+            // Show only on pre-zip screen; hide once a zip has been submitted.
+            footerCta.style.display = formData && formData.initialZip ? 'none' : 'block';
+        }
+
         function prevStep() {
-            if (currentStep > 1) {
+            if (formData && formData.initialZip) {
+                return;
+            }
+            if (currentStep > 0) {
                 document.getElementById('step' + currentStep).classList.remove('active');
                 currentStep--;
                 document.getElementById('step' + currentStep).classList.add('active');
                 updateProgress();
                 updateBackButtonVisibility();
+                // Reset zip error when returning to step 0; refresh zip-step copy for generic vs matched flow
+                if (currentStep === 0) {
+                    const zipErr = document.getElementById('zipErrorMessage');
+                    if (zipErr) zipErr.style.display = 'none';
+                    applyDefaultLocalPickLogo();
+                    refreshStep0Copy();
+                    mainFunnelLocalPickSuppressed = false;
+                    refreshPartnerLocalPickSection();
+                    updateHomeTypeStepOptions();
+                }
                 // Reset homeowner step message visibility when returning to step 1
                 if (currentStep === 1) {
                     const homeownerNoMsg = document.getElementById('homeownerNoMessage');
@@ -3004,18 +2981,9 @@
                     mainFunnelLocalPickSuppressed = false;
                     refreshPartnerLocalPickSection();
                 }
-                // Reset repair damage message when returning to main goal (step 3)
-                if (currentStep === 3) {
-                    const repairDamageMsg = document.getElementById('repairDamageMessage');
-                    if (formData.mainGoal === 'repair_damage' && repairDamageMsg) {
-                        repairDamageMsg.style.display = 'flex';
-                    } else if (repairDamageMsg) {
-                        repairDamageMsg.style.display = 'none';
-                    }
-                }
-                // Reset mobile home message when returning to home type (step 4)
-                if (currentStep === 4) {
-                    updateMaterialStepOptions();
+                // Reset mobile home message visibility when returning to step 2
+                if (currentStep === 2) {
+                    updateHomeTypeStepOptions();
                     const mobileHomeMsg = document.getElementById('mobileHomeMessage');
                     if (formData.homeType === 'mobile_home' && mobileHomeMsg) {
                         mobileHomeMsg.style.display = 'flex';
@@ -3023,37 +2991,41 @@
                         mobileHomeMsg.style.display = 'none';
                     }
                 }
-                // Refresh project type options when returning to step 5
-                if (currentStep === 5) {
-                    updateProjectTypeStepOptions();
+                // Reset repair damage message visibility when returning to step 4
+                if (currentStep === 4) {
+                    const repairDamageMsg = document.getElementById('repairDamageMessage');
+                    if (formData.mainGoal === 'repair_damage' && repairDamageMsg) {
+                        repairDamageMsg.style.display = 'flex';
+                    } else if (repairDamageMsg) {
+                        repairDamageMsg.style.display = 'none';
+                    }
                 }
-                // Reset material / tile message when returning to material step (step 6)
-                if (currentStep === 6) {
-                    updateMaterialStepOptions();
-                }
-                persistFunnelProgress();
             }
+            persistFunnelProgress();
         }
 
         function nextStep() {
-            if (currentStep < TOTAL_STEPS) {
+            if (currentStep < 8) {
                 document.getElementById('step' + currentStep).classList.remove('active');
                 currentStep++;
                 document.getElementById('step' + currentStep).classList.add('active');
                 updateProgress();
                 updateBackButtonVisibility();
-                if (currentStep === 5) updateProjectTypeStepOptions();
-                if (currentStep === 6) updateMaterialStepOptions();
+                if (currentStep === 7 && formData.initialZip) {
+                    const zipInput = document.getElementById('zip');
+                    if (zipInput && !zipInput.value) zipInput.value = formData.initialZip;
+                    validateAddressForm();
+                }
                 // First quiz step completed — hide Airtable "Here's why..." block below the form
                 if (currentStep === 2) {
                     mainFunnelLocalPickSuppressed = true;
                     hideMainFunnelPartnerWhySection();
                 }
-                persistFunnelProgress();
             }
+            persistFunnelProgress();
         }
 
-        function goToStep9() {
+        function goToStep7() {
             validateNameForm();
             if (formData.firstName && formData.lastName) {
                 nextStep();
@@ -3076,7 +3048,7 @@
             persistFunnelProgress();
         }
 
-        function goToStep10() {
+        function goToStep8() {
             validateAddressForm();
             if (formData.address) {
                 nextStep();
@@ -3454,7 +3426,8 @@
             const slots = [];
             const now = getCurrentDateInTimezone();
             const dateStr = date.toLocaleDateString('en-US', { timeZone: clientTimezone });
-            const linkedClientId = (matchedClientData && matchedClientData.id) || (campaignClientData && campaignClientData.id) || null;
+            const activeForCalendar = getActiveClient();
+            const linkedClientId = activeForCalendar && activeForCalendar.id;
             const bookedTimes = await getBookedAppointments(date, linkedClientId);
             console.log('[Calendar] getAvailableTimesForDate', { date: dateStr, linkedClientId, clientAvailability, bookedTimes, clientMinHoursInAdvance });
             
@@ -3540,10 +3513,8 @@
             try {
                 // Only count appointments for this client's leads; otherwise we'd block slots used by other clients
                 if (!linkedClientId) {
-                    console.info(AIRTABLE_LOG_PREFIX, 'getBookedAppointments: no linkedClientId, skip');
                     return [];
                 }
-                console.info(AIRTABLE_LOG_PREFIX, 'getBookedAppointments', { linkedClientId, date: date && date.toISOString && date.toISOString() });
                 const month = (date.getMonth() + 1).toString().padStart(2, '0');
                 const day = date.getDate().toString().padStart(2, '0');
                 const monthUnpadded = (date.getMonth() + 1).toString();
@@ -3580,10 +3551,9 @@
                     }
                 });
                 
-                console.info(AIRTABLE_LOG_PREFIX, 'getBookedAppointments: booked slot count', bookedTimes.length);
                 return bookedTimes;
             } catch (error) {
-                console.error(AIRTABLE_LOG_PREFIX, 'Error fetching booked appointments:', error);
+                console.error('Error fetching booked appointments:', error);
                 return [];
             }
         }
@@ -3866,15 +3836,27 @@
                     const fullSummaryWithAppt = `Appointment: ${appointmentText}\n\n${baseSummary}`;
                     const fullSummaryHTMLWithAppt = `Appointment: ${appointmentText}<BR><BR>${baseSummaryHTML}`;
 
-                    await fetchAirtableMutation(`${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}/${leadRecordId}`, 'PATCH', {
-                        fields: {
-                            'Appt': appointmentText,
-                            'Full Summary': fullSummaryWithAppt,
-                            'Full Summary HTML': fullSummaryHTMLWithAppt
-                        }
+                    const updateResponse = await fetch(`${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}/${leadRecordId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            fields: {
+                                'Appt': appointmentText,
+                                'Full Summary': fullSummaryWithAppt,
+                                'Full Summary HTML': fullSummaryHTMLWithAppt
+                            }
+                        })
                     });
+                    
+                    if (!updateResponse.ok) {
+                        const errorText = await updateResponse.text();
+                        const error = new Error(`Failed to update appointment: ${errorText}`);
+                        throw error;
+                    }
                 } catch (error) {
-                    console.error(AIRTABLE_LOG_PREFIX, 'Error updating appointment in Airtable:', error);
+                    console.error('Error updating appointment in Airtable:', error);
                 }
             } else {
                 if (TESTING_MODE) {
@@ -3929,12 +3911,12 @@
         
         async function showCalendarScreen() {
             postFormSubmitted = true;
-            const phoneStepEl = document.getElementById('step10');
+            const phoneStepEl = document.getElementById('step8');
             const calendarStep = document.getElementById('calendarStep');
             const progressArea = document.getElementById('progressArea');
             
             // Get client timezone, availability, and days
-            const activeClient = matchedClientData || campaignClientData;
+            const activeClient = getActiveClient();
             
             if (activeClient && activeClient.fields) {
                 // Set timezone from client data
@@ -4034,51 +4016,15 @@
             return phoneNumber;
         }
 
-        // Add Contact function (same as testing/addcontact.html) - for Contact submit screen
-        // Uses Name from Airtable client as first name, "Bathroom Remodel" as last name, Phone from Airtable
-        function addContact() {
-            const activeClient = matchedClientData || campaignClientData;
-            if (!activeClient || !activeClient.fields) return;
-
-            const firstName = String(activeClient.fields['Name'] || '').trim() || 'Contact';
-            const lastName = 'Bathroom Remodel';
-            let phoneNumber = activeClient.fields['Phone'] || '';
-            // Strip to digits only for vCard
-            phoneNumber = String(phoneNumber).replace(/\D/g, '');
-
-            if (!phoneNumber) return;
-
-            // Create vCard 3.0 format - works on iOS and Android (same as addcontact.html)
-            const vcard = [
-                'BEGIN:VCARD',
-                'VERSION:3.0',
-                'FN:' + firstName + ' ' + lastName,
-                'N:' + lastName + ';' + firstName + ';;;',
-                'TEL;TYPE=work,voice:' + phoneNumber,
-                'END:VCARD'
-            ].join('\r\n');
-
-            const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = firstName + '.vcf';
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
-
         function showContactAddContactScreen() {
             postFormSubmitted = true;
-            const activeClient = matchedClientData || campaignClientData;
+            const activeClient = getActiveClient();
             if (!activeClient) {
                 showConfirmationScreen();
                 return;
             }
 
-            document.getElementById('step10').classList.remove('active');
+            document.getElementById('step8').classList.remove('active');
             document.getElementById('contactStep').classList.remove('active');
             document.getElementById('contactStepAddContact').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
@@ -4093,10 +4039,13 @@
             // Set "Ready to get started now?" subtitle based on screen type
             const contactReadySubtitle = document.getElementById('contactReadySubtitle');
             if (contactReadySubtitle) {
+                const companyName = (getActiveClient() && getActiveClient().fields && getActiveClient().fields['Name'])
+                    ? String(getActiveClient().fields['Name']).trim()
+                    : 'COMPANY';
                 const subtitles = {
-                    'Phone': "Can't wait to hear from us? Click the button below to call us now.",
-                    'Text': "Can't wait to hear from us? Text us below to schedule your free estimate.",
-                    'Phone/Text': "Can't wait to hear from us? Call or text us below to schedule your free estimate."
+                    'Phone': `Can't wait to hear from ${companyName}? Click the button below to call them now.`,
+                    'Text': `Can't wait to hear from ${companyName}? Text them below to schedule your free estimate.`,
+                    'Phone/Text': `Can't wait to hear from ${companyName}? Call or text them below to schedule your free estimate.`
                 };
                 contactReadySubtitle.textContent = subtitles[submitScreenType] || subtitles['Phone/Text'];
             }
@@ -4105,7 +4054,7 @@
             const firstName = document.getElementById('firstName')?.value.trim() || '';
             
             // Determine which client data to use (matched client or campaign client)
-            const activeClient = matchedClientData || campaignClientData;
+            const activeClient = getActiveClient();
             if (!activeClient) {
                 showConfirmationScreen();
                 return;
@@ -4157,7 +4106,7 @@
             }
             
             // Show the contact screen
-            document.getElementById('step10').classList.remove('active');
+            document.getElementById('step8').classList.remove('active');
             document.getElementById('contactStepAddContact').classList.remove('active');
             document.getElementById('contactStep').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
@@ -4179,9 +4128,13 @@
             if (confirmationAppointmentBlock) confirmationAppointmentBlock.style.display = 'none';
             const confirmationReadySubtitle = document.getElementById('confirmationReadySubtitle');
             if (confirmationReadySubtitle) {
-                confirmationReadySubtitle.textContent = "Can't wait to hear from us? We'll give you a call soon to schedule your free estimate.";
+                const activeClient = getActiveClient();
+                const companyName = (activeClient && activeClient.fields && activeClient.fields['Name'])
+                    ? String(activeClient.fields['Name']).trim()
+                    : 'COMPANY';
+                confirmationReadySubtitle.textContent = `${companyName} will call you soon to schedule your free estimate!`;
             }
-            document.getElementById('step10').classList.remove('active');
+            document.getElementById('step8').classList.remove('active');
             document.getElementById('confirmationStep').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
             
@@ -4213,7 +4166,7 @@
             }, 100);
         }
 
-        /** Partner “why they’re our Local Pick” from Airtable (Local Pick 1–5) below the form during the quiz; reviews stay post-submit. */
+        /** Partner “why they’re our Local Pick” from Airtable (Local Pick 1–5) below the form during the quiz; not post-submit. */
         function refreshPartnerLocalPickSection() {
             if (postFormSubmitted) return;
 
@@ -4222,12 +4175,27 @@
                 return;
             }
 
+            // Zip step uses static “how we choose” copy; Airtable partner bullets only after they’ve entered a zip
+            if (!formData.initialZip) {
+                const reviewsSection = document.getElementById('reviewsSection');
+                const reviewsContainer = document.getElementById('reviewsContainer');
+                if (reviewsSection) {
+                    reviewsSection.classList.remove('active');
+                    reviewsSection.classList.remove('main-funnel-local-pick-only');
+                }
+                if (reviewsContainer) reviewsContainer.innerHTML = '';
+                setTimeout(() => {
+                    if (typeof updateBackgroundHeight === 'function') updateBackgroundHeight();
+                }, 100);
+                return;
+            }
+
             const reviewsSection = document.getElementById('reviewsSection');
             const reviewsContainer = document.getElementById('reviewsContainer');
             const ctaSection = document.getElementById('ctaSection');
             const getQuoteBtn = document.getElementById('getQuoteBottomBtn');
 
-            const activeClient = matchedClientData || campaignClientData;
+            const activeClient = getActiveClient();
             if (!activeClient || !activeClient.fields) {
                 if (reviewsSection) {
                     reviewsSection.classList.remove('active');
@@ -4251,9 +4219,7 @@
                 }
             }
 
-            const partnerName = (matchedClientData && matchedClientData.fields && matchedClientData.fields['Name']) ||
-                (campaignClientData && campaignClientData.fields && campaignClientData.fields['Name']) ||
-                (clientData && clientData.fields && clientData.fields['Name']) || 'Peak Leads Group';
+            const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
             buildLocalPickBlock(localPickItems, partnerName);
 
             if (localPickItems.length > 0) {
@@ -4278,7 +4244,7 @@
 
         function showReviewsModal() {
             // Get reviews from client data
-            const activeClient = matchedClientData || campaignClientData;
+            const activeClient = getActiveClient();
             
             if (!activeClient || !activeClient.fields) {
                 return;
@@ -4298,9 +4264,7 @@
             }
 
             // Build Local Pick block if we have items
-            const partnerName = (matchedClientData && matchedClientData.fields && matchedClientData.fields['Name']) ||
-                (campaignClientData && campaignClientData.fields && campaignClientData.fields['Name']) ||
-                (clientData && clientData.fields && clientData.fields['Name']) || 'Peak Leads Group';
+            const partnerName = (activeClient.fields && activeClient.fields['Name']) || 'Peak Leads Group';
             buildLocalPickBlock(localPickItems, partnerName);
 
             // Collect reviews (up to 3)
@@ -4479,7 +4443,7 @@
             const firstName = document.getElementById('firstName')?.value.trim() || '';
             
             // Determine which client data to use
-            const activeClient = matchedClientData || campaignClientData;
+            const activeClient = getActiveClient();
             if (!activeClient) return;
             
             const phoneField = activeClient.fields['Phone'];
@@ -4682,13 +4646,6 @@
             const options = { 'yes': 'Yes', 'no': 'No' };
             return options[value] || value;
         }
-        function getBathroomLastUpdatedDisplay(value) {
-            const options = {
-                'more_than_10_years': 'More than 10 years ago',
-                'less_than_10_years': 'Less than 10 years ago'
-            };
-            return options[value] || value || '';
-        }
         function getHomeTypeDisplay(value) {
             const options = {
                 'single_family': 'Single Family Home',
@@ -4701,11 +4658,10 @@
         }
         function getProjectTypeDisplay(value) {
             const options = {
-                'shower_replacement': 'Shower replacement',
-                'tub_replacement': 'Tub replacement',
-                'full_remodel': 'Full remodel',
                 'tub_to_shower': 'Tub to shower conversion',
-                'shower_to_tub': 'Shower to tub conversion'
+                'shower_to_tub': 'Shower to tub conversion',
+                'shower_replacement': 'Shower replacement',
+                'tub_replacement': 'Tub replacement'
             };
             return options[value] || value;
         }
@@ -4716,10 +4672,6 @@
                 'repair_damage': 'Repair damage',
                 'home_value': 'Increase home value'
             };
-            return options[value] || value;
-        }
-        function getMaterialPrefDisplay(value) {
-            const options = { 'acrylic': 'Acrylic', 'composite_stone': 'Composite Stone', 'tile': 'Tile', 'not_sure': 'Not sure' };
             return options[value] || value;
         }
         function getTimelineDisplay(value) {
@@ -4762,20 +4714,24 @@
                     email: emailValue
                 };
             
-            // Find client by zip code
+            // Final linked client is always determined by the project-location zip (step 7).
+            // Selection order is preserved in findClientByZipCode: Active first (oldest Created first), then Paused.
             try {
-                // Safety check: ensure address data exists
                 if (!finalData.address || !finalData.address.zip) {
                     throw new Error('Address data is missing or incomplete. Address object: ' + JSON.stringify(finalData.address));
                 }
-                
+
                 matchedClientData = await findClientByZipCode(finalData.address.zip);
-                // Update partner name in privacy policy if client was matched
+                genericLeadFlow = !matchedClientData;
+                if (!matchedClientData) {
+                    clientData = null;
+                    campaignClientData = null;
+                }
                 updatePartnerNameInPrivacyPolicy();
                 refreshPartnerLocalPickSection();
-                updateMaterialStepOptions();
+                updateHomeTypeStepOptions();
             } catch (error) {
-                console.error('Error finding client by zip code:', error);
+                console.error('Error finding client by project zip code:', error);
             }
             
             // Track Meta Pixel Lead event - only when matching zip code is found
@@ -4786,11 +4742,9 @@
                     value: 1.00,
                     currency: 'USD',
                     homeowner_status: finalData.homeowner,
-                    bathroom_last_updated: finalData.bathroomLastUpdated,
-                    main_goal: finalData.mainGoal,
                     home_type: finalData.homeType,
                     project_type: finalData.projectType,
-                    material_pref: finalData.materialPref,
+                    main_goal: finalData.mainGoal,
                     timeline: finalData.timeline
                 };
                 
@@ -4799,34 +4753,28 @@
                 });
             }
             if (TESTING_MODE) {
-                console.log('[TESTING_MODE] Meta Pixel Lead event would fire with:', { homeowner_status: finalData.homeowner, bathroom_last_updated: finalData.bathroomLastUpdated, main_goal: finalData.mainGoal, home_type: finalData.homeType, project_type: finalData.projectType, material_pref: finalData.materialPref, timeline: finalData.timeline });
+                console.log('[TESTING_MODE] Meta Pixel Lead event would fire with:', { homeowner_status: finalData.homeowner, home_type: finalData.homeType, project_type: finalData.projectType, main_goal: finalData.mainGoal, timeline: finalData.timeline });
             }
             
             // Find ad and adset from URL
             try {
                 const adATID = urlParams.get('adATID');
                 const adsetID = urlParams.get('adsetID');
-                console.info(AIRTABLE_LOG_PREFIX, 'Submit flow: ad/adset URL params', { adATID: adATID || null, adsetID: adsetID || null });
 
                 if (adATID) {
                     adRecordId = await findAdByATID(adATID);
-                    console.info(AIRTABLE_LOG_PREFIX, 'Submit flow: adRecordId', adRecordId || null);
                 }
 
                 if (adsetID) {
-                    const adsetFormula = `{Adset ID}="${escapeAirtableStringForFormula(adsetID)}"`;
-                    const adsetUrl = `${AIRTABLE_BASE_URL}/${TABLES.ADSET}?filterByFormula=${encodeURIComponent(adsetFormula)}`;
-                    console.info(AIRTABLE_LOG_PREFIX, 'Submit flow: ADSET lookup', adsetFormula);
+                    const adsetFilterFormula = encodeURIComponent(`{Adset ID}="${adsetID}"`);
+                    const adsetUrl = `${AIRTABLE_BASE_URL}/${TABLES.ADSET}?filterByFormula=${adsetFilterFormula}`;
                     const adsetData = await fetchAirtableData(adsetUrl);
                     if (adsetData.records && adsetData.records.length > 0) {
                         adsetRecordId = adsetData.records[0].id;
-                        console.info(AIRTABLE_LOG_PREFIX, 'Submit flow: adsetRecordId', adsetRecordId);
-                    } else {
-                        console.info(AIRTABLE_LOG_PREFIX, 'Submit flow: no ADSET row for formula');
                     }
                 }
             } catch (error) {
-                console.warn(AIRTABLE_LOG_PREFIX, 'Ad/adset lookup failed:', error && error.message ? error.message : error);
+                console.log('Ad/adset lookup failed:', error.message);
             }
             
             // Build full summary
@@ -4836,11 +4784,9 @@
 Name: ${finalData.firstName} ${finalData.lastName}
 Phone: ${formatPhoneForDisplay(finalData.phone)}
 ${emailLine}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}
-Bathroom last updated: ${getBathroomLastUpdatedDisplay(finalData.bathroomLastUpdated)}
-Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}
 Home Type: ${getHomeTypeDisplay(finalData.homeType)}
 Project Type: ${getProjectTypeDisplay(finalData.projectType)}
-Material Preference: ${getMaterialPrefDisplay(finalData.materialPref)}
+Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}
 Timeline: ${getTimelineDisplay(finalData.timeline)}
 
 Address:
@@ -4863,7 +4809,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             
             // Build HTML version of full summary
             const emailLineHTML = finalData.email ? `Email: ${finalData.email}<BR>` : '';
-            const fullSummaryHTML = `Bathroom Remodel Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Bathroom last updated: ${getBathroomLastUpdatedDisplay(finalData.bathroomLastUpdated)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR>Home Type: ${getHomeTypeDisplay(finalData.homeType)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Material Preference: ${getMaterialPrefDisplay(finalData.materialPref)}<BR>Timeline: ${getTimelineDisplay(finalData.timeline)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
+            const fullSummaryHTML = `Bathroom Remodel Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Home Type: ${getHomeTypeDisplay(finalData.homeType)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR>Timeline: ${getTimelineDisplay(finalData.timeline)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
@@ -4901,6 +4847,13 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 zip: finalData.address.zip || '',
                 uniqueId: eventId
             };
+
+            // Capture client IP at submit time for Airtable "IP" field.
+            try {
+                leadData.ip = await fetchClientIpAddress();
+            } catch (e) {
+                leadData.ip = '';
+            }
             
             // Submit to Airtable
             let submissionSuccessful = false;
@@ -4933,7 +4886,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             
             // Determine which submit screen to show
             // Use matched client first, but fall back to campaign client if matched client doesn't have Submit Screen
-            let activeClient = matchedClientData || campaignClientData;
+            let activeClient = getActiveClient();
             let submitScreenType = 'None'; // Default
             
             // Try to get Submit Screen from matched client first
@@ -4941,8 +4894,8 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 activeClient = matchedClientData;
                 submitScreenType = String(matchedClientData.fields['Submit Screen']).trim();
             } 
-            // Fall back to campaign client if matched client doesn't have Submit Screen
-            else if (campaignClientData && campaignClientData.fields && campaignClientData.fields['Submit Screen']) {
+            // Fall back to campaign client if matched client doesn't have Submit Screen (not used in generic lead flow)
+            else if (!genericLeadFlow && campaignClientData && campaignClientData.fields && campaignClientData.fields['Submit Screen']) {
                 activeClient = campaignClientData;
                 submitScreenType = String(campaignClientData.fields['Submit Screen']).trim();
             }

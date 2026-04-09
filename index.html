@@ -83,6 +83,11 @@
             font-weight: 500;
         }
 
+        .step-subheader strong {
+            font-weight: 700;
+            color: #444;
+        }
+
         .why-we-ask {
             display: flex;
             align-items: flex-start;
@@ -368,6 +373,34 @@
             transform: none;
         }
 
+        .nav-btn.is-loading,
+        .nav-btn.is-loading:disabled {
+            background: #6190f2;
+            cursor: wait;
+            opacity: 0.95;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transform: none;
+        }
+
+        .nav-btn-loading-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: nav-btn-spin 0.65s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes nav-btn-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         .privacy-policy-text {
             margin-top: 20px;
             font-size: 10px;
@@ -480,36 +513,6 @@
             font-weight: 700;
             margin-top: 20px;
             letter-spacing: 1px;
-        }
-
-        /* Add Contact Button (Contact submit screen) */
-        .add-contact-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            background: #6190f2;
-            color: white;
-            border: none;
-            padding: 18px 40px;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            max-width: 320px;
-            box-shadow: 0 4px 15px rgba(97, 144, 242, 0.4);
-        }
-
-        .add-contact-button:hover {
-            background: #6190f2;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(97, 144, 242, 0.5);
-        }
-
-        .add-contact-button:active {
-            transform: translateY(0);
         }
 
         .person-icon {
@@ -785,15 +788,6 @@
         .post-submit-step-num { width: 28px; height: 28px; min-width: 28px; background: #6190f2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0; }
         .post-submit-step-title { font-size: 16px; font-weight: bold; color: #000; margin: 0; }
         .post-submit-step-desc { font-size: 16px; color: #666; line-height: 1.5; font-weight: 500; margin: 0 0 16px 0; text-align: center; max-width: 400px; }
-        .save-contact-btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 12px;
-            background: #6190f2; color: white; padding: 16px 40px;
-            border-radius: 12px; font-size: 18px; font-weight: 600; border: none;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .save-contact-btn-wrap { display: flex; justify-content: center; width: 100%; margin-top: 16px; }
-        .save-contact-btn-wrap .save-contact-btn { margin: 0; }
-        .save-contact-btn:hover { background: #6190f2; transform: translateY(-2px); }
         .post-submit-cta-block { margin-top: 28px; padding-top: 24px; border-top: 1px solid #e9ecef; }
         .post-submit-cta-title { font-size: 16px; font-weight: bold; color: #000; margin-bottom: 8px; }
         .post-submit-cta-subtitle { font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 20px; font-weight: 500; }
@@ -862,6 +856,14 @@
             line-height: 1.4;
         }
 
+        .local-pick-intro-subtext {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            margin-top: 8px;
+        }
+
         .local-pick-highlight {
             color: #6190f2;
         }
@@ -870,28 +872,6 @@
             list-style: none;
             padding: 0;
             margin: 0;
-        }
-
-        /* Step 0 (zip): icons above, center-aligned */
-        .local-pick-block-intro .local-pick-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            font-size: 16px;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .local-pick-block-intro .local-pick-item .local-pick-text {
-            text-align: center;
-            width: 100%;
-        }
-
-        .local-pick-block-intro .local-pick-icon {
-            width: 64px;
-            height: 64px;
         }
 
         /* Post-zip (partner): icons left, like bathrooms.html */
@@ -917,6 +897,19 @@
 
         .local-pick-block-partner .local-pick-item .local-pick-text {
             text-align: left;
+        }
+
+        .partner-logo-wrap {
+            text-align: center;
+            margin: 0 0 18px;
+        }
+
+        .partner-logo-img {
+            max-width: 260px;
+            max-height: 90px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
         }
 
         .local-pick-item:last-child {
@@ -1194,44 +1187,18 @@
 
         <!-- STEP 0: Zip Code (find Local Pick) -->
         <div class="form-step active" id="step0">
-            <div class="step-header">What is your zip code?</div>
-            <div class="step-subheader" id="step0Subheader">Enter your zip code to find your local bathroom remodel expert</div>
+            <div class="step-header">Take our 30 second quiz to get a <span class="step-header-highlight">fast and free quote</span></div>
+            <div class="step-subheader" id="step0Subheader">We've found the <strong>single best bathroom remodeler</strong> in your area so you don't have to</div>
             <div class="zip-input-wrap" style="margin-bottom: 20px;">
                 <input type="text" id="zipCodeInput" class="address-input" placeholder="Enter zip code" maxlength="5" pattern="[0-9]*" inputmode="numeric" style="max-width: 200px; margin: 0 auto 15px; text-align: center; font-size: 18px;" oninput="persistFunnelProgress()" onkeypress="if(event.key==='Enter'){event.preventDefault();handleZipSubmit();}">
             </div>
-            <button type="button" class="nav-btn" id="seeLocalPickBtn" onclick="handleZipSubmit()">See My Local Pick!</button>
+            <button type="button" class="nav-btn" id="seeLocalPickBtn" onclick="handleZipSubmit()">Let's Go!</button>
             <div class="zip-error-message" id="zipErrorMessage" style="display: none; margin-top: 20px; padding: 16px; background: #ffebee; border-radius: 10px; color: #c62828; font-size: 14px;"></div>
-            <div class="local-pick-block local-pick-block-intro" style="margin-top: 30px;">
-                <div class="local-pick-title">Here's how we choose our<br><span class="local-pick-highlight">Local Pick</span></div>
-                <ul class="local-pick-list">
-                    <li class="local-pick-item">
-                        <span class="local-pick-icon"><img src="icons/1.svg" alt=""></span>
-                        <span class="local-pick-text"><span class="local-pick-item-title">Review Deep Dive</span>We don't just check star ratings. We carefully read customer reviews to understand real experiences and spot consistent quality.</span>
-                    </li>
-                    <li class="local-pick-item">
-                        <span class="local-pick-icon"><img src="icons/2.svg" alt=""></span>
-                        <span class="local-pick-text"><span class="local-pick-item-title">Licensed & Insured</span>Every Local Pick must be properly licensed and fully insured to protect you and your home.</span>
-                    </li>
-                    <li class="local-pick-item">
-                        <span class="local-pick-icon"><img src="icons/3.svg" alt=""></span>
-                        <span class="local-pick-text"><span class="local-pick-item-title">Strong Warranties</span>Ultra-long or lifetime warranties are required so you can feel confident in your investment.</span>
-                    </li>
-                    <li class="local-pick-item">
-                        <span class="local-pick-icon"><img src="icons/4.svg" alt=""></span>
-                        <span class="local-pick-text"><span class="local-pick-item-title">High-Quality Materials</span>We only work with contractors who use premium materials — never cheap, builder-grade products.</span>
-                    </li>
-                    <li class="local-pick-item">
-                        <span class="local-pick-icon"><img src="icons/5.svg" alt=""></span>
-                        <span class="local-pick-text"><span class="local-pick-item-title">Fair Pricing & Financing</span>Transparent pricing and flexible financing options to make your project affordable.</span>
-                    </li>
-                </ul>
-            </div>
         </div>
 
         <!-- STEP 1: Homeowner -->
         <div class="form-step" id="step1">
-            <div class="step-header">Take our 30 second quiz for a <span class="step-header-highlight">fast and free estimate</span></div>
-            <div class="step-subheader">Are you the homeowner or authorized decision maker?</div>
+            <div class="step-header">Are you the homeowner or authorized decision maker?</div>
             <div class="options">
                 <div class="option" data-quiz-field="homeowner" data-quiz-value="yes" onclick="selectOptionAndAdvance(this, 'homeowner', 'yes')">Yes</div>
                 <div class="option" data-quiz-field="homeowner" data-quiz-value="no" onclick="selectOptionAndAdvance(this, 'homeowner', 'no')">No</div>
@@ -1330,7 +1297,7 @@
         <!-- STEP 7: Address -->
         <div class="form-step" id="step7">
             <div class="step-header">What is the location of this project?</div>
-            <div class="step-subheader" id="step7AddressSubheader">Please make sure your address is full and accurate so we can confirm you are within <span id="addressServiceAreaCompany">Peak Leads Group</span>'s service area</div>
+            <div class="step-subheader" id="step7AddressSubheader">Please make sure your address is full and accurate</div>
             <div class="address-grid">
                 <div class="address-field">
                     <label class="address-label" for="street">Street Address</label>
@@ -1368,9 +1335,9 @@
                     <input id="phone" name="phone" type="tel" inputmode="tel" placeholder="(___) ___-____" required autocomplete="tel" class="address-input">
                     <input type="hidden" id="phone_digits" name="phone_digits" value="">
                 </div>
-                <div id="emailWrap" style="display:none">
-                    <label for="email">Email</label>
-                    <input id="email" name="email" type="email" inputmode="email" placeholder="your@email.com" autocomplete="email" required>
+                <div id="emailWrap" class="address-field" style="display:none">
+                    <label class="address-label" for="email">Email</label>
+                    <input id="email" name="email" type="email" inputmode="email" placeholder="your@email.com" autocomplete="email" required class="address-input">
                 </div>
             </div>
             <div class="nav-buttons">
@@ -1393,17 +1360,9 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title">Save our contact</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                         </div>
-                        <p class="post-submit-step-desc">We'll call soon to schedule your in-home estimate. Tap the button below, then press "Create Contact" (iPhone) or "Save" (Android) so you know it's us.</p>
-                        <div class="save-contact-btn-wrap">
-                            <button type="button" class="save-contact-btn" onclick="addContact()">
-                                <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;">
-                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                </svg>
-                                Save Contact
-                            </button>
-                        </div>
+                        <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
@@ -1417,11 +1376,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="contactReadySubtitle">Can't wait to hear from us? Call or text us below to schedule your free estimate.</p>
+                        <p class="post-submit-cta-subtitle" id="contactReadySubtitle">Can't wait to hear from <span class="post-submit-company-name">COMPANY</span>? Click the button below to call them now.</p>
                         <a id="callButtonLink" href="#" class="contact-button call-button" style="display: none;">
                     <svg class="phone-icon" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
@@ -1453,17 +1412,9 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title">Save our contact</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                         </div>
-                        <p class="post-submit-step-desc">We'll call soon to schedule your in-home estimate. Tap the button below, then press "Create Contact" (iPhone) or "Save" (Android) so you know it's us.</p>
-                        <div class="save-contact-btn-wrap">
-                            <button type="button" class="save-contact-btn" onclick="addContact()">
-                                <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;">
-                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                </svg>
-                                Save Contact
-                            </button>
-                        </div>
+                        <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
@@ -1477,17 +1428,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="contactAddReadySubtitle">Can't wait to hear from us? Save our contact below so we can reach you.</p>
-                        <button type="button" class="add-contact-button" id="addContactBtn" onclick="addContact()">
-                    <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                    Add Contact
-                </button>
+                        <p class="post-submit-cta-subtitle" id="contactAddReadySubtitle"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</p>
                     </div>
                 </div>
             </div>
@@ -1504,17 +1449,9 @@
                 <div class="post-submit-step">
                     <div class="post-submit-step-header">
                         <span class="post-submit-step-num">1</span>
-                        <h3 class="post-submit-step-title">Save our contact</h3>
+                        <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                     </div>
-                    <p class="post-submit-step-desc">We'll call soon to schedule your in-home estimate. Tap the button below, then press "Create Contact" (iPhone) or "Save" (Android) so you know it's us.</p>
-                    <div class="save-contact-btn-wrap">
-                        <button type="button" class="save-contact-btn" onclick="addContact()">
-                            <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                            </svg>
-                            Save Contact
-                        </button>
-                    </div>
+                    <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                 </div>
                 <div class="post-submit-step">
                     <div class="post-submit-step-header">
@@ -1528,7 +1465,7 @@
                         <span class="post-submit-step-num">3</span>
                         <h3 class="post-submit-step-title">Approval & Installation</h3>
                     </div>
-                    <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                    <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                 </div>
                 <div class="post-submit-cta-block">
                     <h3 class="post-submit-cta-title">Ready to get started now?</h3>
@@ -1581,17 +1518,9 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title">Save our contact</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
                         </div>
-                        <p class="post-submit-step-desc">We'll call soon to schedule your in-home estimate. Tap the button below, then press "Create Contact" (iPhone) or "Save" (Android) so you know it's us.</p>
-                        <div class="save-contact-btn-wrap">
-                            <button type="button" class="save-contact-btn" onclick="addContact()">
-                                <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;">
-                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                </svg>
-                                Save Contact
-                            </button>
-                        </div>
+                        <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
@@ -1605,11 +1534,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, we handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" id="confirmationCtaBlock">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="confirmationReadySubtitle">Can't wait to hear from us? We'll give you a call soon to schedule your free estimate.</p>
+                        <p class="post-submit-cta-subtitle" id="confirmationReadySubtitle"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</p>
                     </div>
                     <div class="post-submit-cta-block" id="confirmationAppointmentBlock" style="display: none; margin-top: 28px;">
                         <div id="confirmationAppointmentIcon" style="margin-bottom: 20px;"></div>
@@ -1625,7 +1554,10 @@
         <div class="reviews-content">
             <!-- LOCAL PICK BLOCK (above reviews) -->
             <div class="local-pick-block local-pick-block-partner" id="localPickBlock" style="display: none;">
-                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span></div>
+                <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
+                    <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
+                </div>
+                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
                 <ul class="local-pick-list" id="localPickList">
                     <!-- Local Pick items will be dynamically added here -->
                 </ul>
@@ -1645,8 +1577,8 @@
             <!-- DUPLICATE CONTACT SCREEN -->
             <div class="form-step cta-block" id="contactStepBelow">
                 <div style="text-align: center;">
-                    <div style="font-size: 24px; color: #000; margin-bottom: 20px; font-weight: bold;">We'll call you soon to schedule your free estimate!</div>
-                    <div style="font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 30px;">Or if you're ready to schedule now you can contact us by clicking one of the buttons below</div>
+                    <div id="contactStepBelowHeadline" style="font-size: 24px; color: #000; margin-bottom: 20px; font-weight: bold;"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</div>
+                    <div id="contactStepBelowSubtext" style="font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 30px;">Or if you're ready to schedule now you can contact <span class="post-submit-company-name">COMPANY</span> by clicking below</div>
                     
                     <a id="callButtonLinkBelow" href="#" class="contact-button call-button" style="display: none;">
                         <svg class="phone-icon" fill="currentColor" viewBox="0 0 24 24">
@@ -1671,12 +1603,7 @@
                 <div style="text-align: center;">
                     <div style="font-size: 24px; color: #000; margin-bottom: 20px; font-weight: bold;">Don't Miss Our Call! Save This Number Now</div>
                     <div style="font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 30px;">Tap the button below, then press "Create Contact" (iPhone) or "Save" (Android). We'll give you a call ASAP to schedule your free estimate!</div>
-                    <button type="button" class="add-contact-button" id="addContactBtnBelow" onclick="addContact()">
-                        <svg class="person-icon" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                        </svg>
-                        Add Contact
-                    </button>
+
                 </div>
             </div>
 
@@ -1735,10 +1662,6 @@
         </div>
     </div>
 
-    <div class="page-bottom-local-pick-cta">
-        <button type="button" class="get-quote-bottom-btn" onclick="scrollToForm()">Find My Local Pick</button>
-    </div>
-
     <script>
         // ============================================
         // TESTING MODE - Disables Airtable writes and Meta Pixel
@@ -1795,12 +1718,14 @@
         let mainFunnelLocalPickSuppressed = false; // After first quiz step, hide "Here's why..." below form until back navigation
         let appointmentTimeSelected = false; // True after user selects a time (so bottom shows confirmation, not calendar)
         let lastAppointmentText = ''; // Formatted appointment date/time for confirmation message
+        let clientIpAddress = null; // Cached client IP for lead submission
         /** True when zip had no Local Pick match—use network-wide copy and default logo; lead still submits. */
         let genericLeadFlow = false;
         const DEFAULT_LOGO_SRC = 'images/TheLocalPick-FlatLeftAligned.svg';
 
         const FUNNEL_RESUME_STORAGE_KEY = 'localpick_funnel_resume_v1';
         const FUNNEL_PAGE_FILE = 'index.html';
+        const DISABLE_FUNNEL_PROGRESS_PERSIST = false; // Live: allow resume from localStorage
         let funnelResumeRestored = false;
         let phoneValidationListenersAttached = false;
 
@@ -1833,6 +1758,10 @@
         }
 
         function persistFunnelProgress() {
+            if (DISABLE_FUNNEL_PROGRESS_PERSIST) {
+                clearPersistedFunnelProgress();
+                return;
+            }
             try {
                 const payload = {
                     v: 1,
@@ -1881,6 +1810,11 @@
         }
 
         async function tryRestoreFunnelProgressAfterBootstrap() {
+            if (DISABLE_FUNNEL_PROGRESS_PERSIST) {
+                clearPersistedFunnelProgress();
+                funnelResumeRestored = true;
+                return;
+            }
             if (funnelResumeRestored) return;
             let raw;
             try {
@@ -1921,8 +1855,7 @@
                             campaignClientData = matchedClientData;
                             const logoUrl = matchedClientData.fields && matchedClientData.fields['Logo Link'];
                             if (logoUrl) {
-                                preloadLogo(logoUrl);
-                                loadLogo(logoUrl);
+                                setPartnerLogoForWhySection(logoUrl);
                             }
                             const metaPixel = matchedClientData.fields && matchedClientData.fields['Meta Pixel'];
                             if (metaPixel) {
@@ -1961,6 +1894,7 @@
 
                 updateProgress();
                 updateBackButtonVisibility();
+                updateBottomLocalPickCtaVisibility();
                 validateNameForm();
                 validateAddressForm();
                 if (typeof validatePhones === 'function') validatePhones();
@@ -1997,6 +1931,44 @@
                 console.error('Airtable fetch error:', error);
                 throw error;
             }
+        }
+
+        function isLikelyIpAddress(value) {
+            const v = String(value || '').trim();
+            if (!v) return false;
+            // Accept IPv4 or IPv6 textual forms.
+            return /^(\d{1,3}\.){3}\d{1,3}$/.test(v) || v.includes(':');
+        }
+
+        async function fetchClientIpAddress() {
+            if (clientIpAddress) return clientIpAddress;
+            const endpoints = [
+                'https://api64.ipify.org?format=json',
+                'https://api.ipify.org?format=json',
+                'https://api.ipify.org?format=text'
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    const res = await fetch(endpoint, { cache: 'no-store' });
+                    if (!res.ok) continue;
+                    const contentType = String(res.headers.get('content-type') || '').toLowerCase();
+                    let ip = '';
+                    if (contentType.includes('application/json')) {
+                        const data = await res.json();
+                        ip = data && data.ip ? String(data.ip).trim() : '';
+                    } else {
+                        ip = String(await res.text()).trim();
+                    }
+                    if (isLikelyIpAddress(ip)) {
+                        clientIpAddress = ip;
+                        return clientIpAddress;
+                    }
+                } catch (e) {
+                    // Try next endpoint.
+                }
+            }
+            return '';
         }
 
         async function fetchUrlParametersForClient(clientId, additionalLogData = {}) {
@@ -2245,23 +2217,27 @@
 
         async function submitLeadToAirtable(leadData) {
             try {
-                // Check for duplicate: existing lead with same linked client + same phone (only if we have a linked client)
+                // Check for duplicate: same phone with any lead created in last 90 days (regardless of linked client).
                 let isDuplicate = false;
-                const hasLinkedClient = !!(matchedClientData && matchedClientData.id);
                 const hasPhone = !!leadData.phone;
-                if (hasLinkedClient && hasPhone) {
+                if (hasPhone) {
                     try {
                         const phoneDigits = String(leadData.phone).replace(/\D/g, '');
                         const filterFormula = `REGEX_REPLACE({Phone}, "[^0-9]", "") = "${phoneDigits}"`;
                         const dupUrl = `${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}?filterByFormula=${encodeURIComponent(filterFormula)}`;
                         const dupData = await fetchAirtableData(dupUrl);
                         if (dupData.records && dupData.records.length > 0) {
-                            const clientId = matchedClientData.id;
-                            isDuplicate = dupData.records.some(rec => {
-                                const linked = rec.fields['Linked Client'];
-                                return Array.isArray(linked) && linked.includes(clientId);
+                            const nowMs = Date.now();
+                            const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+                            isDuplicate = dupData.records.some((rec) => {
+                                const createdRaw = rec.createdTime || (rec.fields && rec.fields['Created']) || '';
+                                const createdMs = Date.parse(String(createdRaw));
+                                if (Number.isNaN(createdMs)) return false;
+                                return (nowMs - createdMs) <= ninetyDaysMs;
                             });
-                            if (isDuplicate) console.log('[Duplicate] Found existing lead for same client + phone, submitting without linked client and Error: DUPLICATE');
+                            if (isDuplicate) {
+                                console.log('[Duplicate] Found lead with same phone created within 90 days; submitting with Error: DUPLICATE');
+                            }
                         }
                     } catch (dupErr) {
                         console.warn('Duplicate check failed, proceeding with normal submission:', dupErr);
@@ -2284,6 +2260,7 @@
                             'City': leadData.city,
                             'State': leadData.state,
                             'Zip': leadData.zip,
+                            'IP': leadData.ip || '',
                             'Email': leadData.email || '',
                             'Unique ID': leadData.uniqueId
                         }
@@ -2309,7 +2286,8 @@
                         'Address': leadData.address,
                         'City': leadData.city,
                         'State': leadData.state,
-                        'Zip': leadData.zip
+                        'Zip': leadData.zip,
+                        'IP': leadData.ip || ''
                     }
                 };
                 
@@ -2412,22 +2390,24 @@
             }
         }
 
-        function loadLogo(logoUrl) {
-            const logoImg = document.getElementById('logoImg');
-            if (logoUrl && logoImg) {
-                // Preload first for faster display
-                preloadLogo(logoUrl);
-                
-                logoImg.src = logoUrl;
-                logoImg.style.display = 'block';
-                
-                // Handle logo load errors - fall back to default Local Pick logo
-                logoImg.onerror = function() {
-                    console.error('Failed to load logo image:', logoUrl);
-                    logoImg.src = 'images/TheLocalPick-FlatLeftAligned.svg';
-                    logoImg.onerror = null;
-                };
+        function setPartnerLogoForWhySection(logoUrl) {
+            const wrap = document.getElementById('partnerLogoWrap');
+            const img = document.getElementById('partnerLogoImg');
+            if (!wrap || !img) return;
+
+            if (!logoUrl) {
+                img.removeAttribute('src');
+                wrap.style.display = 'none';
+                return;
             }
+
+            preloadLogo(logoUrl);
+            img.src = logoUrl;
+            wrap.style.display = 'block';
+            img.onerror = function() {
+                wrap.style.display = 'none';
+                img.onerror = null;
+            };
         }
 
         function getActiveClient() {
@@ -2500,6 +2480,7 @@
             };
             logoImg.src = DEFAULT_LOGO_SRC;
             logoImg.style.display = 'block';
+            setPartnerLogoForWhySection(null);
         }
 
         function refreshStep0Copy() {
@@ -2510,8 +2491,8 @@
                 sub.textContent = "We're still expanding coverage. Enter your zip to continue—your request goes to our vetted contractor network.";
                 btn.textContent = 'Continue';
             } else {
-                sub.textContent = 'Enter your zip code to find your local bathroom remodel expert';
-                btn.textContent = 'See My Local Pick!';
+                sub.innerHTML = "We've found the <strong>single best bathroom remodeler</strong> in your area so you don't have to";
+                btn.textContent = "Let's Go!";
             }
         }
 
@@ -2584,8 +2565,10 @@
             }
 
             zipErr.style.display = 'none';
+            btn.classList.add('is-loading');
             btn.disabled = true;
-            btn.textContent = 'One moment...';
+            btn.setAttribute('aria-busy', 'true');
+            btn.innerHTML = '<span class="nav-btn-loading-spinner" aria-hidden="true"></span><span>Finding Your Local Pick</span>';
 
             try {
                 matchedClientData = await findClientByZipCode(zip);
@@ -2596,10 +2579,7 @@
                     formData.initialZip = zip;
 
                     const logoUrl = matchedClientData.fields && matchedClientData.fields['Logo Link'];
-                    if (logoUrl) {
-                        preloadLogo(logoUrl);
-                        loadLogo(logoUrl);
-                    }
+                    setPartnerLogoForWhySection(logoUrl);
                     const metaPixel = matchedClientData.fields && matchedClientData.fields['Meta Pixel'];
                     if (metaPixel) {
                         initializeMetaPixel(metaPixel);
@@ -2612,6 +2592,7 @@
                     document.getElementById('step0').classList.remove('active');
                     currentStep = 1;
                     document.getElementById('step1').classList.add('active');
+                    updateBottomLocalPickCtaVisibility();
                     updateProgress();
                     updateBackButtonVisibility();
                     persistFunnelProgress();
@@ -2630,6 +2611,7 @@
                     document.getElementById('step0').classList.remove('active');
                     currentStep = 1;
                     document.getElementById('step1').classList.add('active');
+                    updateBottomLocalPickCtaVisibility();
                     updateProgress();
                     updateBackButtonVisibility();
                     persistFunnelProgress();
@@ -2639,6 +2621,8 @@
                 zipErr.textContent = 'Something went wrong. Please try again.';
                 zipErr.style.display = 'block';
             } finally {
+                btn.classList.remove('is-loading');
+                btn.removeAttribute('aria-busy');
                 btn.disabled = false;
                 refreshStep0Copy();
             }
@@ -2659,7 +2643,7 @@
                 }
                 const step7AddressSubheader = document.getElementById('step7AddressSubheader');
                 if (step7AddressSubheader) {
-                    step7AddressSubheader.textContent = 'Please make sure your address is full and accurate so we can match you with a contractor who serves your area.';
+                    step7AddressSubheader.textContent = 'Please make sure your address is full and accurate';
                 }
                 const contactReachElement = document.getElementById('contactReachCompany');
                 if (contactReachElement) {
@@ -2680,7 +2664,7 @@
             }
 
             if (localPickTitleEl) {
-                localPickTitleEl.innerHTML = 'Here\'s why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span>';
+                localPickTitleEl.innerHTML = 'Here\'s why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
             }
             
             // Try to get partner name from matched client first, then campaign client
@@ -2708,11 +2692,14 @@
                 repairCompanyElement.textContent = partnerName || "Peak Leads Group";
             }
 
-            // Update address step subheader (company-specific possessive)
+            // Keep address step subheader simple and non-branded.
             const step7AddressSubheader = document.getElementById('step7AddressSubheader');
-            const nm = partnerName || 'Peak Leads Group';
+            const localPickZipCodeElement = document.getElementById('localPickZipCode');
+            if (localPickZipCodeElement) {
+                localPickZipCodeElement.textContent = formData.initialZip || 'ZIP CODE ENTERED';
+            }
             if (step7AddressSubheader) {
-                step7AddressSubheader.innerHTML = `Please make sure your address is full and accurate so we can confirm you are within <span id="addressServiceAreaCompany">${escapeHtml(nm)}</span>'s service area`;
+                step7AddressSubheader.textContent = 'Please make sure your address is full and accurate';
             }
 
             // Update contact step header with company name
@@ -2720,6 +2707,9 @@
             if (contactReachElement) {
                 contactReachElement.textContent = partnerName || "Peak Leads Group";
             }
+            document.querySelectorAll('.post-submit-company-name').forEach((el) => {
+                el.textContent = partnerName || 'COMPANY';
+            });
 
             // Update Get Estimate button with company name
             const getQuoteCompanyElement = document.getElementById('getQuoteCompanyName');
@@ -2943,7 +2933,9 @@
         function updateBackButtonVisibility() {
             const backBtn = document.getElementById('backButton');
             if (backBtn) {
-                backBtn.style.display = currentStep > 0 ? 'flex' : 'none';
+                // Once zip is submitted, lock the zip choice by removing back navigation.
+                const zipLocked = !!(formData && formData.initialZip);
+                backBtn.style.display = currentStep > 0 && !zipLocked ? 'flex' : 'none';
             }
         }
 
@@ -2951,7 +2943,17 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function updateBottomLocalPickCtaVisibility() {
+            const footerCta = document.getElementById('pageBottomLocalPickCta');
+            if (!footerCta) return;
+            // Show only on pre-zip screen; hide once a zip has been submitted.
+            footerCta.style.display = formData && formData.initialZip ? 'none' : 'block';
+        }
+
         function prevStep() {
+            if (formData && formData.initialZip) {
+                return;
+            }
             if (currentStep > 0) {
                 document.getElementById('step' + currentStep).classList.remove('active');
                 currentStep--;
@@ -4014,42 +4016,6 @@
             return phoneNumber;
         }
 
-        // Add Contact function (same as testing/addcontact.html) - for Contact submit screen
-        // Uses Name from Airtable client as first name, "Bathroom Remodel" as last name, Phone from Airtable
-        function addContact() {
-            const activeClient = getActiveClient();
-            if (!activeClient || !activeClient.fields) return;
-
-            const firstName = String(activeClient.fields['Name'] || '').trim() || 'Contact';
-            const lastName = 'Bathroom Remodel';
-            let phoneNumber = activeClient.fields['Phone'] || '';
-            // Strip to digits only for vCard
-            phoneNumber = String(phoneNumber).replace(/\D/g, '');
-
-            if (!phoneNumber) return;
-
-            // Create vCard 3.0 format - works on iOS and Android (same as addcontact.html)
-            const vcard = [
-                'BEGIN:VCARD',
-                'VERSION:3.0',
-                'FN:' + firstName + ' ' + lastName,
-                'N:' + lastName + ';' + firstName + ';;;',
-                'TEL;TYPE=work,voice:' + phoneNumber,
-                'END:VCARD'
-            ].join('\r\n');
-
-            const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = firstName + '.vcf';
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
-
         function showContactAddContactScreen() {
             postFormSubmitted = true;
             const activeClient = getActiveClient();
@@ -4073,10 +4039,13 @@
             // Set "Ready to get started now?" subtitle based on screen type
             const contactReadySubtitle = document.getElementById('contactReadySubtitle');
             if (contactReadySubtitle) {
+                const companyName = (getActiveClient() && getActiveClient().fields && getActiveClient().fields['Name'])
+                    ? String(getActiveClient().fields['Name']).trim()
+                    : 'COMPANY';
                 const subtitles = {
-                    'Phone': "Can't wait to hear from us? Click the button below to call us now.",
-                    'Text': "Can't wait to hear from us? Text us below to schedule your free estimate.",
-                    'Phone/Text': "Can't wait to hear from us? Call or text us below to schedule your free estimate."
+                    'Phone': `Can't wait to hear from ${companyName}? Click the button below to call them now.`,
+                    'Text': `Can't wait to hear from ${companyName}? Text them below to schedule your free estimate.`,
+                    'Phone/Text': `Can't wait to hear from ${companyName}? Call or text them below to schedule your free estimate.`
                 };
                 contactReadySubtitle.textContent = subtitles[submitScreenType] || subtitles['Phone/Text'];
             }
@@ -4159,7 +4128,11 @@
             if (confirmationAppointmentBlock) confirmationAppointmentBlock.style.display = 'none';
             const confirmationReadySubtitle = document.getElementById('confirmationReadySubtitle');
             if (confirmationReadySubtitle) {
-                confirmationReadySubtitle.textContent = "Can't wait to hear from us? We'll give you a call soon to schedule your free estimate.";
+                const activeClient = getActiveClient();
+                const companyName = (activeClient && activeClient.fields && activeClient.fields['Name'])
+                    ? String(activeClient.fields['Name']).trim()
+                    : 'COMPANY';
+                confirmationReadySubtitle.textContent = `${companyName} will call you soon to schedule your free estimate!`;
             }
             document.getElementById('step8').classList.remove('active');
             document.getElementById('confirmationStep').classList.add('active');
@@ -4741,20 +4714,24 @@
                     email: emailValue
                 };
             
-            // Re-match by project zip only when not in generic flow (generic = no Local Pick for initial zip; keep unlinked lead)
-            if (!genericLeadFlow) {
-                try {
-                    if (!finalData.address || !finalData.address.zip) {
-                        throw new Error('Address data is missing or incomplete. Address object: ' + JSON.stringify(finalData.address));
-                    }
-                    
-                    matchedClientData = await findClientByZipCode(finalData.address.zip);
-                    updatePartnerNameInPrivacyPolicy();
-                    refreshPartnerLocalPickSection();
-                    updateHomeTypeStepOptions();
-                } catch (error) {
-                    console.error('Error finding client by zip code:', error);
+            // Final linked client is always determined by the project-location zip (step 7).
+            // Selection order is preserved in findClientByZipCode: Active first (oldest Created first), then Paused.
+            try {
+                if (!finalData.address || !finalData.address.zip) {
+                    throw new Error('Address data is missing or incomplete. Address object: ' + JSON.stringify(finalData.address));
                 }
+
+                matchedClientData = await findClientByZipCode(finalData.address.zip);
+                genericLeadFlow = !matchedClientData;
+                if (!matchedClientData) {
+                    clientData = null;
+                    campaignClientData = null;
+                }
+                updatePartnerNameInPrivacyPolicy();
+                refreshPartnerLocalPickSection();
+                updateHomeTypeStepOptions();
+            } catch (error) {
+                console.error('Error finding client by project zip code:', error);
             }
             
             // Track Meta Pixel Lead event - only when matching zip code is found
@@ -4870,6 +4847,13 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 zip: finalData.address.zip || '',
                 uniqueId: eventId
             };
+
+            // Capture client IP at submit time for Airtable "IP" field.
+            try {
+                leadData.ip = await fetchClientIpAddress();
+            } catch (e) {
+                leadData.ip = '';
+            }
             
             // Submit to Airtable
             let submissionSuccessful = false;
