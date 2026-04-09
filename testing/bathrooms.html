@@ -2569,7 +2569,7 @@
             btn.classList.add('is-loading');
             btn.disabled = true;
             btn.setAttribute('aria-busy', 'true');
-            btn.innerHTML = '<span class="nav-btn-loading-spinner" aria-hidden="true"></span><span>Checking…</span>';
+            btn.innerHTML = '<span class="nav-btn-loading-spinner" aria-hidden="true"></span><span>Finding Your Local Pick</span>';
 
             try {
                 matchedClientData = await findClientByZipCode(zip);
