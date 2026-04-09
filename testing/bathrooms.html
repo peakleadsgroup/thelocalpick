@@ -1641,7 +1641,7 @@
                 <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
                     <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
                 </div>
-                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span> in <span id="localPickZipCode">ZIP CODE ENTERED</span></div>
+                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick in <span id="localPickZipCode">ZIP CODE ENTERED</span></span></div>
                 <ul class="local-pick-list" id="localPickList">
                     <!-- Local Pick items will be dynamically added here -->
                 </ul>
@@ -1751,7 +1751,7 @@
         </div>
     </div>
 
-    <div class="page-bottom-local-pick-cta">
+    <div class="page-bottom-local-pick-cta" id="pageBottomLocalPickCta">
         <button type="button" class="get-quote-bottom-btn" onclick="scrollToForm()">See My Local Pick!</button>
     </div>
 
@@ -1817,6 +1817,7 @@
 
         const FUNNEL_RESUME_STORAGE_KEY = 'localpick_funnel_resume_v1';
         const FUNNEL_PAGE_FILE = 'index.html';
+        const DISABLE_FUNNEL_PROGRESS_PERSIST = true; // Testing page: always start fresh
         let funnelResumeRestored = false;
         let phoneValidationListenersAttached = false;
 
@@ -1849,6 +1850,10 @@
         }
 
         function persistFunnelProgress() {
+            if (DISABLE_FUNNEL_PROGRESS_PERSIST) {
+                clearPersistedFunnelProgress();
+                return;
+            }
             try {
                 const payload = {
                     v: 1,
@@ -1897,6 +1902,11 @@
         }
 
         async function tryRestoreFunnelProgressAfterBootstrap() {
+            if (DISABLE_FUNNEL_PROGRESS_PERSIST) {
+                clearPersistedFunnelProgress();
+                funnelResumeRestored = true;
+                return;
+            }
             if (funnelResumeRestored) return;
             let raw;
             try {
@@ -1976,6 +1986,7 @@
 
                 updateProgress();
                 updateBackButtonVisibility();
+                updateBottomLocalPickCtaVisibility();
                 validateNameForm();
                 validateAddressForm();
                 if (typeof validatePhones === 'function') validatePhones();
@@ -2642,6 +2653,7 @@
                     document.getElementById('step0').classList.remove('active');
                     currentStep = 1;
                     document.getElementById('step1').classList.add('active');
+                    updateBottomLocalPickCtaVisibility();
                     updateProgress();
                     updateBackButtonVisibility();
                     persistFunnelProgress();
@@ -2660,6 +2672,7 @@
                     document.getElementById('step0').classList.remove('active');
                     currentStep = 1;
                     document.getElementById('step1').classList.add('active');
+                    updateBottomLocalPickCtaVisibility();
                     updateProgress();
                     updateBackButtonVisibility();
                     persistFunnelProgress();
@@ -2710,7 +2723,7 @@
             }
 
             if (localPickTitleEl) {
-                localPickTitleEl.innerHTML = 'Here\'s why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span> in <span id="localPickZipCode">ZIP CODE ENTERED</span>';
+                localPickTitleEl.innerHTML = 'Here\'s why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick in <span id="localPickZipCode">ZIP CODE ENTERED</span></span>';
             }
             
             // Try to get partner name from matched client first, then campaign client
@@ -2985,6 +2998,13 @@
 
         function scrollToForm() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateBottomLocalPickCtaVisibility() {
+            const footerCta = document.getElementById('pageBottomLocalPickCta');
+            if (!footerCta) return;
+            // Show only on pre-zip screen; hide once a zip has been submitted.
+            footerCta.style.display = formData && formData.initialZip ? 'none' : 'block';
         }
 
         function prevStep() {
