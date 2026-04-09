@@ -1338,7 +1338,7 @@
                 </div>
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="submitFinalForm()" id="phoneSubmitBtn" disabled>Get Quote</button>
+                <button class="nav-btn" onclick="submitFinalForm()" id="phoneSubmitBtn" disabled>Get Estimate</button>
             </div>
             <div class="privacy-policy-text" id="privacyPolicyText">
                 <p>By clicking "NEXT STEP" and submitting this form, (i) I agree that <span id="partnerBusinessName">Peak Leads Group and it's marketing partners</span> may use automated technology to call or text my phone number (provided above) or email me regarding my request, and I may revoke this consent at any time, and (ii) I agree to the <a href="privacypolicy.html" class="privacy-policy-funnel-link" target="_blank" rel="noopener noreferrer">Terms & Conditions and Privacy Policy</a>.</p>
@@ -2259,8 +2259,7 @@
                             'Zip': leadData.zip,
                             'IP': leadData.ip || '',
                             'Email': leadData.email || '',
-                            'Unique ID': leadData.uniqueId,
-                            'Project Type': getProjectTypeAirtableMultiSelect(leadData.projectType)
+                            'Unique ID': leadData.uniqueId
                         }
                     });
                     return { records: [{ id: 'test-record-id' }] };
@@ -2326,11 +2325,6 @@
                 // Add Unique ID (used for Meta lead deduplication) if provided
                 if (leadData.uniqueId) {
                     record.fields['Unique ID'] = leadData.uniqueId;
-                }
-
-                const projectTypeForAirtable = getProjectTypeAirtableMultiSelect(leadData.projectType);
-                if (projectTypeForAirtable.length) {
-                    record.fields['Project Type'] = projectTypeForAirtable;
                 }
                 
                 // Submit to Airtable
@@ -2484,17 +2478,6 @@
                 return ORDER.map((d) => ({ value: d.value, label: d.label }));
             }
             return ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
-        }
-
-        /** Values for B2C Leads "Project Type" multi-select (exact Airtable option strings). */
-        function getProjectTypeAirtableMultiSelect(internalValue) {
-            const map = {
-                shower_replacement: 'Shower replacement',
-                tub_replacement: 'Tub replacement',
-                full_remodel: 'Full remodel'
-            };
-            const label = map[internalValue];
-            return label ? [label] : [];
         }
 
         function updateHomeTypeStepOptions() {
@@ -4911,8 +4894,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 city: finalData.address.city || '',
                 state: finalData.address.state || '',
                 zip: finalData.address.zip || '',
-                uniqueId: eventId,
-                projectType: finalData.projectType
+                uniqueId: eventId
             };
 
             // Capture client IP at submit time for Airtable "IP" field.
@@ -4938,7 +4920,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 isSubmitting = false;
                 if (phoneSubmitBtn) {
                     phoneSubmitBtn.disabled = false;
-                    phoneSubmitBtn.textContent = 'Get Quote';
+                    phoneSubmitBtn.textContent = 'Get Estimate';
                 }
                 return; // Exit early - don't show calendar/phone options
             }
@@ -5025,7 +5007,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 isSubmitting = false;
                 if (phoneSubmitBtn) {
                     phoneSubmitBtn.disabled = false;
-                    phoneSubmitBtn.textContent = 'Get Quote';
+                    phoneSubmitBtn.textContent = 'Get Estimate';
                 }
             }
         }
@@ -5077,7 +5059,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
     </script>
 
     <script async defer
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyANMfDpc1o2RoVn2qtQM091Rs840U0O7QE&libraries=places&callback=__attachPlaces">
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyANMfDpc1o2RoVn2qtQM091Rs840U0O7QE&libraries=places&loading=async&callback=__attachPlaces">
     </script>
 </body>
 </html>
