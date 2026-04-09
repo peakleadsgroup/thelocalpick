@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
+    <link rel="icon" type="image/png" href="favicon-local-pick-48.png?v=4">
     <title>Find Your Local Pick - Bathroom Remodel</title>
     <base href="../">
     
@@ -483,36 +483,6 @@
             letter-spacing: 1px;
         }
 
-        /* Add Contact Button (Contact submit screen) */
-        .add-contact-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            background: #6190f2;
-            color: white;
-            border: none;
-            padding: 18px 40px;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            max-width: 320px;
-            box-shadow: 0 4px 15px rgba(97, 144, 242, 0.4);
-        }
-
-        .add-contact-button:hover {
-            background: #6190f2;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(97, 144, 242, 0.5);
-        }
-
-        .add-contact-button:active {
-            transform: translateY(0);
-        }
-
         .person-icon {
             width: 24px;
             height: 24px;
@@ -786,15 +756,6 @@
         .post-submit-step-num { width: 28px; height: 28px; min-width: 28px; background: #6190f2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0; }
         .post-submit-step-title { font-size: 16px; font-weight: bold; color: #000; margin: 0; }
         .post-submit-step-desc { font-size: 16px; color: #666; line-height: 1.5; font-weight: 500; margin: 0 0 16px 0; text-align: center; max-width: 400px; }
-        .save-contact-btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 12px;
-            background: #6190f2; color: white; padding: 16px 40px;
-            border-radius: 12px; font-size: 18px; font-weight: 600; border: none;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .save-contact-btn-wrap { display: flex; justify-content: center; width: 100%; margin-top: 16px; }
-        .save-contact-btn-wrap .save-contact-btn { margin: 0; }
-        .save-contact-btn:hover { background: #6190f2; transform: translateY(-2px); }
         .post-submit-cta-block { margin-top: 28px; padding-top: 24px; border-top: 1px solid #e9ecef; }
         .post-submit-cta-title { font-size: 16px; font-weight: bold; color: #000; margin-bottom: 8px; }
         .post-submit-cta-subtitle { font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 20px; font-weight: 500; }
@@ -2444,21 +2405,6 @@
             }
         }
 
-        function loadLogo(logoUrl) {
-            const logoImg = document.getElementById('logoImg');
-            if (logoUrl && logoImg) {
-                // Legacy helper retained for compatibility.
-                preloadLogo(logoUrl);
-                logoImg.src = logoUrl;
-                logoImg.style.display = 'block';
-                logoImg.onerror = function() {
-                    console.error('Failed to load logo image:', logoUrl);
-                    logoImg.src = 'images/TheLocalPick-FlatLeftAligned.svg';
-                    logoImg.onerror = null;
-                };
-            }
-        }
-
         function setPartnerLogoForWhySection(logoUrl) {
             const wrap = document.getElementById('partnerLogoWrap');
             const img = document.getElementById('partnerLogoImg');
@@ -4079,42 +4025,6 @@
             
             // Return original if format doesn't match
             return phoneNumber;
-        }
-
-        // Add Contact function (same as testing/addcontact.html) - for Contact submit screen
-        // Uses Name from Airtable client as first name, "Bathroom Remodel" as last name, Phone from Airtable
-        function addContact() {
-            const activeClient = getActiveClient();
-            if (!activeClient || !activeClient.fields) return;
-
-            const firstName = String(activeClient.fields['Name'] || '').trim() || 'Contact';
-            const lastName = 'Bathroom Remodel';
-            let phoneNumber = activeClient.fields['Phone'] || '';
-            // Strip to digits only for vCard
-            phoneNumber = String(phoneNumber).replace(/\D/g, '');
-
-            if (!phoneNumber) return;
-
-            // Create vCard 3.0 format - works on iOS and Android (same as addcontact.html)
-            const vcard = [
-                'BEGIN:VCARD',
-                'VERSION:3.0',
-                'FN:' + firstName + ' ' + lastName,
-                'N:' + lastName + ';' + firstName + ';;;',
-                'TEL;TYPE=work,voice:' + phoneNumber,
-                'END:VCARD'
-            ].join('\r\n');
-
-            const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = firstName + '.vcf';
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
         }
 
         function showContactAddContactScreen() {
