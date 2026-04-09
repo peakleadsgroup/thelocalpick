@@ -84,6 +84,11 @@
             font-weight: 500;
         }
 
+        .step-subheader strong {
+            font-weight: 700;
+            color: #444;
+        }
+
         .why-we-ask {
             display: flex;
             align-items: flex-start;
@@ -367,6 +372,34 @@
             background: #ccc;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .nav-btn.is-loading,
+        .nav-btn.is-loading:disabled {
+            background: #6190f2;
+            cursor: wait;
+            opacity: 0.95;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transform: none;
+        }
+
+        .nav-btn-loading-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: nav-btn-spin 0.65s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes nav-btn-spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .privacy-policy-text {
@@ -1156,7 +1189,7 @@
         <!-- STEP 0: Zip Code (find Local Pick) -->
         <div class="form-step active" id="step0">
             <div class="step-header">Take our 30 second quiz to get a <span class="step-header-highlight">fast and free quote</span></div>
-            <div class="step-subheader" id="step0Subheader">We've found the best bathroom remodeler in your area so you don't have to</div>
+            <div class="step-subheader" id="step0Subheader">We've found the <strong>single best bathroom remodeler</strong> in your area so you don't have to</div>
             <div class="zip-input-wrap" style="margin-bottom: 20px;">
                 <input type="text" id="zipCodeInput" class="address-input" placeholder="Enter zip code" maxlength="5" pattern="[0-9]*" inputmode="numeric" style="max-width: 200px; margin: 0 auto 15px; text-align: center; font-size: 18px;" oninput="persistFunnelProgress()" onkeypress="if(event.key==='Enter'){event.preventDefault();handleZipSubmit();}">
             </div>
@@ -2459,7 +2492,7 @@
                 sub.textContent = "We're still expanding coverage. Enter your zip to continue—your request goes to our vetted contractor network.";
                 btn.textContent = 'Continue';
             } else {
-                sub.textContent = "We've found the best bathroom remodeler in your area so you don't have to";
+                sub.innerHTML = "We've found the <strong>single best bathroom remodeler</strong> in your area so you don't have to";
                 btn.textContent = "Let's Go!";
             }
         }
@@ -2533,8 +2566,10 @@
             }
 
             zipErr.style.display = 'none';
+            btn.classList.add('is-loading');
             btn.disabled = true;
-            btn.textContent = 'One moment...';
+            btn.setAttribute('aria-busy', 'true');
+            btn.innerHTML = '<span class="nav-btn-loading-spinner" aria-hidden="true"></span><span>Checking…</span>';
 
             try {
                 matchedClientData = await findClientByZipCode(zip);
@@ -2587,6 +2622,8 @@
                 zipErr.textContent = 'Something went wrong. Please try again.';
                 zipErr.style.display = 'block';
             } finally {
+                btn.classList.remove('is-loading');
+                btn.removeAttribute('aria-busy');
                 btn.disabled = false;
                 refreshStep0Copy();
             }
