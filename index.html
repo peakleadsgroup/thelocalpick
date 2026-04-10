@@ -6,6 +6,7 @@
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="icons/favicon-local-pick-48.png?v=4">
     <title>Find Your Local Pick - Bathroom Remodel</title>
+    <base href="./">
     
     <!-- Meta Pixel -->
     <script>
@@ -89,6 +90,7 @@
             box-sizing: border-box;
         }
 
+        /* Hide quiz tagline only on post-submit / ending screens */
         body.funnel-post-submit .global-quiz-tagline {
             display: none;
         }
@@ -854,12 +856,48 @@
             text-align: center;
         }
 
+        .main-funnel-local-pick-wrap {
+            max-width: 500px;
+            margin: 0 auto 28px;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+
+        .local-pick-group {
+            margin-bottom: 0;
+        }
+
         .local-pick-block {
             background: white;
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0;
+        }
+
+        .local-pick-happens-now-header {
+            font-size: 21px;
+            font-weight: 700;
+            color: #000;
+            text-align: center;
+            margin: 26px 0 16px;
+            padding: 18px 16px 0;
+            line-height: 1.35;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .local-pick-next-steps {
+            margin-bottom: 8px;
+        }
+
+        .reviews-local-pick-mount {
             margin-bottom: 20px;
+        }
+
+        .reviews-local-pick-mount .local-pick-block {
+            margin-bottom: 0;
         }
 
         .local-pick-title {
@@ -867,8 +905,11 @@
             color: #000;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             line-height: 1.4;
+            max-width: 100%;
+            padding: 0 8px;
+            box-sizing: border-box;
         }
 
         .local-pick-intro-subtext {
@@ -890,7 +931,7 @@
         }
 
         /* Post-zip (partner): icons left, like bathrooms.html */
-        .local-pick-block-partner .local-pick-item {
+        .local-pick-group .local-pick-item {
             display: flex;
             align-items: flex-start;
             gap: 16px;
@@ -900,17 +941,17 @@
             line-height: 1.5;
         }
 
-        .local-pick-block-partner .local-pick-item:last-child {
+        .local-pick-group .local-pick-item:last-child {
             margin-bottom: 0;
         }
 
-        .local-pick-block-partner .local-pick-icon {
+        .local-pick-group .local-pick-icon {
             flex-shrink: 0;
             width: 48px;
             height: 48px;
         }
 
-        .local-pick-block-partner .local-pick-item .local-pick-text {
+        .local-pick-group .local-pick-item .local-pick-text {
             text-align: left;
         }
 
@@ -1193,25 +1234,51 @@
         <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
     </div>
 
+    <div class="main-funnel-local-pick-wrap" id="mainFunnelLocalPickWrap" style="display: none;">
+        <div class="local-pick-group local-pick-block-partner" id="localPickOuter" style="display: none;">
+            <div class="local-pick-block" id="localPickBlock">
+                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
+                <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
+                    <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
+                </div>
+                <ul class="local-pick-list" id="localPickList"></ul>
+            </div>
+            <h2 class="local-pick-happens-now-header" id="localPickHappensNowHeader">Here's what happens now...</h2>
+            <div class="local-pick-next-steps post-submit-intro" id="localPickNextSteps">
+                <div class="post-submit-step">
+                    <div class="post-submit-step-header">
+                        <span class="post-submit-step-num">1</span>
+                        <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
+                    </div>
+                    <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
+                </div>
+                <div class="post-submit-step">
+                    <div class="post-submit-step-header">
+                        <span class="post-submit-step-num">2</span>
+                        <h3 class="post-submit-step-title">In-Home Estimate</h3>
+                    </div>
+                    <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
+                </div>
+                <div class="post-submit-step">
+                    <div class="post-submit-step-header">
+                        <span class="post-submit-step-num">3</span>
+                        <h3 class="post-submit-step-title">Approval & Installation</h3>
+                    </div>
+                    <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="form-wrapper" id="formSection">
         <div class="progress-area" id="progressArea">
             <div class="progress-bar" id="progressBarContainer">
-                <div class="progress-fill" id="progressFill" style="width: 9%"></div>
+                <div class="progress-fill" id="progressFill" style="width: 14%"></div>
             </div>
         </div>
 
-        <!-- STEP 0: Zip Code (find Local Pick) -->
+        <!-- STEP 0: Homeowner -->
         <div class="form-step active" id="step0">
-            <div class="step-subheader" id="step0Subheader">We've found the <strong>single best bathroom remodeler</strong> in your area so you don't have to</div>
-            <div class="zip-input-wrap" style="margin-bottom: 20px;">
-                <input type="text" id="zipCodeInput" class="address-input" placeholder="Enter zip code" maxlength="5" pattern="[0-9]*" inputmode="numeric" style="max-width: 200px; margin: 0 auto 15px; text-align: center; font-size: 18px;" oninput="persistFunnelProgress()" onkeypress="if(event.key==='Enter'){event.preventDefault();handleZipSubmit();}">
-            </div>
-            <button type="button" class="nav-btn" id="seeLocalPickBtn" onclick="handleZipSubmit()">Let's Go!</button>
-            <div class="zip-error-message" id="zipErrorMessage" style="display: none; margin-top: 20px; padding: 16px; background: #ffebee; border-radius: 10px; color: #c62828; font-size: 14px;"></div>
-        </div>
-
-        <!-- STEP 1: Homeowner -->
-        <div class="form-step" id="step1">
             <div class="step-header">Are you the homeowner or authorized decision maker?</div>
             <div class="options">
                 <div class="option" data-quiz-field="homeowner" data-quiz-value="yes" onclick="selectOptionAndAdvance(this, 'homeowner', 'yes')">Yes</div>
@@ -1225,37 +1292,29 @@
                     </svg>
                 </div>
                 <div class="homeowner-no-content">
-                    <div class="homeowner-no-text">By law, you can only make a bathroom upgrade if you are the homeowner or authorized decision maker</div>
+                    <div class="homeowner-no-text">You must be the homeowner or an authorized decision maker to continue.</div>
                 </div>
             </div>
         </div>
 
-        <!-- STEP 2: Home Type -->
+        <!-- STEP 1: Bathroom last updated -->
+        <div class="form-step" id="step1">
+            <div class="step-header">When was your bathroom last updated?</div>
+            <div class="options">
+                <div class="option" data-quiz-field="bathroomLastUpdated" data-quiz-value="less_than_10" onclick="selectOptionAndAdvance(this, 'bathroomLastUpdated', 'less_than_10')">Less than 10 years ago</div>
+                <div class="option" data-quiz-field="bathroomLastUpdated" data-quiz-value="more_than_10" onclick="selectOptionAndAdvance(this, 'bathroomLastUpdated', 'more_than_10')">More than 10 years ago</div>
+            </div>
+        </div>
+
+        <!-- STEP 2: Project Type (from Airtable Client "Project Type") -->
         <div class="form-step" id="step2">
-            <div class="step-header">What type of home is this?</div>
-            <div class="options" id="homeTypeOptions"></div>
-            <div class="mobile-home-message" id="mobileHomeMessage" style="display: none;">
-                <div class="why-we-ask-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/>
-                    </svg>
-                </div>
-                <div class="mobile-home-content">
-                    <div class="why-we-ask-text">A new shower can only be installed in mobile homes with permanent plumbing fixtures.  Would you still like to continue?</div>
-                    <button type="button" class="mobile-home-continue-btn" onclick="continueMobileHome()">Continue</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- STEP 3: Project Type (options from Client "Project Type" multi-select, same pattern as Home Types) -->
-        <div class="form-step" id="step3">
-            <div class="step-header">What type of project is this?</div>
+            <div class="step-header">Which best describes this project?</div>
             <div class="options" id="projectTypeOptions"></div>
         </div>
 
-        <!-- STEP 4: Main Goal -->
-        <div class="form-step" id="step4">
-            <div class="step-header">My goal is to...</div>
+        <!-- STEP 3: Main Goal -->
+        <div class="form-step" id="step3">
+            <div class="step-header">What do you want most in your remodel?</div>
             <div class="options">
                 <div class="option" data-quiz-field="mainGoal" data-quiz-value="accessibility_safety" onclick="selectOptionAndAdvance(this, 'mainGoal', 'accessibility_safety')">Improve accessibility/safety</div>
                 <div class="option" data-quiz-field="mainGoal" data-quiz-value="look_function" onclick="selectOptionAndAdvance(this, 'mainGoal', 'look_function')">Improve look/function</div>
@@ -1275,40 +1334,10 @@
             </div>
         </div>
 
-        <!-- STEP 5: Timeline -->
-        <div class="form-step" id="step5">
-            <div class="step-header">How soon would you like this project to be completed?</div>
-            <div class="step-subheader">Estimates can only be given for projects that can start soon so pricing is accurate</div>
-            <div class="options">
-                <div class="option" data-quiz-field="timeline" data-quiz-value="asap" onclick="selectOptionAndAdvance(this, 'timeline', 'asap')">ASAP</div>
-                <div class="option" data-quiz-field="timeline" data-quiz-value="within_month" onclick="selectOptionAndAdvance(this, 'timeline', 'within_month')">Within a month</div>
-                <div class="option" data-quiz-field="timeline" data-quiz-value="within_3_months" onclick="selectOptionAndAdvance(this, 'timeline', 'within_3_months')">Within 3 months</div>
-                <div class="option" data-quiz-field="timeline" data-quiz-value="within_6_months" onclick="selectOptionAndAdvance(this, 'timeline', 'within_6_months')">Within 6 months</div>
-            </div>
-        </div>
-
-        <!-- STEP 6: NAME -->
-        <div class="form-step" id="step6">
-            <div class="step-header">What is your name?</div>
-            <div class="name-grid">
-                <div class="address-field">
-                    <label class="address-label" for="firstName">First Name</label>
-                    <input type="text" class="address-input" id="firstName" placeholder="First Name" required autocomplete="given-name" oninput="validateNameForm()">
-                </div>
-                <div class="address-field">
-                    <label class="address-label" for="lastName">Last Name</label>
-                    <input type="text" class="address-input" id="lastName" placeholder="Last Name" required autocomplete="family-name" oninput="validateNameForm()">
-                </div>
-            </div>
-            <div class="nav-buttons">
-                <button class="nav-btn" onclick="goToStep7()" id="nameNextBtn" disabled>Next</button>
-            </div>
-        </div>
-
-        <!-- STEP 7: Address -->
-        <div class="form-step" id="step7">
+        <!-- STEP 4: Address -->
+        <div class="form-step" id="step4">
             <div class="step-header">What is the location of this project?</div>
-            <div class="step-subheader" id="step7AddressSubheader">Please make sure your address is full and accurate</div>
+            <div class="step-subheader" id="step4AddressSubheader">Please make sure your address is full and correct so we can match you with the correct Local Pick for your area</div>
             <div class="address-grid">
                 <div class="address-field">
                     <label class="address-label" for="street">Street Address</label>
@@ -1333,12 +1362,30 @@
                 </div>
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="goToStep8()" id="submitFormBtn" disabled>Next</button>
+                <button class="nav-btn" onclick="goFromAddressToNameStep()" id="submitFormBtn" disabled>Next</button>
             </div>
         </div>
 
-        <!-- STEP 8: PHONE -->
-        <div class="form-step" id="step8">
+        <!-- STEP 5: Name -->
+        <div class="form-step" id="step5">
+            <div class="step-header">Who will we be speaking with?</div>
+            <div class="name-grid">
+                <div class="address-field">
+                    <label class="address-label" for="firstName">First Name</label>
+                    <input type="text" class="address-input" id="firstName" placeholder="First Name" required autocomplete="given-name" oninput="validateNameForm()">
+                </div>
+                <div class="address-field">
+                    <label class="address-label" for="lastName">Last Name</label>
+                    <input type="text" class="address-input" id="lastName" placeholder="Last Name" required autocomplete="family-name" oninput="validateNameForm()">
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="goFromNameToPhoneStep()" id="nameNextBtn" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- STEP 6: Phone -->
+        <div class="form-step" id="step6">
             <div class="step-header">Where can <span id="contactReachCompany">Peak Leads Group</span> reach you?</div>
             <div class="row">
                 <div id="phoneWrap" class="address-field">
@@ -1364,31 +1411,6 @@
         <div class="form-step" id="contactStep">
             <div>
                 <div class="post-submit-intro">
-                    <div class="post-submit-header-block">
-                        <h2 class="post-submit-main-title">You're one step closer to your dream bathroom!</h2>
-                        <p class="post-submit-subtitle">Here's what happens now...</p>
-                    </div>
-                    <div class="post-submit-step">
-                        <div class="post-submit-step-header">
-                            <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
-                        </div>
-                        <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
-                    </div>
-                    <div class="post-submit-step">
-                        <div class="post-submit-step-header">
-                            <span class="post-submit-step-num">2</span>
-                            <h3 class="post-submit-step-title">In-Home Estimate</h3>
-                        </div>
-                        <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
-                    </div>
-                    <div class="post-submit-step">
-                        <div class="post-submit-step-header">
-                            <span class="post-submit-step-num">3</span>
-                            <h3 class="post-submit-step-title">Approval & Installation</h3>
-                        </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
-                    </div>
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
                         <p class="post-submit-cta-subtitle" id="contactReadySubtitle">Can't wait to hear from <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span>? Click the button below to call them now.</p>
@@ -1416,31 +1438,6 @@
         <div class="form-step" id="contactStepAddContact">
             <div>
                 <div class="post-submit-intro">
-                    <div class="post-submit-header-block">
-                        <h2 class="post-submit-main-title">You're one step closer to your dream bathroom!</h2>
-                        <p class="post-submit-subtitle">Here's what happens now...</p>
-                    </div>
-                    <div class="post-submit-step">
-                        <div class="post-submit-step-header">
-                            <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
-                        </div>
-                        <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
-                    </div>
-                    <div class="post-submit-step">
-                        <div class="post-submit-step-header">
-                            <span class="post-submit-step-num">2</span>
-                            <h3 class="post-submit-step-title">In-Home Estimate</h3>
-                        </div>
-                        <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
-                    </div>
-                    <div class="post-submit-step">
-                        <div class="post-submit-step-header">
-                            <span class="post-submit-step-num">3</span>
-                            <h3 class="post-submit-step-title">Approval & Installation</h3>
-                        </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
-                    </div>
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
                         <p class="post-submit-cta-subtitle" id="contactAddReadySubtitle"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> will call you soon to schedule your free estimate!</p>
@@ -1453,31 +1450,6 @@
         <div class="form-step" id="calendarStep">
             <div style="padding: 0 20px 20px;">
             <div class="post-submit-intro">
-                <div class="post-submit-header-block">
-                    <h2 class="post-submit-main-title">You're one step closer to your dream bathroom!</h2>
-                    <p class="post-submit-subtitle">Here's what happens now...</p>
-                </div>
-                <div class="post-submit-step">
-                    <div class="post-submit-step-header">
-                        <span class="post-submit-step-num">1</span>
-                        <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
-                    </div>
-                    <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
-                </div>
-                <div class="post-submit-step">
-                    <div class="post-submit-step-header">
-                        <span class="post-submit-step-num">2</span>
-                        <h3 class="post-submit-step-title">In-Home Estimate</h3>
-                    </div>
-                    <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
-                </div>
-                <div class="post-submit-step">
-                    <div class="post-submit-step-header">
-                        <span class="post-submit-step-num">3</span>
-                        <h3 class="post-submit-step-title">Approval & Installation</h3>
-                    </div>
-                    <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
-                </div>
                 <div class="post-submit-cta-block">
                     <h3 class="post-submit-cta-title">Ready to get started now?</h3>
                     <p class="post-submit-cta-subtitle" id="calendarReadySubtitle">Request a time for your free <strong>in home estimate</strong> then our team will reach out to confirm our availability.</p>
@@ -1522,31 +1494,6 @@
         <div class="form-step" id="confirmationStep">
             <div style="padding: 40px 20px;">
                 <div class="post-submit-intro">
-                    <div class="post-submit-header-block">
-                        <h2 class="post-submit-main-title">You're one step closer to your dream bathroom!</h2>
-                        <p class="post-submit-subtitle">Here's what happens now...</p>
-                    </div>
-                    <div class="post-submit-step">
-                        <div class="post-submit-step-header">
-                            <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
-                        </div>
-                        <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
-                    </div>
-                    <div class="post-submit-step">
-                        <div class="post-submit-step-header">
-                            <span class="post-submit-step-num">2</span>
-                            <h3 class="post-submit-step-title">In-Home Estimate</h3>
-                        </div>
-                        <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
-                    </div>
-                    <div class="post-submit-step">
-                        <div class="post-submit-step-header">
-                            <span class="post-submit-step-num">3</span>
-                            <h3 class="post-submit-step-title">Approval & Installation</h3>
-                        </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
-                    </div>
                     <div class="post-submit-cta-block" id="confirmationCtaBlock">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
                         <p class="post-submit-cta-subtitle" id="confirmationReadySubtitle"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> will call you soon to schedule your free estimate!</p>
@@ -1563,15 +1510,41 @@
     <!-- REVIEWS SECTION -->
     <div class="reviews-section" id="reviewsSection">
         <div class="reviews-content">
-            <!-- LOCAL PICK BLOCK (above reviews) -->
-            <div class="local-pick-block local-pick-block-partner" id="localPickBlock" style="display: none;">
-                <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
-                    <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
+            <!-- Post-submit: same Local Pick layout below thank-you (top block hidden) -->
+            <div class="reviews-local-pick-mount main-funnel-local-pick-wrap" id="reviewsLocalPickMount" style="display: none;">
+                <div class="local-pick-group local-pick-block-partner">
+                    <div class="local-pick-block">
+                        <div class="local-pick-title" id="reviewsLocalPickTitle">Here's why <span id="reviewsLocalPickCompanyName">Company</span> is our Local Pick in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
+                        <div class="partner-logo-wrap" id="reviewsPartnerLogoWrap" style="display: none;">
+                            <img id="reviewsPartnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
+                        </div>
+                        <ul class="local-pick-list" id="reviewsLocalPickList"></ul>
+                    </div>
+                    <h2 class="local-pick-happens-now-header">Here's what happens now...</h2>
+                    <div class="local-pick-next-steps post-submit-intro">
+                        <div class="post-submit-step">
+                            <div class="post-submit-step-header">
+                                <span class="post-submit-step-num">1</span>
+                                <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
+                            </div>
+                            <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
+                        </div>
+                        <div class="post-submit-step">
+                            <div class="post-submit-step-header">
+                                <span class="post-submit-step-num">2</span>
+                                <h3 class="post-submit-step-title">In-Home Estimate</h3>
+                            </div>
+                            <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
+                        </div>
+                        <div class="post-submit-step">
+                            <div class="post-submit-step-header">
+                                <span class="post-submit-step-num">3</span>
+                                <h3 class="post-submit-step-title">Approval & Installation</h3>
+                            </div>
+                            <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
-                <ul class="local-pick-list" id="localPickList">
-                    <!-- Local Pick items will be dynamically added here -->
-                </ul>
             </div>
             <div class="reviews-container" id="reviewsContainer">
                 <!-- Review blocks will be dynamically added here -->
@@ -1678,7 +1651,7 @@
         // TESTING MODE - Disables Airtable writes and Meta Pixel
         // ============================================
         const TESTING_MODE = false; // Set to true to disable Airtable writes and Meta Pixel for testing
-        if (TESTING_MODE) console.log('[TESTING_MODE] Page loaded - Airtable and Meta Pixel disabled for testing');
+        if (TESTING_MODE) console.log('[TESTING_MODE] Page loaded - Airtable writes and Meta Pixel disabled for testing');
         
         // ============================================
         // AIRTABLE CONFIGURATION
@@ -1706,7 +1679,7 @@
         // ============================================
 
         let currentStep = 0;
-        const TOTAL_STEPS = 9;
+        const TOTAL_STEPS = 7;
         let formData = {};
         let eventId = null;
         let hasTrackedEngagement = false;
@@ -1760,7 +1733,7 @@
         }
 
         function buildFunnelInputSnapshot() {
-            const ids = ['zipCodeInput', 'firstName', 'lastName', 'street', 'city', 'state', 'zip', 'phone', 'email'];
+            const ids = ['firstName', 'lastName', 'street', 'city', 'state', 'zip', 'phone', 'email'];
             const out = {};
             ids.forEach((id) => {
                 const el = document.getElementById(id);
@@ -1819,15 +1792,11 @@
         function syncAuxiliaryStepMessages() {
             const homeownerNoMsg = document.getElementById('homeownerNoMessage');
             if (homeownerNoMsg) {
-                homeownerNoMsg.style.display = (currentStep === 1 && formData.homeowner === 'no') ? 'flex' : 'none';
+                homeownerNoMsg.style.display = (currentStep === 0 && formData.homeowner === 'no') ? 'flex' : 'none';
             }
             const repairDamageMsg = document.getElementById('repairDamageMessage');
             if (repairDamageMsg) {
-                repairDamageMsg.style.display = (currentStep === 4 && formData.mainGoal === 'repair_damage') ? 'flex' : 'none';
-            }
-            const mobileHomeMsg = document.getElementById('mobileHomeMessage');
-            if (mobileHomeMsg) {
-                mobileHomeMsg.style.display = (currentStep === 2 && formData.homeType === 'mobile_home') ? 'flex' : 'none';
+                repairDamageMsg.style.display = (currentStep === 3 && formData.mainGoal === 'repair_damage') ? 'flex' : 'none';
             }
         }
 
@@ -1894,7 +1863,6 @@
                         tryShowReviewsOnLoad();
                     }
                 } else if (currentStep === 0) {
-                    refreshStep0Copy();
                     updatePartnerNameInPrivacyPolicy();
                 }
 
@@ -1904,7 +1872,7 @@
                 }
 
                 applyFunnelInputSnapshot(s.inputs);
-                updateHomeTypeStepOptions();
+                updateProjectTypeStepOptions();
                 refreshQuizOptionHighlights();
                 syncAuxiliaryStepMessages();
 
@@ -1919,7 +1887,7 @@
                 validateNameForm();
                 validateAddressForm();
                 if (typeof validatePhones === 'function') validatePhones();
-                if (currentStep === 8 && typeof setupPhoneValidation === 'function') setupPhoneValidation();
+                if (currentStep === 6 && typeof setupPhoneValidation === 'function') setupPhoneValidation();
             } catch (e) {
                 console.warn('Funnel resume failed:', e);
             }
@@ -2237,6 +2205,10 @@
         }
 
         async function submitLeadToAirtable(leadData) {
+            if (TESTING_MODE) {
+                console.log('[TESTING_MODE] Airtable writes and duplicate checks skipped; payload:', JSON.stringify(leadData, null, 2));
+                return { records: [{ id: 'test-record-id' }] };
+            }
             try {
                 // Check for duplicate: same phone with any lead created in last 90 days (regardless of linked client).
                 let isDuplicate = false;
@@ -2263,30 +2235,6 @@
                     } catch (dupErr) {
                         console.warn('Duplicate check failed, proceeding with normal submission:', dupErr);
                     }
-                }
-                
-                if (TESTING_MODE) {
-                    console.log('[TESTING_MODE] Would write to Airtable B2C_LEADS:', JSON.stringify(leadData, null, 2));
-                    console.log('[TESTING_MODE] Full record that would be submitted:', {
-                        table: TABLES.B2C_LEADS,
-                        fields: {
-                            'Phone': leadData.phone,
-                            'Full Summary': leadData.fullSummary,
-                            'Full Summary HTML': leadData.fullSummaryHTML,
-                            'Full Name': leadData.fullName,
-                            'First Name': leadData.firstName,
-                            'Last Name': leadData.lastName,
-                            'Model': 'Lead',
-                            'Address': leadData.address,
-                            'City': leadData.city,
-                            'State': leadData.state,
-                            'Zip': leadData.zip,
-                            'IP': leadData.ip || '',
-                            'Email': leadData.email || '',
-                            'Unique ID': leadData.uniqueId
-                        }
-                    });
-                    return { records: [{ id: 'test-record-id' }] };
                 }
                 // Only set Lead Price when we have a matched client by zip; leave blank if no match
                 let leadPrice = null;
@@ -2411,24 +2359,31 @@
             }
         }
 
-        function setPartnerLogoForWhySection(logoUrl) {
-            const wrap = document.getElementById('partnerLogoWrap');
-            const img = document.getElementById('partnerLogoImg');
-            if (!wrap || !img) return;
+        function setPartnerLogoForWhySection(logoUrl, which) {
+            const w = which || 'both';
 
-            if (!logoUrl) {
-                img.removeAttribute('src');
-                wrap.style.display = 'none';
-                return;
+            function apply(wrapId, imgId) {
+                const wrap = document.getElementById(wrapId);
+                const img = document.getElementById(imgId);
+                if (!wrap || !img) return;
+
+                if (!logoUrl) {
+                    img.removeAttribute('src');
+                    wrap.style.display = 'none';
+                    return;
+                }
+
+                preloadLogo(logoUrl);
+                img.src = logoUrl;
+                wrap.style.display = 'block';
+                img.onerror = function() {
+                    wrap.style.display = 'none';
+                    img.onerror = null;
+                };
             }
 
-            preloadLogo(logoUrl);
-            img.src = logoUrl;
-            wrap.style.display = 'block';
-            img.onerror = function() {
-                wrap.style.display = 'none';
-                img.onerror = null;
-            };
+            if (w === 'top' || w === 'both') apply('partnerLogoWrap', 'partnerLogoImg');
+            if (w === 'reviews' || w === 'both') apply('reviewsPartnerLogoWrap', 'reviewsPartnerLogoImg');
         }
 
         function resolveLogoLinkField(raw) {
@@ -2477,35 +2432,6 @@
             return s.split(/[,;]+/).map(p => p.trim()).filter(Boolean);
         }
 
-        /** Maps Airtable "Home Types" multi-select to form values; order follows field list. */
-        function getHomeTypeChoicesForClient(activeClient) {
-            const ORDER = [
-                { match: (t) => /^single\s*family\s*home$/i.test(t), value: 'single_family', label: 'Single Family Home' },
-                { match: (t) => /^town\s*home\s*\/\s*condo$/i.test(t) || /^town\s*home$/i.test(t) || /^condo$/i.test(t), value: 'town_home', label: 'Town Home/Condo' },
-                { match: (t) => /^vacation\s*home$/i.test(t), value: 'vacation_home', label: 'Vacation Home' },
-                { match: (t) => /^apartment$/i.test(t), value: 'apartment', label: 'Apartment' },
-                { match: (t) => /^mobile\s*home$/i.test(t), value: 'mobile_home', label: 'Mobile Home' }
-            ];
-            const labels = normalizeAirtableMultiSelectField(activeClient && activeClient.fields && activeClient.fields['Home Types']);
-            if (!labels.length) {
-                return ORDER.map((d) => ({ value: d.value, label: d.label }));
-            }
-            const matched = new Set();
-            for (const lbl of labels) {
-                const t = lbl.trim();
-                for (const def of ORDER) {
-                    if (def.match(t)) {
-                        matched.add(def.value);
-                        break;
-                    }
-                }
-            }
-            if (matched.size === 0) {
-                return ORDER.map((d) => ({ value: d.value, label: d.label }));
-            }
-            return ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
-        }
-
         /** Maps Airtable Client "Project Type" multi-select to form values; options must match B2C lead field options. */
         function getProjectTypeChoicesForClient(activeClient) {
             const ORDER = [
@@ -2534,26 +2460,6 @@
                 return ORDER.map((d) => ({ value: d.value, label: d.label }));
             }
             return ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
-        }
-
-        function updateHomeTypeStepOptions() {
-            const container = document.getElementById('homeTypeOptions');
-            if (!container) return;
-            const choices = getHomeTypeChoicesForClient(getActiveClient());
-            container.replaceChildren();
-            choices.forEach((c) => {
-                const div = document.createElement('div');
-                div.className = 'option';
-                div.setAttribute('data-quiz-field', 'homeType');
-                div.setAttribute('data-quiz-value', c.value);
-                div.textContent = c.label;
-                const value = c.value;
-                div.addEventListener('click', function () {
-                    selectOptionAndAdvance(div, 'homeType', value);
-                });
-                container.appendChild(div);
-            });
-            updateProjectTypeStepOptions();
         }
 
         function updateProjectTypeStepOptions() {
@@ -2587,20 +2493,7 @@
             setPartnerLogoForWhySection(null);
         }
 
-        function refreshStep0Copy() {
-            const sub = document.getElementById('step0Subheader');
-            const btn = document.getElementById('seeLocalPickBtn');
-            if (!sub || !btn) return;
-            if (genericLeadFlow) {
-                sub.textContent = "We're still expanding coverage. Enter your zip to continue—your request goes to our vetted contractor network.";
-                btn.textContent = 'Continue';
-            } else {
-                sub.innerHTML = "We've found the <strong>single best bathroom remodeler</strong> in your area so you don't have to";
-                btn.textContent = "Let's Go!";
-            }
-        }
-
-        // Load campaign from URL when present (Source Campaign + Meta campaignID for redirects); zip step still selects service-area client
+        // Load campaign from URL when present (Source Campaign + Meta campaignID for redirects); Local Pick match uses project address zip at submit.
         (async function() {
             try {
                 const loadedCampaignClient = await loadClientFromCampaign(initialCampaignID);
@@ -2610,14 +2503,14 @@
                     clientData = null;
                     applyDefaultLocalPickLogo();
                     updatePartnerNameInPrivacyPolicy();
-                    updateHomeTypeStepOptions();
+                    updateProjectTypeStepOptions();
                     await tryRestoreFunnelProgressAfterBootstrap();
                     return;
                 }
                 if (matchedClientData) {
                     campaignClientData = matchedClientData;
                     clientData = matchedClientData;
-                    updateHomeTypeStepOptions();
+                    updateProjectTypeStepOptions();
                     await tryRestoreFunnelProgressAfterBootstrap();
                     return;
                 }
@@ -2626,21 +2519,19 @@
                 if (campaignClientData) {
                     clientData = campaignClientData;
 
-                    // Home screen (step 0): always show The Local Pick logo; partner logo only after zip match in handleZipSubmit
-
                     const metaPixel = campaignClientData.fields['Meta Pixel'];
                     if (metaPixel) {
                         initializeMetaPixel(metaPixel);
                     }
                     updatePartnerNameInPrivacyPolicy();
-                    updateHomeTypeStepOptions();
+                    updateProjectTypeStepOptions();
                 } else {
                     if (typeof fbq !== 'undefined') {
                         fbq('track', 'PageView');
                     }
                     applyDefaultLocalPickLogo();
                     updatePartnerNameInPrivacyPolicy();
-                    updateHomeTypeStepOptions();
+                    updateProjectTypeStepOptions();
                 }
                 await tryRestoreFunnelProgressAfterBootstrap();
             } catch (error) {
@@ -2650,85 +2541,10 @@
                 }
                 applyDefaultLocalPickLogo();
                 updatePartnerNameInPrivacyPolicy();
-                updateHomeTypeStepOptions();
+                updateProjectTypeStepOptions();
                 await tryRestoreFunnelProgressAfterBootstrap();
             }
         })();
-
-        async function handleZipSubmit() {
-            const zipInput = document.getElementById('zipCodeInput');
-            const zipErr = document.getElementById('zipErrorMessage');
-            const btn = document.getElementById('seeLocalPickBtn');
-            if (!zipInput || !zipErr || !btn) return;
-
-            const zip = String(zipInput.value || '').trim();
-            if (zip.length !== 5 || !/^\d{5}$/.test(zip)) {
-                zipErr.textContent = 'Please enter a valid 5-digit zip code.';
-                zipErr.style.display = 'block';
-                return;
-            }
-
-            zipErr.style.display = 'none';
-            btn.classList.add('is-loading');
-            btn.disabled = true;
-            btn.setAttribute('aria-busy', 'true');
-            btn.innerHTML = '<span class="nav-btn-loading-spinner" aria-hidden="true"></span><span>Finding your local pick</span>';
-
-            try {
-                matchedClientData = await findClientByZipCode(zip);
-                if (matchedClientData) {
-                    genericLeadFlow = false;
-                    clientData = matchedClientData;
-                    campaignClientData = matchedClientData;
-                    formData.initialZip = zip;
-
-                    const logoUrl = resolveLogoLinkField(matchedClientData.fields && matchedClientData.fields['Logo Link']);
-                    setPartnerLogoForWhySection(logoUrl);
-                    const metaPixel = matchedClientData.fields && matchedClientData.fields['Meta Pixel'];
-                    if (metaPixel) {
-                        initializeMetaPixel(metaPixel);
-                    }
-                    updatePartnerNameInPrivacyPolicy();
-                    tryShowReviewsOnLoad();
-                    updateHomeTypeStepOptions();
-                    refreshStep0Copy();
-
-                    document.getElementById('step0').classList.remove('active');
-                    currentStep = 1;
-                    document.getElementById('step1').classList.add('active');
-                    updateBottomLocalPickCtaVisibility();
-                    updateProgress();
-                    persistFunnelProgress();
-                } else {
-                    genericLeadFlow = true;
-                    matchedClientData = null;
-                    clientData = null;
-                    campaignClientData = null;
-                    formData.initialZip = zip;
-                    zipErr.style.display = 'none';
-                    applyDefaultLocalPickLogo();
-                    updatePartnerNameInPrivacyPolicy();
-                    updateHomeTypeStepOptions();
-                    refreshStep0Copy();
-
-                    document.getElementById('step0').classList.remove('active');
-                    currentStep = 1;
-                    document.getElementById('step1').classList.add('active');
-                    updateBottomLocalPickCtaVisibility();
-                    updateProgress();
-                    persistFunnelProgress();
-                }
-            } catch (error) {
-                console.error('Error finding client by zip:', error);
-                zipErr.textContent = 'Something went wrong. Please try again.';
-                zipErr.style.display = 'block';
-            } finally {
-                btn.classList.remove('is-loading');
-                btn.removeAttribute('aria-busy');
-                btn.disabled = false;
-                refreshStep0Copy();
-            }
-        }
         
         // Function to update partner name in privacy policy and other branded elements
         function updatePartnerNameInPrivacyPolicy() {
@@ -2739,9 +2555,9 @@
                 if (partnerNameElement) {
                     partnerNameElement.textContent = "The Local Pick and it's marketing partners";
                 }
-                const step7AddressSubheader = document.getElementById('step7AddressSubheader');
-                if (step7AddressSubheader) {
-                    step7AddressSubheader.textContent = 'Please make sure your address is full and accurate';
+                const step4AddressSubheader = document.getElementById('step4AddressSubheader');
+                if (step4AddressSubheader) {
+                    step4AddressSubheader.textContent = 'Please make sure your address is full and correct so we can match you with the correct Local Pick for your area';
                 }
                 const contactReachElement = document.getElementById('contactReachCompany');
                 if (contactReachElement) {
@@ -2754,10 +2570,12 @@
                 if (localPickTitleEl) {
                     localPickTitleEl.innerHTML = 'How we choose every <span class="local-pick-highlight">Local Pick</span>';
                 }
-                const localPickBlock = document.getElementById('localPickBlock');
-                if (localPickBlock) {
-                    localPickBlock.style.display = 'none';
-                }
+                const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
+                if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
+                const localPickOuter = document.getElementById('localPickOuter');
+                if (localPickOuter) localPickOuter.style.display = 'none';
+                const reviewsLPMount = document.getElementById('reviewsLocalPickMount');
+                if (reviewsLPMount) reviewsLPMount.style.display = 'none';
                 if (postFormSubmitted) {
                     applyGenericNoMatchPostSubmitCopy();
                 }
@@ -2769,7 +2587,11 @@
             if (localPickTitleEl) {
                 localPickTitleEl.innerHTML = 'Here\'s why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
             }
-            
+            const reviewsLocalPickTitleEl = document.getElementById('reviewsLocalPickTitle');
+            if (reviewsLocalPickTitleEl) {
+                reviewsLocalPickTitleEl.innerHTML = 'Here\'s why <span id="reviewsLocalPickCompanyName">Company</span> is our Local Pick in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
+            }
+
             // Try to get partner name from matched client first, then campaign client
             let partnerName = null;
             if (matchedClientData && matchedClientData.fields && matchedClientData.fields['Name']) {
@@ -2780,38 +2602,45 @@
                 partnerName = clientData.fields['Name'];
             }
             
-            // Update privacy policy text
             if (partnerNameElement) {
-                if (partnerName) {
-                    partnerNameElement.textContent = partnerName;
-                } else {
-                    partnerNameElement.textContent = "The Local Pick and it's marketing partners";
-                }
+                partnerNameElement.textContent = (postFormSubmitted && partnerName)
+                    ? partnerName
+                    : "The Local Pick and it's marketing partners";
             }
 
-            // Keep address step subheader simple and non-branded.
-            const step7AddressSubheader = document.getElementById('step7AddressSubheader');
+            const step4AddressSubheader = document.getElementById('step4AddressSubheader');
+            const zForPick = (formData.address && formData.address.zip) || formData.initialZip;
             const localPickZipCodeElement = document.getElementById('localPickZipCode');
             if (localPickZipCodeElement) {
-                localPickZipCodeElement.textContent = formData.initialZip || 'ZIP CODE ENTERED';
+                localPickZipCodeElement.textContent = zForPick || 'ZIP CODE ENTERED';
             }
-            if (step7AddressSubheader) {
-                step7AddressSubheader.textContent = 'Please make sure your address is full and accurate';
+            const reviewsLocalPickZipEl = document.getElementById('reviewsLocalPickZipCode');
+            if (reviewsLocalPickZipEl) {
+                reviewsLocalPickZipEl.textContent = zForPick || 'ZIP CODE ENTERED';
+            }
+            const localPickCompanyNameEl = document.getElementById('localPickCompanyName');
+            if (localPickCompanyNameEl) {
+                localPickCompanyNameEl.textContent = postFormSubmitted ? (partnerName || 'COMPANY') : 'COMPANY';
+            }
+            const reviewsLocalPickCompanyNameEl = document.getElementById('reviewsLocalPickCompanyName');
+            if (reviewsLocalPickCompanyNameEl) {
+                reviewsLocalPickCompanyNameEl.textContent = postFormSubmitted ? (partnerName || 'COMPANY') : 'COMPANY';
+            }
+            if (step4AddressSubheader) {
+                step4AddressSubheader.textContent = 'Please make sure your address is full and correct so we can match you with the correct Local Pick for your area';
             }
 
-            // Update contact step header with company name
             const contactReachElement = document.getElementById('contactReachCompany');
             if (contactReachElement) {
-                contactReachElement.textContent = partnerName || "Peak Leads Group";
+                contactReachElement.textContent = postFormSubmitted ? (partnerName || 'Peak Leads Group') : 'we';
             }
             document.querySelectorAll('.post-submit-company-name').forEach((el) => {
-                el.textContent = partnerName || 'COMPANY';
+                el.textContent = postFormSubmitted ? (partnerName || 'COMPANY') : 'COMPANY';
             });
 
-            // Update Get Estimate button with company name
             const getQuoteCompanyElement = document.getElementById('getQuoteCompanyName');
             if (getQuoteCompanyElement) {
-                getQuoteCompanyElement.textContent = partnerName || "Peak Leads Group";
+                getQuoteCompanyElement.textContent = postFormSubmitted ? (partnerName || 'Peak Leads Group') : 'The Local Pick';
             }
         }
         
@@ -2860,15 +2689,12 @@
                 // Initial update
                 setTimeout(updateBackgroundHeight, 100);
                 
-                // Zip step: always The Local Pick mark (never swap to company logo until user passes step 0)
                 if (currentStep === 0) {
                     applyDefaultLocalPickLogo();
                 }
                 
-                // Show reviews below form when DOM is ready (if client data already loaded)
                 tryShowReviewsOnLoad();
-                updateHomeTypeStepOptions();
-                refreshStep0Copy();
+                updateProjectTypeStepOptions();
 
                 document.querySelectorAll('a.privacy-policy-funnel-link').forEach(function (a) {
                     a.addEventListener('click', function (e) {
@@ -2882,8 +2708,7 @@
         } else {
             updateBackgroundHeight();
             tryShowReviewsOnLoad();
-            updateHomeTypeStepOptions();
-            refreshStep0Copy();
+            updateProjectTypeStepOptions();
             if (currentStep === 0) {
                 applyDefaultLocalPickLogo();
             }
@@ -2938,17 +2763,6 @@
                 }
             }
             
-            // Home type step: show blue message when "Mobile home" selected, don't advance
-            if (field === 'homeType') {
-                const mobileHomeMsg = document.getElementById('mobileHomeMessage');
-                if (value === 'mobile_home') {
-                    if (mobileHomeMsg) mobileHomeMsg.style.display = 'flex';
-                    return;
-                } else {
-                    if (mobileHomeMsg) mobileHomeMsg.style.display = 'none';
-                }
-            }
-            
             // Main goal step: show red message when "Repair damage" selected, don't advance
             if (field === 'mainGoal') {
                 const repairDamageMsg = document.getElementById('repairDamageMessage');
@@ -2963,12 +2777,6 @@
             setTimeout(() => {
                 nextStep();
             }, 200);
-        }
-
-        function continueMobileHome() {
-            const mobileHomeMsg = document.getElementById('mobileHomeMessage');
-            if (mobileHomeMsg) mobileHomeMsg.style.display = 'none';
-            nextStep();
         }
 
         function validateAddressForm() {
@@ -3034,23 +2842,17 @@
         function updateBottomLocalPickCtaVisibility() {
             const footerCta = document.getElementById('pageBottomLocalPickCta');
             if (!footerCta) return;
-            // Show only on pre-zip screen; hide once a zip has been submitted.
-            footerCta.style.display = formData && formData.initialZip ? 'none' : 'block';
+            footerCta.style.display = currentStep === 0 ? 'block' : 'none';
         }
 
         function nextStep() {
-            if (currentStep < 8) {
+            if (currentStep < 6) {
                 document.getElementById('step' + currentStep).classList.remove('active');
                 currentStep++;
                 document.getElementById('step' + currentStep).classList.add('active');
                 updateProgress();
-                if (currentStep === 7 && formData.initialZip) {
-                    const zipInput = document.getElementById('zip');
-                    if (zipInput && !zipInput.value) zipInput.value = formData.initialZip;
-                    validateAddressForm();
-                }
-                // First quiz step completed — hide Airtable "Here's why..." block below the form
-                if (currentStep === 2) {
+                updateBottomLocalPickCtaVisibility();
+                if (currentStep === 1) {
                     mainFunnelLocalPickSuppressed = true;
                     hideMainFunnelPartnerWhySection();
                 }
@@ -3058,10 +2860,18 @@
             persistFunnelProgress();
         }
 
-        function goToStep7() {
+        function goFromAddressToNameStep() {
+            validateAddressForm();
+            if (formData.address) {
+                nextStep();
+            }
+        }
+
+        function goFromNameToPhoneStep() {
             validateNameForm();
             if (formData.firstName && formData.lastName) {
                 nextStep();
+                setupPhoneValidation();
             }
         }
 
@@ -3079,14 +2889,6 @@
                 formData.lastName = lastName;
             }
             persistFunnelProgress();
-        }
-
-        function goToStep8() {
-            validateAddressForm();
-            if (formData.address) {
-                nextStep();
-                setupPhoneValidation();
-            }
         }
 
         function formatPhone(val) {
@@ -3492,7 +3294,7 @@
             return { slotTime, displayTime, apptTimeFormat };
         }
 
-        async function loadAvailabilityFromApi(baseUrl) {
+        async function loadAvailabilityFromApi(baseUrl, zipForApi) {
             try {
                 const nowTz = getCurrentDateInTimezone();
                 nowTz.setHours(0, 0, 0, 0);
@@ -3504,6 +3306,10 @@
                 const u = new URL(baseUrl, window.location.origin);
                 u.searchParams.set('startDate', String(startMs));
                 u.searchParams.set('endDate', String(endMs));
+                const z = zipForApi != null ? String(zipForApi).trim() : '';
+                if (z) {
+                    u.searchParams.set('zip', z);
+                }
                 const res = await fetch(u.toString());
                 const text = await res.text();
                 let data;
@@ -4081,7 +3887,8 @@
             } else {
                 resetPostSubmitCtaTitlesVisibility();
             }
-            const phoneStepEl = document.getElementById('step8');
+            updatePartnerNameInPrivacyPolicy();
+            const phoneStepEl = document.getElementById('step6');
             const calendarStep = document.getElementById('calendarStep');
             const progressArea = document.getElementById('progressArea');
             
@@ -4139,7 +3946,8 @@
                 const apiUrlRaw = activeClient.fields['Availability API URL'];
                 if (apiUrlRaw != null && String(apiUrlRaw).trim()) {
                     calendarAvailabilityFromApi = true;
-                    const ok = await loadAvailabilityFromApi(String(apiUrlRaw).trim());
+                    const zipForApi = ((formData.address && formData.address.zip) || formData.initialZip || '').trim();
+                    const ok = await loadAvailabilityFromApi(String(apiUrlRaw).trim(), zipForApi);
                     if (!ok) {
                         calendarAvailabilityFromApi = false;
                         apiAvailabilityByDate = null;
@@ -4190,13 +3998,14 @@
             postFormSubmitted = true;
             syncGlobalQuizTaglineVisibility();
             resetPostSubmitCtaTitlesVisibility();
+            updatePartnerNameInPrivacyPolicy();
             const activeClient = getActiveClient();
             if (!activeClient) {
                 showConfirmationScreen();
                 return;
             }
 
-            document.getElementById('step8').classList.remove('active');
+            document.getElementById('step6').classList.remove('active');
             document.getElementById('contactStep').classList.remove('active');
             document.getElementById('contactStepAddContact').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
@@ -4210,6 +4019,7 @@
             postFormSubmitted = true;
             syncGlobalQuizTaglineVisibility();
             resetPostSubmitCtaTitlesVisibility();
+            updatePartnerNameInPrivacyPolicy();
             // Set "Ready to get started now?" subtitle based on screen type
             const contactReadySubtitle = document.getElementById('contactReadySubtitle');
             if (contactReadySubtitle) {
@@ -4280,7 +4090,7 @@
             }
             
             // Show the contact screen
-            document.getElementById('step8').classList.remove('active');
+            document.getElementById('step6').classList.remove('active');
             document.getElementById('contactStepAddContact').classList.remove('active');
             document.getElementById('contactStep').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
@@ -4301,6 +4111,7 @@
             } else {
                 resetPostSubmitCtaTitlesVisibility();
             }
+            updatePartnerNameInPrivacyPolicy();
             // Show the confirmation/thank you screen (default state: show "Ready to get started now?", hide appointment block)
             const confirmationCtaBlock = document.getElementById('confirmationCtaBlock');
             const confirmationAppointmentBlock = document.getElementById('confirmationAppointmentBlock');
@@ -4314,7 +4125,7 @@
                     : 'COMPANY';
                 confirmationReadySubtitle.textContent = `${companyName} will call you soon to schedule your free estimate!`;
             }
-            document.getElementById('step8').classList.remove('active');
+            document.getElementById('step6').classList.remove('active');
             document.getElementById('confirmationStep').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
             
@@ -4332,6 +4143,10 @@
         }
 
         function hideMainFunnelPartnerWhySection() {
+            const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
+            if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
+            const topOuter = document.getElementById('localPickOuter');
+            if (topOuter) topOuter.style.display = 'none';
             const reviewsSection = document.getElementById('reviewsSection');
             const reviewsContainer = document.getElementById('reviewsContainer');
             const ctaSection = document.getElementById('ctaSection');
@@ -4357,6 +4172,10 @@
 
             // Zip step uses static “how we choose” copy; Airtable partner bullets only after they’ve entered a zip
             if (!formData.initialZip) {
+                const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
+                if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
+                const topOuter = document.getElementById('localPickOuter');
+                if (topOuter) topOuter.style.display = 'none';
                 const reviewsSection = document.getElementById('reviewsSection');
                 const reviewsContainer = document.getElementById('reviewsContainer');
                 if (reviewsSection) {
@@ -4377,6 +4196,10 @@
 
             const activeClient = getActiveClient();
             if (!activeClient || !activeClient.fields) {
+                const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
+                if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
+                const topOuter = document.getElementById('localPickOuter');
+                if (topOuter) topOuter.style.display = 'none';
                 if (reviewsSection) {
                     reviewsSection.classList.remove('active');
                     reviewsSection.classList.remove('main-funnel-local-pick-only');
@@ -4411,6 +4234,10 @@
                 if (ctaSection) ctaSection.classList.remove('active');
                 if (getQuoteBtn) getQuoteBtn.style.display = '';
             } else {
+                const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
+                if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
+                const topOuter = document.getElementById('localPickOuter');
+                if (topOuter) topOuter.style.display = 'none';
                 if (reviewsSection) {
                     reviewsSection.classList.remove('active');
                     reviewsSection.classList.remove('main-funnel-local-pick-only');
@@ -4443,9 +4270,18 @@
                 }
             }
 
-            // Build Local Pick block if we have items
-            const partnerName = (activeClient.fields && activeClient.fields['Name']) || 'Peak Leads Group';
-            buildLocalPickBlock(localPickItems, partnerName);
+            const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
+            if (postFormSubmitted) {
+                if (localPickItems.length > 0) {
+                    // Keep card + “what happens now” steps in #mainFunnelLocalPickWrap (under logo, above post-submit CTA).
+                    // Do not move them to #reviewsLocalPickMount — that sits below the form and inverts the page order.
+                    buildLocalPickBlock(localPickItems, partnerName);
+                } else {
+                    const rm = document.getElementById('reviewsLocalPickMount');
+                    if (rm) rm.style.display = 'none';
+                    setPartnerLogoForWhySection(null, 'reviews');
+                }
+            }
 
             // Collect reviews (up to 3)
             for (let i = 1; i <= 3; i++) {
@@ -4490,37 +4326,66 @@
             }
         }
 
-        function buildLocalPickBlock(localPickItems, partnerName) {
-            const block = document.getElementById('localPickBlock');
-            const titleSpan = document.getElementById('localPickCompanyName');
-            const listEl = document.getElementById('localPickList');
-            if (!block || !listEl) return;
+        function buildLocalPickBlock(localPickItems, partnerName, options) {
+            const forReviews = options && options.forReviewsSection === true;
+            const mainWrap = document.getElementById('mainFunnelLocalPickWrap');
+            const topOuter = document.getElementById('localPickOuter');
+            const reviewsMount = document.getElementById('reviewsLocalPickMount');
 
             if (localPickItems.length === 0) {
-                block.style.display = 'none';
-                setPartnerLogoForWhySection(null);
+                if (mainWrap) mainWrap.style.display = 'none';
+                if (topOuter) topOuter.style.display = 'none';
+                if (reviewsMount) reviewsMount.style.display = 'none';
+                setPartnerLogoForWhySection(null, 'both');
                 return;
             }
 
-            if (titleSpan) titleSpan.textContent = partnerName;
-            listEl.innerHTML = '';
+            const active = getActiveClient();
+            const logoUrl = active && active.fields ? resolveLogoLinkField(active.fields['Logo Link']) : null;
 
-            localPickItems.forEach((item) => {
-                const li = document.createElement('li');
-                li.className = 'local-pick-item';
-                const iconPath = `icons/${item.iconIndex}.svg`;
-                li.innerHTML = `
+            function fillList(listEl, iconBase) {
+                listEl.innerHTML = '';
+                localPickItems.forEach((item) => {
+                    const li = document.createElement('li');
+                    li.className = 'local-pick-item';
+                    const iconPath = `${iconBase}${item.iconIndex}.svg`;
+                    li.innerHTML = `
                     <span class="local-pick-icon"><img src="${escapeHtml(iconPath)}" alt="" onerror="this.parentElement.style.display='none'"></span>
                     <span class="local-pick-text">${escapeHtml(item.text)}</span>
                 `;
-                listEl.appendChild(li);
-            });
+                    listEl.appendChild(li);
+                });
+            }
 
-            const active = getActiveClient();
-            const logoUrl = active && active.fields ? resolveLogoLinkField(active.fields['Logo Link']) : null;
-            setPartnerLogoForWhySection(logoUrl);
-
-            block.style.display = 'block';
+            if (forReviews) {
+                if (mainWrap) mainWrap.style.display = 'none';
+                if (topOuter) topOuter.style.display = 'none';
+                setPartnerLogoForWhySection(null, 'top');
+                const listEl = document.getElementById('reviewsLocalPickList');
+                const co = document.getElementById('reviewsLocalPickCompanyName');
+                if (!reviewsMount || !listEl) return;
+                if (co) co.textContent = partnerName;
+                fillList(listEl, 'icons/');
+                const rz = document.getElementById('reviewsLocalPickZipCode');
+                if (rz) {
+                    const z = (formData.address && formData.address.zip) || formData.initialZip;
+                    rz.textContent = z || 'ZIP CODE ENTERED';
+                }
+                setPartnerLogoForWhySection(logoUrl, 'reviews');
+                reviewsMount.style.display = 'block';
+            } else {
+                if (reviewsMount) reviewsMount.style.display = 'none';
+                setPartnerLogoForWhySection(null, 'reviews');
+                const block = document.getElementById('localPickBlock');
+                const listEl = document.getElementById('localPickList');
+                const titleSpan = document.getElementById('localPickCompanyName');
+                if (!mainWrap || !topOuter || !block || !listEl) return;
+                if (titleSpan) titleSpan.textContent = partnerName;
+                fillList(listEl, 'icons/');
+                setPartnerLogoForWhySection(logoUrl, 'top');
+                topOuter.style.display = 'block';
+                mainWrap.style.display = 'block';
+            }
         }
 
         function buildReviewBlocks() {
@@ -4833,13 +4698,10 @@
             const options = { 'yes': 'Yes', 'no': 'No' };
             return options[value] || value;
         }
-        function getHomeTypeDisplay(value) {
+        function getBathroomLastUpdatedDisplay(value) {
             const options = {
-                'single_family': 'Single Family Home',
-                'town_home': 'Town Home/Condo',
-                'apartment': 'Apartment',
-                'vacation_home': 'Vacation Home',
-                'mobile_home': 'Mobile Home'
+                'less_than_10': 'Less than 10 years ago',
+                'more_than_10': 'More than 10 years ago'
             };
             return options[value] || value;
         }
@@ -4859,15 +4721,6 @@
                 'look_function': 'Improve look/function',
                 'repair_damage': 'Repair damage',
                 'home_value': 'Increase home value'
-            };
-            return options[value] || value;
-        }
-        function getTimelineDisplay(value) {
-            const options = {
-                'asap': 'ASAP',
-                'within_month': 'Within a month',
-                'within_3_months': 'Within 3 months',
-                'within_6_months': 'Within 6 months'
             };
             return options[value] || value;
         }
@@ -4914,7 +4767,7 @@
                     email: emailValue
                 };
             
-            // Final linked client is always determined by the project-location zip (step 7).
+            // Final linked client is always determined by the project-location zip (address step).
             // Selection order is preserved in findClientByZipCode: Active first (oldest Created first), then Paused.
             try {
                 if (!finalData.address || !finalData.address.zip) {
@@ -4929,7 +4782,7 @@
                 }
                 updatePartnerNameInPrivacyPolicy();
                 refreshPartnerLocalPickSection();
-                updateHomeTypeStepOptions();
+                updateProjectTypeStepOptions();
             } catch (error) {
                 console.error('Error finding client by project zip code:', error);
             }
@@ -4942,10 +4795,9 @@
                     value: 1.00,
                     currency: 'USD',
                     homeowner_status: finalData.homeowner,
-                    home_type: finalData.homeType,
+                    bathroom_last_updated: finalData.bathroomLastUpdated,
                     project_type: finalData.projectType,
-                    main_goal: finalData.mainGoal,
-                    timeline: finalData.timeline
+                    main_goal: finalData.mainGoal
                 };
                 
                 fbq('track', 'Lead', leadEventData, {
@@ -4953,7 +4805,7 @@
                 });
             }
             if (TESTING_MODE) {
-                console.log('[TESTING_MODE] Meta Pixel Lead event would fire with:', { homeowner_status: finalData.homeowner, home_type: finalData.homeType, project_type: finalData.projectType, main_goal: finalData.mainGoal, timeline: finalData.timeline });
+                console.log('[TESTING_MODE] Meta Pixel Lead event would fire with:', { homeowner_status: finalData.homeowner, bathroom_last_updated: finalData.bathroomLastUpdated, project_type: finalData.projectType, main_goal: finalData.mainGoal });
             }
             
             // Find ad and adset from URL
@@ -4984,10 +4836,9 @@
 Name: ${finalData.firstName} ${finalData.lastName}
 Phone: ${formatPhoneForDisplay(finalData.phone)}
 ${emailLine}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}
-Home Type: ${getHomeTypeDisplay(finalData.homeType)}
+Bathroom last updated: ${getBathroomLastUpdatedDisplay(finalData.bathroomLastUpdated)}
 Project Type: ${getProjectTypeDisplay(finalData.projectType)}
 Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}
-Timeline: ${getTimelineDisplay(finalData.timeline)}
 
 Address:
 ${finalData.address.street}
@@ -5009,7 +4860,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             
             // Build HTML version of full summary
             const emailLineHTML = finalData.email ? `Email: ${finalData.email}<BR>` : '';
-            const fullSummaryHTML = `Bathroom Remodel Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Home Type: ${getHomeTypeDisplay(finalData.homeType)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR>Timeline: ${getTimelineDisplay(finalData.timeline)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
+            const fullSummaryHTML = `Bathroom Remodel Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Bathroom last updated: ${getBathroomLastUpdatedDisplay(finalData.bathroomLastUpdated)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
@@ -5156,6 +5007,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
         }
 
         updateProgress();
+        updateBottomLocalPickCtaVisibility();
 
         window.__attachPlaces = function(){
             if(!window.google || !google.maps || !google.maps.places) return;
