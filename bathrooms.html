@@ -46,11 +46,12 @@
 
         .logo-container {
             margin-top: 30px;
-            margin-bottom: 30px;
-            height: 120px;
+            margin-bottom: 24px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 14px;
         }
 
         .logo-img {
@@ -68,6 +69,27 @@
         }
 
         .step-header .step-header-highlight {
+            background-color: #ffeb3b;
+            color: #000;
+            padding: 0 0.15em;
+            border-radius: 4px;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+        }
+
+        .global-quiz-tagline {
+            font-size: 24px;
+            color: #000;
+            margin: 0;
+            line-height: 1.4;
+            font-weight: bold;
+            text-align: center;
+            max-width: 500px;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+
+        .global-quiz-tagline .step-header-highlight {
             background-color: #ffeb3b;
             color: #000;
             padding: 0 0.15em;
@@ -318,23 +340,6 @@
 
         .progress-area {
             text-align: left;
-        }
-
-        .back-button {
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 10px 0;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .back-button:hover {
-            color: #555;
         }
 
         .progress-fill {
@@ -772,6 +777,10 @@
                 font-size: 20px;
             }
 
+            .global-quiz-tagline {
+                font-size: 20px;
+            }
+
             .step-subheader {
                 font-size: 15px;
             }
@@ -1175,6 +1184,7 @@
              alt="The Local Pick" 
              class="logo-img"
              style="display: block;">
+        <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
     </div>
 
     <div class="form-wrapper" id="formSection">
@@ -1182,12 +1192,10 @@
             <div class="progress-bar" id="progressBarContainer">
                 <div class="progress-fill" id="progressFill" style="width: 9%"></div>
             </div>
-            <button type="button" class="back-button" id="backButton" onclick="prevStep()" style="display: none;">← Back</button>
         </div>
 
         <!-- STEP 0: Zip Code (find Local Pick) -->
         <div class="form-step active" id="step0">
-            <div class="step-header">Take our 30 second quiz to get a <span class="step-header-highlight">fast and free quote</span></div>
             <div class="step-subheader" id="step0Subheader">We've found the <strong>single best bathroom remodeler</strong> in your area so you don't have to</div>
             <div class="zip-input-wrap" style="margin-bottom: 20px;">
                 <input type="text" id="zipCodeInput" class="address-input" placeholder="Enter zip code" maxlength="5" pattern="[0-9]*" inputmode="numeric" style="max-width: 200px; margin: 0 auto 15px; text-align: center; font-size: 18px;" oninput="persistFunnelProgress()" onkeypress="if(event.key==='Enter'){event.preventDefault();handleZipSubmit();}">
@@ -1855,7 +1863,7 @@
                             genericLeadFlow = false;
                             clientData = matchedClientData;
                             campaignClientData = matchedClientData;
-                            const logoUrl = matchedClientData.fields && matchedClientData.fields['Logo Link'];
+                            const logoUrl = resolveLogoLinkField(matchedClientData.fields && matchedClientData.fields['Logo Link']);
                             if (logoUrl) {
                                 setPartnerLogoForWhySection(logoUrl);
                             }
@@ -1895,7 +1903,6 @@
                 }
 
                 updateProgress();
-                updateBackButtonVisibility();
                 updateBottomLocalPickCtaVisibility();
                 validateNameForm();
                 validateAddressForm();
@@ -2412,6 +2419,21 @@
             };
         }
 
+        function resolveLogoLinkField(raw) {
+            if (raw == null) return null;
+            if (typeof raw === 'string') {
+                const s = raw.trim();
+                return s || null;
+            }
+            if (Array.isArray(raw) && raw.length > 0) {
+                const first = raw[0];
+                if (first && typeof first.url === 'string' && first.url.trim()) {
+                    return first.url.trim();
+                }
+            }
+            return null;
+        }
+
         function getActiveClient() {
             if (genericLeadFlow) return null;
             return matchedClientData || campaignClientData;
@@ -2648,7 +2670,7 @@
                     campaignClientData = matchedClientData;
                     formData.initialZip = zip;
 
-                    const logoUrl = matchedClientData.fields && matchedClientData.fields['Logo Link'];
+                    const logoUrl = resolveLogoLinkField(matchedClientData.fields && matchedClientData.fields['Logo Link']);
                     setPartnerLogoForWhySection(logoUrl);
                     const metaPixel = matchedClientData.fields && matchedClientData.fields['Meta Pixel'];
                     if (metaPixel) {
@@ -2664,7 +2686,6 @@
                     document.getElementById('step1').classList.add('active');
                     updateBottomLocalPickCtaVisibility();
                     updateProgress();
-                    updateBackButtonVisibility();
                     persistFunnelProgress();
                 } else {
                     genericLeadFlow = true;
@@ -2683,7 +2704,6 @@
                     document.getElementById('step1').classList.add('active');
                     updateBottomLocalPickCtaVisibility();
                     updateProgress();
-                    updateBackButtonVisibility();
                     persistFunnelProgress();
                 }
             } catch (error) {
@@ -2995,15 +3015,6 @@
             progressFill.style.width = percentage + '%';
         }
 
-        function updateBackButtonVisibility() {
-            const backBtn = document.getElementById('backButton');
-            if (backBtn) {
-                // Once zip is submitted, lock the zip choice by removing back navigation.
-                const zipLocked = !!(formData && formData.initialZip);
-                backBtn.style.display = currentStep > 0 && !zipLocked ? 'flex' : 'none';
-            }
-        }
-
         function scrollToForm() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -3015,67 +3026,12 @@
             footerCta.style.display = formData && formData.initialZip ? 'none' : 'block';
         }
 
-        function prevStep() {
-            if (formData && formData.initialZip) {
-                return;
-            }
-            if (currentStep > 0) {
-                document.getElementById('step' + currentStep).classList.remove('active');
-                currentStep--;
-                document.getElementById('step' + currentStep).classList.add('active');
-                updateProgress();
-                updateBackButtonVisibility();
-                // Reset zip error when returning to step 0; refresh zip-step copy for generic vs matched flow
-                if (currentStep === 0) {
-                    const zipErr = document.getElementById('zipErrorMessage');
-                    if (zipErr) zipErr.style.display = 'none';
-                    applyDefaultLocalPickLogo();
-                    refreshStep0Copy();
-                    mainFunnelLocalPickSuppressed = false;
-                    refreshPartnerLocalPickSection();
-                    updateHomeTypeStepOptions();
-                }
-                // Reset homeowner step message visibility when returning to step 1
-                if (currentStep === 1) {
-                    const homeownerNoMsg = document.getElementById('homeownerNoMessage');
-                    if (formData.homeowner === 'no') {
-                        if (homeownerNoMsg) homeownerNoMsg.style.display = 'flex';
-                    } else {
-                        if (homeownerNoMsg) homeownerNoMsg.style.display = 'none';
-                    }
-                    mainFunnelLocalPickSuppressed = false;
-                    refreshPartnerLocalPickSection();
-                }
-                // Reset mobile home message visibility when returning to step 2
-                if (currentStep === 2) {
-                    updateHomeTypeStepOptions();
-                    const mobileHomeMsg = document.getElementById('mobileHomeMessage');
-                    if (formData.homeType === 'mobile_home' && mobileHomeMsg) {
-                        mobileHomeMsg.style.display = 'flex';
-                    } else if (mobileHomeMsg) {
-                        mobileHomeMsg.style.display = 'none';
-                    }
-                }
-                // Reset repair damage message visibility when returning to step 4
-                if (currentStep === 4) {
-                    const repairDamageMsg = document.getElementById('repairDamageMessage');
-                    if (formData.mainGoal === 'repair_damage' && repairDamageMsg) {
-                        repairDamageMsg.style.display = 'flex';
-                    } else if (repairDamageMsg) {
-                        repairDamageMsg.style.display = 'none';
-                    }
-                }
-            }
-            persistFunnelProgress();
-        }
-
         function nextStep() {
             if (currentStep < 8) {
                 document.getElementById('step' + currentStep).classList.remove('active');
                 currentStep++;
                 document.getElementById('step' + currentStep).classList.add('active');
                 updateProgress();
-                updateBackButtonVisibility();
                 if (currentStep === 7 && formData.initialZip) {
                     const zipInput = document.getElementById('zip');
                     if (zipInput && !zipInput.value) zipInput.value = formData.initialZip;
@@ -4519,6 +4475,7 @@
 
             if (localPickItems.length === 0) {
                 block.style.display = 'none';
+                setPartnerLogoForWhySection(null);
                 return;
             }
 
@@ -4535,6 +4492,10 @@
                 `;
                 listEl.appendChild(li);
             });
+
+            const active = getActiveClient();
+            const logoUrl = active && active.fields ? resolveLogoLinkField(active.fields['Logo Link']) : null;
+            setPartnerLogoForWhySection(logoUrl);
 
             block.style.display = 'block';
         }

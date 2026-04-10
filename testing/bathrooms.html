@@ -47,11 +47,12 @@
 
         .logo-container {
             margin-top: 30px;
-            margin-bottom: 30px;
-            height: 120px;
+            margin-bottom: 24px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 14px;
         }
 
         .logo-img {
@@ -69,6 +70,27 @@
         }
 
         .step-header .step-header-highlight {
+            background-color: #ffeb3b;
+            color: #000;
+            padding: 0 0.15em;
+            border-radius: 4px;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+        }
+
+        .global-quiz-tagline {
+            font-size: 24px;
+            color: #000;
+            margin: 0;
+            line-height: 1.4;
+            font-weight: bold;
+            text-align: center;
+            max-width: 500px;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+
+        .global-quiz-tagline .step-header-highlight {
             background-color: #ffeb3b;
             color: #000;
             padding: 0 0.15em;
@@ -319,23 +341,6 @@
 
         .progress-area {
             text-align: left;
-        }
-
-        .back-button {
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 10px 0;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .back-button:hover {
-            color: #555;
         }
 
         .progress-fill {
@@ -773,6 +778,10 @@
                 font-size: 20px;
             }
 
+            .global-quiz-tagline {
+                font-size: 20px;
+            }
+
             .step-subheader {
                 font-size: 15px;
             }
@@ -1176,6 +1185,7 @@
              alt="The Local Pick" 
              class="logo-img"
              style="display: block;">
+        <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
     </div>
 
     <div class="form-wrapper" id="formSection">
@@ -1183,12 +1193,11 @@
             <div class="progress-bar" id="progressBarContainer">
                 <div class="progress-fill" id="progressFill" style="width: 14%"></div>
             </div>
-            <button type="button" class="back-button" id="backButton" onclick="prevStep()" style="display: none;">← Back</button>
         </div>
 
         <!-- STEP 0: Homeowner -->
         <div class="form-step active" id="step0">
-            <div class="step-header">Are you a homeowner or authorized decision maker?</div>
+            <div class="step-header">Are you the homeowner or authorized decision maker?</div>
             <div class="options">
                 <div class="option" data-quiz-field="homeowner" data-quiz-value="yes" onclick="selectOptionAndAdvance(this, 'homeowner', 'yes')">Yes</div>
                 <div class="option" data-quiz-field="homeowner" data-quiz-value="no" onclick="selectOptionAndAdvance(this, 'homeowner', 'no')">No</div>
@@ -1816,7 +1825,7 @@
                             genericLeadFlow = false;
                             clientData = matchedClientData;
                             campaignClientData = matchedClientData;
-                            const logoUrl = matchedClientData.fields && matchedClientData.fields['Logo Link'];
+                            const logoUrl = resolveLogoLinkField(matchedClientData.fields && matchedClientData.fields['Logo Link']);
                             if (logoUrl) {
                                 setPartnerLogoForWhySection(logoUrl);
                             }
@@ -1855,7 +1864,6 @@
                 }
 
                 updateProgress();
-                updateBackButtonVisibility();
                 updateBottomLocalPickCtaVisibility();
                 validateNameForm();
                 validateAddressForm();
@@ -2352,6 +2360,21 @@
             };
         }
 
+        function resolveLogoLinkField(raw) {
+            if (raw == null) return null;
+            if (typeof raw === 'string') {
+                const s = raw.trim();
+                return s || null;
+            }
+            if (Array.isArray(raw) && raw.length > 0) {
+                const first = raw[0];
+                if (first && typeof first.url === 'string' && first.url.trim()) {
+                    return first.url.trim();
+                }
+            }
+            return null;
+        }
+
         function getActiveClient() {
             if (genericLeadFlow) return null;
             return matchedClientData || campaignClientData;
@@ -2768,13 +2791,6 @@
             progressFill.style.width = percentage + '%';
         }
 
-        function updateBackButtonVisibility() {
-            const backBtn = document.getElementById('backButton');
-            if (backBtn) {
-                backBtn.style.display = currentStep > 0 ? 'flex' : 'none';
-            }
-        }
-
         function scrollToForm() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -2785,45 +2801,12 @@
             footerCta.style.display = currentStep === 0 ? 'block' : 'none';
         }
 
-        function prevStep() {
-            if (currentStep > 0) {
-                document.getElementById('step' + currentStep).classList.remove('active');
-                currentStep--;
-                document.getElementById('step' + currentStep).classList.add('active');
-                updateProgress();
-                updateBackButtonVisibility();
-                updateBottomLocalPickCtaVisibility();
-                if (currentStep === 0) {
-                    applyDefaultLocalPickLogo();
-                    mainFunnelLocalPickSuppressed = false;
-                    refreshPartnerLocalPickSection();
-                    updateProjectTypeStepOptions();
-                    const homeownerNoMsg = document.getElementById('homeownerNoMessage');
-                    if (formData.homeowner === 'no') {
-                        if (homeownerNoMsg) homeownerNoMsg.style.display = 'flex';
-                    } else if (homeownerNoMsg) {
-                        homeownerNoMsg.style.display = 'none';
-                    }
-                }
-                if (currentStep === 3) {
-                    const repairDamageMsg = document.getElementById('repairDamageMessage');
-                    if (formData.mainGoal === 'repair_damage' && repairDamageMsg) {
-                        repairDamageMsg.style.display = 'flex';
-                    } else if (repairDamageMsg) {
-                        repairDamageMsg.style.display = 'none';
-                    }
-                }
-            }
-            persistFunnelProgress();
-        }
-
         function nextStep() {
             if (currentStep < 6) {
                 document.getElementById('step' + currentStep).classList.remove('active');
                 currentStep++;
                 document.getElementById('step' + currentStep).classList.add('active');
                 updateProgress();
-                updateBackButtonVisibility();
                 updateBottomLocalPickCtaVisibility();
                 if (currentStep === 1) {
                     mainFunnelLocalPickSuppressed = true;
@@ -4142,6 +4125,7 @@
 
             if (localPickItems.length === 0) {
                 block.style.display = 'none';
+                setPartnerLogoForWhySection(null);
                 return;
             }
 
@@ -4158,6 +4142,10 @@
                 `;
                 listEl.appendChild(li);
             });
+
+            const active = getActiveClient();
+            const logoUrl = active && active.fields ? resolveLogoLinkField(active.fields['Logo Link']) : null;
+            setPartnerLogoForWhySection(logoUrl);
 
             block.style.display = 'block';
         }
