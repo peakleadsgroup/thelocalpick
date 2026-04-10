@@ -876,13 +876,16 @@
         }
 
         .local-pick-happens-now-header {
-            font-size: 17px;
-            font-weight: 600;
+            font-size: 21px;
+            font-weight: 700;
             color: #000;
             text-align: center;
-            margin: 22px 0 18px;
-            padding: 0 8px;
-            line-height: 1.4;
+            margin: 26px 0 16px;
+            padding: 18px 16px 0;
+            line-height: 1.35;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .local-pick-next-steps {
@@ -1240,7 +1243,7 @@
                 </div>
                 <ul class="local-pick-list" id="localPickList"></ul>
             </div>
-            <p class="local-pick-happens-now-header" id="localPickHappensNowHeader">Here's what happens now...</p>
+            <h2 class="local-pick-happens-now-header" id="localPickHappensNowHeader">Here's what happens now...</h2>
             <div class="local-pick-next-steps post-submit-intro" id="localPickNextSteps">
                 <div class="post-submit-step">
                     <div class="post-submit-step-header">
@@ -1517,7 +1520,7 @@
                         </div>
                         <ul class="local-pick-list" id="reviewsLocalPickList"></ul>
                     </div>
-                    <p class="local-pick-happens-now-header">Here's what happens now...</p>
+                    <h2 class="local-pick-happens-now-header">Here's what happens now...</h2>
                     <div class="local-pick-next-steps post-submit-intro">
                         <div class="post-submit-step">
                             <div class="post-submit-step-header">
@@ -1689,10 +1692,17 @@
         let metaCampaignID = null; // Track the Meta campaign ID (from Campaign ID field)
         let leadRecordId = null; // Track the lead record ID so we can update it with appointment
         let clientTimezone = 'America/New_York'; // Default timezone
-        let clientAvailability = []; // Client's available times (each element one time string, e.g. "9:00 AM")
+        /** Per JS weekday 0=Sun … 6=Sat — Airtable multi-selects Sunday … Saturday */
+        let clientWeekdayTimes = [[], [], [], [], [], [], []];
+        const CALENDAR_WEEKDAY_FIELDS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         let clientAvailableDays = [1, 2, 3, 4, 5]; // Default: Monday-Friday
         let clientDaysOut = 14; // Default: 14 days out
         let clientMinHoursInAdvance = 48; // Default: 48; can be overridden by client field
+        /** When true, slots come from JSON at the client "Availability API URL" (see loadAvailabilityFromApi). */
+        let calendarAvailabilityFromApi = false;
+        /** @type {Record<string, { start: string, label: string }[]>|null} */
+        let apiAvailabilityByDate = null;
+        const apiDatesWithSlots = new Set();
         let isSubmitting = false; // Flag to prevent duplicate submissions
         let currentSubmitScreenType = null; // Store the current submit screen type
         let postFormSubmitted = false; // When true, reviews/Local Pick block show after submit (not on main page)
@@ -3194,7 +3204,31 @@
         }
         
         function isDayOfWeekAvailable(date) {
-            return clientAvailableDays.includes(date.getDay());
+            if (calendarAvailabilityFromApi) return true;
+            const d = date.getDay();
+            if (!clientAvailableDays.includes(d)) return false;
+            const times = clientWeekdayTimes[d];
+            return Array.isArray(times) && times.length > 0;
+        }
+
+        function applyClientWeekdayTimesFromFields(fields) {
+            if (!fields) {
+                clientWeekdayTimes = [[], [], [], [], [], [], []];
+                return;
+            }
+            clientWeekdayTimes = CALENDAR_WEEKDAY_FIELDS.map((name) => {
+                const raw = fields[name];
+                if (raw == null) return [];
+                const arr = Array.isArray(raw) ? raw : [raw];
+                const out = [];
+                arr.forEach((item) => {
+                    if (typeof item === 'string') {
+                        const t = item.trim();
+                        if (t) out.push(t);
+                    }
+                });
+                return [...new Set(out)];
+            });
         }
         
         function isWithinBookingWindow(date) {
@@ -3232,6 +3266,82 @@
             if (timeStr == null || typeof timeStr !== 'string') return '';
             return timeStr.trim().replace(/^0(\d):/, '$1:').toUpperCase();
         }
+
+        /**
+         * @param {string|Date} isoOrDate
+         * @param {string} tz
+         * @returns {{ slotTime: Date, displayTime: string, apptTimeFormat: string } | null}
+         */
+        function wallClockPartsInTimezone(isoOrDate, tz) {
+            const slotTime = isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
+            if (Number.isNaN(slotTime.getTime())) return null;
+            const parts = new Intl.DateTimeFormat('en-US', {
+                timeZone: tz,
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+            }).formatToParts(slotTime);
+            let h = 0;
+            let m = '00';
+            let dp = 'AM';
+            for (const p of parts) {
+                if (p.type === 'hour') h = parseInt(p.value, 10) || 0;
+                if (p.type === 'minute') m = p.value.padStart(2, '0');
+                if (p.type === 'dayPeriod') dp = p.value.toUpperCase();
+            }
+            const displayTime = `${h}:${m} ${dp}`;
+            const apptTimeFormat = `${String(h).padStart(2, '0')}:${m} ${dp}`;
+            return { slotTime, displayTime, apptTimeFormat };
+        }
+
+        async function loadAvailabilityFromApi(baseUrl, zipForApi) {
+            try {
+                const nowTz = getCurrentDateInTimezone();
+                nowTz.setHours(0, 0, 0, 0);
+                const endTz = new Date(nowTz);
+                endTz.setDate(endTz.getDate() + clientDaysOut);
+                endTz.setHours(23, 59, 59, 999);
+                const startMs = nowTz.getTime();
+                const endMs = endTz.getTime();
+                const u = new URL(baseUrl, window.location.origin);
+                u.searchParams.set('startDate', String(startMs));
+                u.searchParams.set('endDate', String(endMs));
+                const z = zipForApi != null ? String(zipForApi).trim() : '';
+                if (z) {
+                    u.searchParams.set('zip', z);
+                }
+                const res = await fetch(u.toString());
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    console.error('[Calendar] Availability API non-JSON:', text.slice(0, 240));
+                    return false;
+                }
+                if (!res.ok || data.error) {
+                    console.error('[Calendar] Availability API error:', data.error || res.status);
+                    return false;
+                }
+                if (!data.slots || typeof data.slots !== 'object') {
+                    console.error('[Calendar] Availability API missing slots object');
+                    return false;
+                }
+                apiAvailabilityByDate = data.slots;
+                apiDatesWithSlots.clear();
+                for (const [ymd, arr] of Object.entries(data.slots)) {
+                    if (Array.isArray(arr) && arr.length > 0) apiDatesWithSlots.add(ymd);
+                }
+                if (data.timezone && typeof data.timezone === 'string') {
+                    clientTimezone = data.timezone;
+                }
+                console.log('[Calendar] Loaded Availability API:', { dayCount: apiDatesWithSlots.size });
+                return true;
+            } catch (e) {
+                console.error('[Calendar] Availability API fetch failed:', e);
+                return false;
+            }
+        }
         
         async function getAvailableTimesForDate(date) {
             if (!date) {
@@ -3241,10 +3351,43 @@
             
             // Ensure we have a proper Date object
             const dateObj = new Date(date);
+
+            if (calendarAvailabilityFromApi && apiAvailabilityByDate) {
+                const ymd = dateObj.toLocaleDateString('en-CA', { timeZone: clientTimezone });
+                const rawSlots = apiAvailabilityByDate[ymd] || [];
+                if (rawSlots.length === 0) return [];
+                const slots = [];
+                const nowReal = new Date();
+                const activeForCalendar = getActiveClient();
+                const linkedClientId = activeForCalendar && activeForCalendar.id;
+                const bookedTimes = await getBookedAppointments(dateObj, linkedClientId);
+                for (const item of rawSlots) {
+                    if (!item || typeof item !== 'object' || !item.start) continue;
+                    const wall = wallClockPartsInTimezone(item.start, clientTimezone);
+                    if (!wall) continue;
+                    const hoursFromNow = (wall.slotTime - nowReal) / (1000 * 60 * 60);
+                    if (hoursFromNow < clientMinHoursInAdvance) continue;
+                    const normalizedDisplayTime = normalizeTimeForComparison(wall.displayTime);
+                    const isBooked = bookedTimes.some(booked => {
+                        return normalizeTimeForComparison(booked) === normalizedDisplayTime;
+                    });
+                    if (isBooked) continue;
+                    const display = (item.label && typeof item.label === 'string') ? item.label : wall.displayTime;
+                    slots.push({
+                        time: wall.slotTime,
+                        display,
+                        apptFormat: wall.apptTimeFormat,
+                        isoString: wall.slotTime.toISOString(),
+                        originalTime: wall.displayTime,
+                    });
+                }
+                slots.sort((a, b) => a.time - b.time);
+                return slots;
+            }
             
-            // Use standard client availability logic
-            if (!clientAvailability || clientAvailability.length === 0) {
-                console.log('[Calendar] getAvailableTimesForDate: no date or no clientAvailability', { date: date ? date.toISOString() : null, availabilityLength: clientAvailability ? clientAvailability.length : 0 });
+            const timesForDay = clientWeekdayTimes[dateObj.getDay()] || [];
+            if (!timesForDay.length) {
+                console.log('[Calendar] getAvailableTimesForDate: no times for weekday', { date: date ? date.toISOString() : null, jsDay: dateObj.getDay() });
                 return [];
             }
             
@@ -3254,13 +3397,13 @@
             const activeForCalendar = getActiveClient();
             const linkedClientId = activeForCalendar && activeForCalendar.id;
             const bookedTimes = await getBookedAppointments(date, linkedClientId);
-            console.log('[Calendar] getAvailableTimesForDate', { date: dateStr, linkedClientId, clientAvailability, bookedTimes, clientMinHoursInAdvance });
+            console.log('[Calendar] getAvailableTimesForDate', { date: dateStr, linkedClientId, timesForDay, bookedTimes, clientMinHoursInAdvance });
             
             let parsed = 0;
             let skippedTooSoon = 0;
             let skippedBooked = 0;
             
-            clientAvailability.forEach(timeStr => {
+            timesForDay.forEach(timeStr => {
                 const timeParts = parseTimeString(timeStr);
                 if (!timeParts) {
                     console.log('[Calendar] parseTimeString failed for:', JSON.stringify(timeStr));
@@ -3418,7 +3561,9 @@
                 date.setDate(startDate.getDate() + i);
                 
                 // Check if day is available
-                const isAvailable = isDayOfWeekAvailable(date) && isWithinBookingWindow(date) && !isHoliday(date);
+                const ymd = date.toLocaleDateString('en-CA', { timeZone: clientTimezone });
+                const hasApiSlots = !calendarAvailabilityFromApi || apiDatesWithSlots.has(ymd);
+                const isAvailable = hasApiSlots && isDayOfWeekAvailable(date) && isWithinBookingWindow(date) && !isHoliday(date);
                 
                 const dayCell = document.createElement('div');
                 dayCell.className = 'calendar-day';
@@ -3747,7 +3892,12 @@
             const calendarStep = document.getElementById('calendarStep');
             const progressArea = document.getElementById('progressArea');
             
-            // Get client timezone, availability, and days
+            calendarAvailabilityFromApi = false;
+            apiAvailabilityByDate = null;
+            apiDatesWithSlots.clear();
+            clientWeekdayTimes = [[], [], [], [], [], [], []];
+            
+            // Get client timezone, per-weekday times, and days
             const activeClient = getActiveClient();
             
             if (activeClient && activeClient.fields) {
@@ -3756,25 +3906,8 @@
                     clientTimezone = activeClient.fields['Timezone'];
                 }
                 
-                // Set availability from client data; flatten so comma/newline-separated strings become multiple slots
-                if (activeClient.fields['Availability']) {
-                    const raw = activeClient.fields['Availability'];
-                    const arr = Array.isArray(raw) ? raw : [raw];
-                    const flattened = [];
-                    arr.forEach(item => {
-                        let str = typeof item === 'string' ? item : (item && (item.fields && (item.fields['Time'] || item.fields['Name'] || item.fields['Label'])) || item.name || '');
-                        if (typeof str !== 'string') return;
-                        str.split(/[\n,]+/).forEach(part => {
-                            const t = part.trim();
-                            if (t) flattened.push(t);
-                        });
-                    });
-                    clientAvailability = [...new Set(flattened)];
-                    console.log('[Calendar] Client availability (normalized):', clientAvailability);
-                } else {
-                    clientAvailability = [];
-                    console.log('[Calendar] No client Availability field');
-                }
+                applyClientWeekdayTimesFromFields(activeClient.fields);
+                console.log('[Calendar] Client weekday times (Airtable):', clientWeekdayTimes);
                 // Hardcoded 48 hours in advance for all clients (including Home Pro)
                 clientMinHoursInAdvance = 48;
                 console.log('[Calendar] clientMinHoursInAdvance:', clientMinHoursInAdvance);
@@ -3808,6 +3941,19 @@
                     }
                 } else {
                     clientDaysOut = 14;
+                }
+
+                const apiUrlRaw = activeClient.fields['Availability API URL'];
+                if (apiUrlRaw != null && String(apiUrlRaw).trim()) {
+                    calendarAvailabilityFromApi = true;
+                    const zipForApi = ((formData.address && formData.address.zip) || formData.initialZip || '').trim();
+                    const ok = await loadAvailabilityFromApi(String(apiUrlRaw).trim(), zipForApi);
+                    if (!ok) {
+                        calendarAvailabilityFromApi = false;
+                        apiAvailabilityByDate = null;
+                        apiDatesWithSlots.clear();
+                        console.warn('[Calendar] Availability API failed; using per-weekday Airtable times.');
+                    }
                 }
             }
             
@@ -4437,7 +4583,9 @@
                 date.setDate(startDate.getDate() + i);
                 
                 // Check if day is available
-                const isAvailable = isDayOfWeekAvailable(date) && isWithinBookingWindow(date) && !isHoliday(date);
+                const ymdBelow = date.toLocaleDateString('en-CA', { timeZone: clientTimezone });
+                const hasApiSlotsBelow = !calendarAvailabilityFromApi || apiDatesWithSlots.has(ymdBelow);
+                const isAvailable = hasApiSlotsBelow && isDayOfWeekAvailable(date) && isWithinBookingWindow(date) && !isHoliday(date);
                 
                 const dayCell = document.createElement('div');
                 dayCell.className = 'calendar-day';

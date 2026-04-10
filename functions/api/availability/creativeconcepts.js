@@ -1,7 +1,7 @@
 /**
- * Standardized partner availability for landing pages (fetch JSON; no iframe).
+ * Creative Concepts — GHL calendar availability (JSON for landing pages).
  *
- * Store in Airtable: https://YOUR_DOMAIN/api/availability/creativeconcepts
+ * URL: https://YOUR_DOMAIN/api/availability/creativeconcepts
  * Query: startDate & endDate = Unix ms (optional; default now → +14d), timezone (optional).
  *
  * Response (200):
@@ -17,18 +17,14 @@
  */
 const GHL_BASE = 'https://services.leadconnectorhq.com';
 
-/**
- * Use explicit `getToken(env)` per partner so Cloudflare binds secrets (dynamic env[name] is unreliable).
- * @type {Record<string, { type: 'ghl'; calendarId: string; defaultTimezone: string; getToken: (env: { CreativeConceptsGHLAPI?: string }) => string | undefined }>}
- */
-const PARTNERS = {
-  creativeconcepts: {
-    type: 'ghl',
-    calendarId: 'JA9Hs9cmV6uU9fXaQS9y',
-    defaultTimezone: 'America/New_York',
-    getToken: (env) => env.CreativeConceptsGHLAPI,
-  },
-};
+const PARTNER_SLUG = 'creativeconcepts';
+const CALENDAR_ID = 'JA9Hs9cmV6uU9fXaQS9y';
+const DEFAULT_TIMEZONE = 'America/New_York';
+
+/** @param {{ CreativeConceptsGHLAPI?: string }} env */
+function getApiToken(env) {
+  return env.CreativeConceptsGHLAPI;
+}
 
 const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -169,27 +165,18 @@ export async function onRequest(context) {
     return jsonResponse({ schemaVersion: 1, error: 'Method not allowed', code: 'METHOD' }, 405);
   }
 
-  const partnerKey = context.params.partner;
-  const config = PARTNERS[partnerKey];
-  if (!config) {
-    return jsonResponse(
-      { schemaVersion: 1, error: `Unknown partner "${partnerKey}"`, code: 'UNKNOWN_PARTNER' },
-      404
-    );
-  }
-
   const url = new URL(request.url);
   const now = Date.now();
   const defaultEnd = now + 14 * 24 * 60 * 60 * 1000;
 
   let startDate = url.searchParams.get('startDate');
   let endDate = url.searchParams.get('endDate');
-  const timezone = url.searchParams.get('timezone') || config.defaultTimezone;
+  const timezone = url.searchParams.get('timezone') || DEFAULT_TIMEZONE;
 
   if (!startDate) startDate = String(now);
   if (!endDate) endDate = String(defaultEnd);
 
-  const apiKey = config.getToken(env);
+  const apiKey = getApiToken(env);
   if (!apiKey) {
     return jsonResponse(
       {
@@ -201,36 +188,32 @@ export async function onRequest(context) {
     );
   }
 
-  if (config.type === 'ghl') {
-    const ghl = await fetchGhlFreeSlots(apiKey, config.calendarId, startDate, endDate, timezone);
-    if (!ghl.ok) {
-      return jsonResponse(
-        {
-          schemaVersion: 1,
-          partner: partnerKey,
-          error: typeof ghl.error === 'string' ? ghl.error : JSON.stringify(ghl.error),
-          code: 'UPSTREAM',
-          traceId: ghl.traceId,
-        },
-        ghl.status >= 400 && ghl.status < 600 ? ghl.status : 502
-      );
-    }
-
-    const dateMap = extractGhlDateMap(/** @type {Record<string, unknown>} */ (ghl.raw));
-    /** @type {Record<string, { start: string, label: string }[]>} */
-    const slots = {};
-    for (const [date, value] of Object.entries(dateMap)) {
-      slots[date] = normalizeDay(value, timezone);
-    }
-
-    return jsonResponse({
-      schemaVersion: 1,
-      partner: partnerKey,
-      timezone,
-      range: { startMs: Number(startDate), endMs: Number(endDate) },
-      slots,
-    });
+  const ghl = await fetchGhlFreeSlots(apiKey, CALENDAR_ID, startDate, endDate, timezone);
+  if (!ghl.ok) {
+    return jsonResponse(
+      {
+        schemaVersion: 1,
+        partner: PARTNER_SLUG,
+        error: typeof ghl.error === 'string' ? ghl.error : JSON.stringify(ghl.error),
+        code: 'UPSTREAM',
+        traceId: ghl.traceId,
+      },
+      ghl.status >= 400 && ghl.status < 600 ? ghl.status : 502
+    );
   }
 
-  return jsonResponse({ schemaVersion: 1, error: 'Unsupported provider type', code: 'PROVIDER' }, 500);
+  const dateMap = extractGhlDateMap(/** @type {Record<string, unknown>} */ (ghl.raw));
+  /** @type {Record<string, { start: string, label: string }[]>} */
+  const slots = {};
+  for (const [date, value] of Object.entries(dateMap)) {
+    slots[date] = normalizeDay(value, timezone);
+  }
+
+  return jsonResponse({
+    schemaVersion: 1,
+    partner: PARTNER_SLUG,
+    timezone,
+    range: { startMs: Number(startDate), endMs: Number(endDate) },
+    slots,
+  });
 }
