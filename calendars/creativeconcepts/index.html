@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Creative Concepts — Availability</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f8f9fb;
+      color: #1a1a1a;
+      padding: 16px;
+      line-height: 1.45;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 520px; margin: 0 auto; }
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .sub {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 16px;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    label { font-size: 0.8rem; color: #444; }
+    input[type="date"] {
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    button {
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      border: none;
+      border-radius: 6px;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .status {
+      font-size: 0.85rem;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .status.loading { background: #e0e7ff; color: #1e3a5f; }
+    .status.error { background: #fee2e2; color: #7f1d1d; }
+    .status.ok { background: #dcfce7; color: #14532d; }
+    .day-block {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+ }
+    .day-block h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #111827;
+    }
+    .slots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .slot {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      background: #f3f4f6;
+      border-radius: 999px;
+      color: #374151;
+    }
+    .empty-day { font-size: 0.85rem; color: #9ca3af; font-style: italic; }
+    pre.raw {
+      margin-top: 20px;
+      font-size: 0.7rem;
+      background: #111827;
+      color: #e5e7eb;
+      padding: 12px;
+      border-radius: 8px;
+      overflow: auto;
+      max-height: 220px;
+    }
+    details { margin-top: 16px; }
+    summary { cursor: pointer; font-size: 0.8rem; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Creative Concepts</h1>
+    <p class="sub">Available times from Go High Level (next 14 days by default). Embed this page in an iframe to use as a widget.</p>
+
+    <div class="toolbar">
+      <div>
+        <label for="start">From</label><br>
+        <input type="date" id="start" />
+      </div>
+      <div>
+        <label for="end">To</label><br>
+        <input type="date" id="end" />
+      </div>
+      <div style="align-self: flex-end;">
+        <button type="button" id="loadBtn">Load slots</button>
+      </div>
+    </div>
+
+    <div id="status" class="status loading" hidden></div>
+    <div id="results"></div>
+
+    <details>
+      <summary>Raw API response</summary>
+      <pre class="raw" id="raw"></pre>
+    </details>
+  </div>
+
+  <script>
+    const API_PATH = '/api/ghl/creativeconcepts-free-slots';
+
+    function ymd(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function parseDateInput(ymdStr) {
+      const [y, m, d] = ymdStr.split('-').map(Number);
+      return new Date(y, m - 1, d, 0, 0, 0, 0);
+    }
+
+    function startOfDayMs(d) {
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).getTime();
+    }
+
+    function endOfDayMs(d) {
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999).getTime();
+    }
+
+    /** @param {unknown} item */
+    function slotLabel(item) {
+      if (item == null) return '';
+      if (typeof item === 'string') {
+        const t = Date.parse(item);
+        if (!Number.isNaN(t)) {
+          return new Date(t).toLocaleString(undefined, {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          });
+        }
+        return item;
+      }
+      if (typeof item === 'object') {
+        const o = item;
+        const cand = o.startTime ?? o.time ?? o.slotTime ?? o.label ?? o.datetime ?? o.date;
+        if (typeof cand === 'string') return slotLabel(cand);
+        if (cand != null && typeof cand === 'number') return slotLabel(new Date(cand).toISOString());
+      }
+      return JSON.stringify(item);
+    }
+
+    /** @param {unknown} value */
+    function slotsForDay(value) {
+      if (value == null) return [];
+      if (Array.isArray(value)) return value.map(slotLabel).filter(Boolean);
+      if (typeof value === 'object' && Array.isArray(value.slots)) {
+        return value.slots.map(slotLabel).filter(Boolean);
+      }
+      return [];
+    }
+
+    /** @param {Record<string, unknown>} obj */
+    function extractDateKeysOnly(obj) {
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(k)) out[k] = v;
+      }
+      return out;
+    }
+
+    /** @param {unknown} data */
+    function extractDateMap(data) {
+      if (!data || typeof data !== 'object') return {};
+      const top = extractDateKeysOnly(/** @type {Record<string, unknown>} */ (data));
+      if (Object.keys(top).length) return top;
+      const o = /** @type {Record<string, unknown>} */ (data);
+      const nestedKeys = ['slots', 'data', 'freeSlots', 'availability', 'calendar'];
+      for (const nk of nestedKeys) {
+        const inner = o[nk];
+        if (inner && typeof inner === 'object' && !Array.isArray(inner)) {
+          const found = extractDateKeysOnly(/** @type {Record<string, unknown>} */ (inner));
+          if (Object.keys(found).length) return found;
+        }
+      }
+      return {};
+    }
+
+    function setStatus(kind, text) {
+      const el = document.getElementById('status');
+      el.hidden = !text;
+      el.className = 'status ' + (kind || '');
+      el.textContent = text || '';
+    }
+
+    function renderResults(payload) {
+      const results = document.getElementById('results');
+      results.innerHTML = '';
+      const map = extractDateMap(payload);
+      const dates = Object.keys(map).sort();
+      if (dates.length === 0) {
+        const p = document.createElement('p');
+        p.className = 'empty-day';
+        p.textContent = 'No date keys in response (see raw JSON).';
+        results.appendChild(p);
+        return;
+      }
+      for (const date of dates) {
+        const slots = slotsForDay(map[date]);
+        const block = document.createElement('div');
+        block.className = 'day-block';
+        const h = document.createElement('h2');
+        h.textContent = date;
+        block.appendChild(h);
+        if (slots.length === 0) {
+          const em = document.createElement('p');
+          em.className = 'empty-day';
+          em.textContent = 'No open slots for this day.';
+          block.appendChild(em);
+        } else {
+          const div = document.createElement('div');
+          div.className = 'slots';
+          for (const s of slots) {
+            const span = document.createElement('span');
+            span.className = 'slot';
+            span.textContent = s;
+            div.appendChild(span);
+          }
+          block.appendChild(div);
+        }
+        results.appendChild(block);
+      }
+    }
+
+    async function loadSlots() {
+      const startEl = document.getElementById('start');
+      const endEl = document.getElementById('end');
+      const btn = document.getElementById('loadBtn');
+      const rawEl = document.getElementById('raw');
+
+      const startD = parseDateInput(startEl.value);
+      const endD = parseDateInput(endEl.value);
+      if (startD > endD) {
+        setStatus('error', 'End date must be on or after start date.');
+        return;
+      }
+
+      const startDate = String(startOfDayMs(startD));
+      const endDate = String(endOfDayMs(endD));
+
+      btn.disabled = true;
+      setStatus('loading', 'Loading availability…');
+      rawEl.textContent = '';
+
+      try {
+        const tz = new URLSearchParams(window.location.search).get('timezone');
+        let url = `${API_PATH}?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
+        if (tz) url += `&timezone=${encodeURIComponent(tz)}`;
+        const res = await fetch(url);
+        const text = await res.text();
+        rawEl.textContent = text;
+
+        let payload;
+        try {
+          payload = JSON.parse(text);
+        } catch {
+          setStatus('error', `Non-JSON response (${res.status})`);
+          return;
+        }
+
+        if (!res.ok) {
+          const msg = payload.message || payload.error || payload.statusCode || res.statusText;
+          setStatus('error', `API error (${res.status}): ${typeof msg === 'string' ? msg : JSON.stringify(msg)}`);
+          return;
+        }
+
+        setStatus('ok', 'Connected — slots below are from Go High Level.');
+        renderResults(payload);
+      } catch (e) {
+        setStatus('error', String(e.message || e));
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function initDates() {
+      const start = new Date();
+      const end = new Date();
+      end.setDate(end.getDate() + 14);
+      document.getElementById('start').value = ymd(start);
+      document.getElementById('end').value = ymd(end);
+    }
+
+    initDates();
+    document.getElementById('loadBtn').addEventListener('click', loadSlots);
+    loadSlots();
+  </script>
+</body>
+</html>

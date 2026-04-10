@@ -1,3 +1,6 @@
 # Copy to .dev.vars and add your Airtable API key for local development.
 # .dev.vars is gitignored - never commit real secrets.
 Airtable=your_airtable_api_key_here
+
+# Go High Level private integration / sub-account token for Creative Concepts calendar proxy.
+CreativeConceptsGHLAPI=your_ghl_token_here
