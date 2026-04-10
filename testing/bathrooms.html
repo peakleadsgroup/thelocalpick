@@ -856,8 +856,15 @@
             text-align: center;
         }
 
+        .main-funnel-local-pick-wrap {
+            max-width: 500px;
+            margin: 0 auto 28px;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+
         .local-pick-group {
-            margin-bottom: 20px;
+            margin-bottom: 0;
         }
 
         .local-pick-block {
@@ -873,16 +880,21 @@
             font-weight: 600;
             color: #000;
             text-align: center;
-            margin: 20px 0 18px;
-            padding: 0 16px;
+            margin: 22px 0 18px;
+            padding: 0 8px;
             line-height: 1.4;
         }
 
-        .local-pick-group > .local-pick-list {
-            max-width: 100%;
-            margin: 0 auto;
-            padding: 0 8px;
-            box-sizing: border-box;
+        .local-pick-next-steps {
+            margin-bottom: 8px;
+        }
+
+        .reviews-local-pick-mount {
+            margin-bottom: 20px;
+        }
+
+        .reviews-local-pick-mount .local-pick-block {
+            margin-bottom: 0;
         }
 
         .local-pick-title {
@@ -895,21 +907,6 @@
             max-width: 100%;
             padding: 0 8px;
             box-sizing: border-box;
-        }
-
-        .local-pick-card-tlp-logo {
-            text-align: center;
-            margin: 0 0 20px;
-        }
-
-        .local-pick-card-tlp-logo-img {
-            max-width: 280px;
-            max-height: 110px;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            display: block;
-            margin: 0 auto;
         }
 
         .local-pick-intro-subtext {
@@ -1232,6 +1229,42 @@
              class="logo-img"
              style="display: block;">
         <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
+    </div>
+
+    <div class="main-funnel-local-pick-wrap" id="mainFunnelLocalPickWrap" style="display: none;">
+        <div class="local-pick-group local-pick-block-partner" id="localPickOuter" style="display: none;">
+            <div class="local-pick-block" id="localPickBlock">
+                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
+                <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
+                    <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
+                </div>
+                <ul class="local-pick-list" id="localPickList"></ul>
+            </div>
+            <p class="local-pick-happens-now-header" id="localPickHappensNowHeader">Here's what happens now...</p>
+            <div class="local-pick-next-steps post-submit-intro" id="localPickNextSteps">
+                <div class="post-submit-step">
+                    <div class="post-submit-step-header">
+                        <span class="post-submit-step-num">1</span>
+                        <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
+                    </div>
+                    <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
+                </div>
+                <div class="post-submit-step">
+                    <div class="post-submit-step-header">
+                        <span class="post-submit-step-num">2</span>
+                        <h3 class="post-submit-step-title">In-Home Estimate</h3>
+                    </div>
+                    <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
+                </div>
+                <div class="post-submit-step">
+                    <div class="post-submit-step-header">
+                        <span class="post-submit-step-num">3</span>
+                        <h3 class="post-submit-step-title">Approval & Installation</h3>
+                    </div>
+                    <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="form-wrapper" id="formSection">
@@ -1558,21 +1591,41 @@
     <!-- REVIEWS SECTION -->
     <div class="reviews-section" id="reviewsSection">
         <div class="reviews-content">
-            <!-- LOCAL PICK: card (why + logos), then header, then bullet list -->
-            <div class="local-pick-group local-pick-block-partner" id="localPickOuter" style="display: none;">
-                <div class="local-pick-block" id="localPickBlock">
-                    <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
-                    <div class="local-pick-card-tlp-logo">
-                        <img class="local-pick-card-tlp-logo-img" src="images/TheLocalPick-FlatLeftAligned.svg" alt="The Local Pick">
+            <!-- Post-submit: same Local Pick layout below thank-you (top block hidden) -->
+            <div class="reviews-local-pick-mount main-funnel-local-pick-wrap" id="reviewsLocalPickMount" style="display: none;">
+                <div class="local-pick-group local-pick-block-partner">
+                    <div class="local-pick-block">
+                        <div class="local-pick-title" id="reviewsLocalPickTitle">Here's why <span id="reviewsLocalPickCompanyName">Company</span> is our Local Pick in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
+                        <div class="partner-logo-wrap" id="reviewsPartnerLogoWrap" style="display: none;">
+                            <img id="reviewsPartnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
+                        </div>
+                        <ul class="local-pick-list" id="reviewsLocalPickList"></ul>
                     </div>
-                    <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
-                        <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
+                    <p class="local-pick-happens-now-header">Here's what happens now...</p>
+                    <div class="local-pick-next-steps post-submit-intro">
+                        <div class="post-submit-step">
+                            <div class="post-submit-step-header">
+                                <span class="post-submit-step-num">1</span>
+                                <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
+                            </div>
+                            <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
+                        </div>
+                        <div class="post-submit-step">
+                            <div class="post-submit-step-header">
+                                <span class="post-submit-step-num">2</span>
+                                <h3 class="post-submit-step-title">In-Home Estimate</h3>
+                            </div>
+                            <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
+                        </div>
+                        <div class="post-submit-step">
+                            <div class="post-submit-step-header">
+                                <span class="post-submit-step-num">3</span>
+                                <h3 class="post-submit-step-title">Approval & Installation</h3>
+                            </div>
+                            <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
+                        </div>
                     </div>
                 </div>
-                <p class="local-pick-happens-now-header" id="localPickHappensNowHeader">Here's what happens now..</p>
-                <ul class="local-pick-list" id="localPickList">
-                    <!-- Local Pick items will be dynamically added here -->
-                </ul>
             </div>
             <div class="reviews-container" id="reviewsContainer">
                 <!-- Review blocks will be dynamically added here -->
@@ -2380,24 +2433,31 @@
             }
         }
 
-        function setPartnerLogoForWhySection(logoUrl) {
-            const wrap = document.getElementById('partnerLogoWrap');
-            const img = document.getElementById('partnerLogoImg');
-            if (!wrap || !img) return;
+        function setPartnerLogoForWhySection(logoUrl, which) {
+            const w = which || 'both';
 
-            if (!logoUrl) {
-                img.removeAttribute('src');
-                wrap.style.display = 'none';
-                return;
+            function apply(wrapId, imgId) {
+                const wrap = document.getElementById(wrapId);
+                const img = document.getElementById(imgId);
+                if (!wrap || !img) return;
+
+                if (!logoUrl) {
+                    img.removeAttribute('src');
+                    wrap.style.display = 'none';
+                    return;
+                }
+
+                preloadLogo(logoUrl);
+                img.src = logoUrl;
+                wrap.style.display = 'block';
+                img.onerror = function() {
+                    wrap.style.display = 'none';
+                    img.onerror = null;
+                };
             }
 
-            preloadLogo(logoUrl);
-            img.src = logoUrl;
-            wrap.style.display = 'block';
-            img.onerror = function() {
-                wrap.style.display = 'none';
-                img.onerror = null;
-            };
+            if (w === 'top' || w === 'both') apply('partnerLogoWrap', 'partnerLogoImg');
+            if (w === 'reviews' || w === 'both') apply('reviewsPartnerLogoWrap', 'reviewsPartnerLogoImg');
         }
 
         function resolveLogoLinkField(raw) {
@@ -2584,10 +2644,12 @@
                 if (localPickTitleEl) {
                     localPickTitleEl.innerHTML = 'How we choose every <span class="local-pick-highlight">Local Pick</span>';
                 }
+                const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
+                if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
                 const localPickOuter = document.getElementById('localPickOuter');
-                if (localPickOuter) {
-                    localPickOuter.style.display = 'none';
-                }
+                if (localPickOuter) localPickOuter.style.display = 'none';
+                const reviewsLPMount = document.getElementById('reviewsLocalPickMount');
+                if (reviewsLPMount) reviewsLPMount.style.display = 'none';
                 if (postFormSubmitted) {
                     applyGenericNoMatchPostSubmitCopy();
                 }
@@ -2599,7 +2661,11 @@
             if (localPickTitleEl) {
                 localPickTitleEl.innerHTML = 'Here\'s why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
             }
-            
+            const reviewsLocalPickTitleEl = document.getElementById('reviewsLocalPickTitle');
+            if (reviewsLocalPickTitleEl) {
+                reviewsLocalPickTitleEl.innerHTML = 'Here\'s why <span id="reviewsLocalPickCompanyName">Company</span> is our Local Pick in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
+            }
+
             // Try to get partner name from matched client first, then campaign client
             let partnerName = null;
             if (matchedClientData && matchedClientData.fields && matchedClientData.fields['Name']) {
@@ -2617,10 +2683,22 @@
             }
 
             const step4AddressSubheader = document.getElementById('step4AddressSubheader');
+            const zForPick = (formData.address && formData.address.zip) || formData.initialZip;
             const localPickZipCodeElement = document.getElementById('localPickZipCode');
             if (localPickZipCodeElement) {
-                const z = (formData.address && formData.address.zip) || formData.initialZip;
-                localPickZipCodeElement.textContent = z || 'ZIP CODE ENTERED';
+                localPickZipCodeElement.textContent = zForPick || 'ZIP CODE ENTERED';
+            }
+            const reviewsLocalPickZipEl = document.getElementById('reviewsLocalPickZipCode');
+            if (reviewsLocalPickZipEl) {
+                reviewsLocalPickZipEl.textContent = zForPick || 'ZIP CODE ENTERED';
+            }
+            const localPickCompanyNameEl = document.getElementById('localPickCompanyName');
+            if (localPickCompanyNameEl) {
+                localPickCompanyNameEl.textContent = postFormSubmitted ? (partnerName || 'COMPANY') : 'COMPANY';
+            }
+            const reviewsLocalPickCompanyNameEl = document.getElementById('reviewsLocalPickCompanyName');
+            if (reviewsLocalPickCompanyNameEl) {
+                reviewsLocalPickCompanyNameEl.textContent = postFormSubmitted ? (partnerName || 'COMPANY') : 'COMPANY';
             }
             if (step4AddressSubheader) {
                 step4AddressSubheader.textContent = 'Please make sure your address is full and correct so we can match you with the correct Local Pick for your area';
@@ -4003,6 +4081,10 @@
         }
 
         function hideMainFunnelPartnerWhySection() {
+            const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
+            if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
+            const topOuter = document.getElementById('localPickOuter');
+            if (topOuter) topOuter.style.display = 'none';
             const reviewsSection = document.getElementById('reviewsSection');
             const reviewsContainer = document.getElementById('reviewsContainer');
             const ctaSection = document.getElementById('ctaSection');
@@ -4028,6 +4110,10 @@
 
             // Zip step uses static “how we choose” copy; Airtable partner bullets only after they’ve entered a zip
             if (!formData.initialZip) {
+                const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
+                if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
+                const topOuter = document.getElementById('localPickOuter');
+                if (topOuter) topOuter.style.display = 'none';
                 const reviewsSection = document.getElementById('reviewsSection');
                 const reviewsContainer = document.getElementById('reviewsContainer');
                 if (reviewsSection) {
@@ -4048,6 +4134,10 @@
 
             const activeClient = getActiveClient();
             if (!activeClient || !activeClient.fields) {
+                const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
+                if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
+                const topOuter = document.getElementById('localPickOuter');
+                if (topOuter) topOuter.style.display = 'none';
                 if (reviewsSection) {
                     reviewsSection.classList.remove('active');
                     reviewsSection.classList.remove('main-funnel-local-pick-only');
@@ -4082,6 +4172,10 @@
                 if (ctaSection) ctaSection.classList.remove('active');
                 if (getQuoteBtn) getQuoteBtn.style.display = '';
             } else {
+                const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
+                if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
+                const topOuter = document.getElementById('localPickOuter');
+                if (topOuter) topOuter.style.display = 'none';
                 if (reviewsSection) {
                     reviewsSection.classList.remove('active');
                     reviewsSection.classList.remove('main-funnel-local-pick-only');
@@ -4114,9 +4208,16 @@
                 }
             }
 
-            // Build Local Pick block if we have items
-            const partnerName = (activeClient.fields && activeClient.fields['Name']) || 'Peak Leads Group';
-            buildLocalPickBlock(localPickItems, partnerName);
+            const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
+            if (postFormSubmitted) {
+                if (localPickItems.length > 0) {
+                    buildLocalPickBlock(localPickItems, partnerName, { forReviewsSection: true });
+                } else {
+                    const rm = document.getElementById('reviewsLocalPickMount');
+                    if (rm) rm.style.display = 'none';
+                    setPartnerLogoForWhySection(null, 'reviews');
+                }
+            }
 
             // Collect reviews (up to 3)
             for (let i = 1; i <= 3; i++) {
@@ -4161,38 +4262,66 @@
             }
         }
 
-        function buildLocalPickBlock(localPickItems, partnerName) {
-            const outer = document.getElementById('localPickOuter');
-            const block = document.getElementById('localPickBlock');
-            const titleSpan = document.getElementById('localPickCompanyName');
-            const listEl = document.getElementById('localPickList');
-            if (!outer || !block || !listEl) return;
+        function buildLocalPickBlock(localPickItems, partnerName, options) {
+            const forReviews = options && options.forReviewsSection === true;
+            const mainWrap = document.getElementById('mainFunnelLocalPickWrap');
+            const topOuter = document.getElementById('localPickOuter');
+            const reviewsMount = document.getElementById('reviewsLocalPickMount');
 
             if (localPickItems.length === 0) {
-                outer.style.display = 'none';
-                setPartnerLogoForWhySection(null);
+                if (mainWrap) mainWrap.style.display = 'none';
+                if (topOuter) topOuter.style.display = 'none';
+                if (reviewsMount) reviewsMount.style.display = 'none';
+                setPartnerLogoForWhySection(null, 'both');
                 return;
             }
 
-            if (titleSpan) titleSpan.textContent = partnerName;
-            listEl.innerHTML = '';
+            const active = getActiveClient();
+            const logoUrl = active && active.fields ? resolveLogoLinkField(active.fields['Logo Link']) : null;
 
-            localPickItems.forEach((item) => {
-                const li = document.createElement('li');
-                li.className = 'local-pick-item';
-                const iconPath = `icons/${item.iconIndex}.svg`;
-                li.innerHTML = `
+            function fillList(listEl, iconBase) {
+                listEl.innerHTML = '';
+                localPickItems.forEach((item) => {
+                    const li = document.createElement('li');
+                    li.className = 'local-pick-item';
+                    const iconPath = `${iconBase}${item.iconIndex}.svg`;
+                    li.innerHTML = `
                     <span class="local-pick-icon"><img src="${escapeHtml(iconPath)}" alt="" onerror="this.parentElement.style.display='none'"></span>
                     <span class="local-pick-text">${escapeHtml(item.text)}</span>
                 `;
-                listEl.appendChild(li);
-            });
+                    listEl.appendChild(li);
+                });
+            }
 
-            const active = getActiveClient();
-            const logoUrl = active && active.fields ? resolveLogoLinkField(active.fields['Logo Link']) : null;
-            setPartnerLogoForWhySection(logoUrl);
-
-            outer.style.display = 'block';
+            if (forReviews) {
+                if (mainWrap) mainWrap.style.display = 'none';
+                if (topOuter) topOuter.style.display = 'none';
+                setPartnerLogoForWhySection(null, 'top');
+                const listEl = document.getElementById('reviewsLocalPickList');
+                const co = document.getElementById('reviewsLocalPickCompanyName');
+                if (!reviewsMount || !listEl) return;
+                if (co) co.textContent = partnerName;
+                fillList(listEl, 'icons/');
+                const rz = document.getElementById('reviewsLocalPickZipCode');
+                if (rz) {
+                    const z = (formData.address && formData.address.zip) || formData.initialZip;
+                    rz.textContent = z || 'ZIP CODE ENTERED';
+                }
+                setPartnerLogoForWhySection(logoUrl, 'reviews');
+                reviewsMount.style.display = 'block';
+            } else {
+                if (reviewsMount) reviewsMount.style.display = 'none';
+                setPartnerLogoForWhySection(null, 'reviews');
+                const block = document.getElementById('localPickBlock');
+                const listEl = document.getElementById('localPickList');
+                const titleSpan = document.getElementById('localPickCompanyName');
+                if (!mainWrap || !topOuter || !block || !listEl) return;
+                if (titleSpan) titleSpan.textContent = partnerName;
+                fillList(listEl, 'icons/');
+                setPartnerLogoForWhySection(logoUrl, 'top');
+                topOuter.style.display = 'block';
+                mainWrap.style.display = 'block';
+            }
         }
 
         function buildReviewBlocks() {
