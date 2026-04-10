@@ -1341,7 +1341,7 @@
         <!-- STEP 4: Address -->
         <div class="form-step" id="step4">
             <div class="step-header">What is the location of this project?</div>
-            <div class="step-subheader" id="step4AddressSubheader">Please make sure your address is full and correct so we can match you with the correct Local Pick for your area</div>
+            <div class="step-subheader" id="step4AddressSubheader">Please make sure your address is full and correct</div>
             <div class="address-grid">
                 <div class="address-field">
                     <label class="address-label" for="street">Street Address</label>
@@ -1406,7 +1406,7 @@
                 <button class="nav-btn" onclick="submitFinalForm()" id="phoneSubmitBtn" disabled>Get Estimate</button>
             </div>
             <div class="privacy-policy-text" id="privacyPolicyText">
-                <p>By clicking "NEXT STEP" and submitting this form, (i) I agree that <span id="partnerBusinessName">The Local Pick and it's marketing partners</span> may use automated technology to call or text my phone number (provided above) or email me regarding my request, and I may revoke this consent at any time, and (ii) I agree to the <a href="privacypolicy.html" class="privacy-policy-funnel-link" target="_blank" rel="noopener noreferrer">Terms & Conditions and Privacy Policy</a>.</p>
+                <p>By clicking "NEXT STEP" and submitting this form, (i) I agree that <span id="partnerBusinessName">Peak Leads Group LLC and its marketing partners</span> may use automated technology to call or text my phone number (provided above) or email me regarding my request, and I may revoke this consent at any time, and (ii) I agree to the <a href="privacypolicy.html" class="privacy-policy-funnel-link" target="_blank" rel="noopener noreferrer">Terms & Conditions and Privacy Policy</a>.</p>
                 <p>I understand that my authorization to receive calls, texts, and emails via automated technology is not a condition of purchasing any goods or services. Message frequency may vary. Msg & data rates may apply. Reply STOP to cancel. Reply HELP for assistance.</p>
             </div>
         </div>
@@ -2557,11 +2557,11 @@
 
             if (genericLeadFlow) {
                 if (partnerNameElement) {
-                    partnerNameElement.textContent = "The Local Pick and it's marketing partners";
+                    partnerNameElement.textContent = "Peak Leads Group LLC and its marketing partners";
                 }
                 const step4AddressSubheader = document.getElementById('step4AddressSubheader');
                 if (step4AddressSubheader) {
-                    step4AddressSubheader.textContent = 'Please make sure your address is full and correct so we can match you with the correct Local Pick for your area';
+                    step4AddressSubheader.textContent = 'Please make sure your address is full and correct';
                 }
                 const contactReachElement = document.getElementById('contactReachCompany');
                 if (contactReachElement) {
@@ -2609,7 +2609,7 @@
             if (partnerNameElement) {
                 partnerNameElement.textContent = (postFormSubmitted && partnerName)
                     ? partnerName
-                    : "The Local Pick and it's marketing partners";
+                    : "Peak Leads Group LLC and its marketing partners";
             }
 
             const step4AddressSubheader = document.getElementById('step4AddressSubheader');
@@ -2631,7 +2631,7 @@
                 reviewsLocalPickCompanyNameEl.textContent = postFormSubmitted ? (partnerName || 'COMPANY') : 'COMPANY';
             }
             if (step4AddressSubheader) {
-                step4AddressSubheader.textContent = 'Please make sure your address is full and correct so we can match you with the correct Local Pick for your area';
+                step4AddressSubheader.textContent = 'Please make sure your address is full and correct';
             }
 
             const contactReachElement = document.getElementById('contactReachCompany');
