@@ -4162,13 +4162,14 @@
         }
 
         function buildLocalPickBlock(localPickItems, partnerName) {
+            const outer = document.getElementById('localPickOuter');
             const block = document.getElementById('localPickBlock');
             const titleSpan = document.getElementById('localPickCompanyName');
             const listEl = document.getElementById('localPickList');
-            if (!block || !listEl) return;
+            if (!outer || !block || !listEl) return;
 
             if (localPickItems.length === 0) {
-                block.style.display = 'none';
+                outer.style.display = 'none';
                 setPartnerLogoForWhySection(null);
                 return;
             }
