@@ -4127,7 +4127,9 @@
             const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
             if (postFormSubmitted) {
                 if (localPickItems.length > 0) {
-                    buildLocalPickBlock(localPickItems, partnerName, { forReviewsSection: true });
+                    // Keep card + “what happens now” steps in #mainFunnelLocalPickWrap (under logo, above post-submit CTA).
+                    // Do not move them to #reviewsLocalPickMount — that sits below the form and inverts the page order.
+                    buildLocalPickBlock(localPickItems, partnerName);
                 } else {
                     const rm = document.getElementById('reviewsLocalPickMount');
                     if (rm) rm.style.display = 'none';
