@@ -39,10 +39,12 @@
             justify-content: center;
         }
 
-        .logo-container img {
+        .logo-spacer {
+            width: 100%;
             max-width: 200px;
-            max-height: 72px;
-            object-fit: contain;
+            min-height: 72px;
+            margin: 0 auto;
+            pointer-events: none;
         }
 
         .pp-back-bar {
@@ -229,9 +231,7 @@
 
     <div class="page-inner">
         <div class="logo-container">
-            <a href="index.html" aria-label="The Local Pick home">
-                <img src="images/TheLocalPick-FlatLeftAligned.svg" alt="The Local Pick">
-            </a>
+            <div class="logo-spacer" aria-hidden="true"></div>
         </div>
 
         <header class="doc-header">

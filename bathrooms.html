@@ -61,6 +61,14 @@
             object-fit: contain;
         }
 
+        .logo-spacer {
+            width: 100%;
+            max-width: 300px;
+            min-height: 120px;
+            flex-shrink: 0;
+            pointer-events: none;
+        }
+
         .step-header {
             font-size: 20px;
             color: #000;
@@ -1226,11 +1234,7 @@
 </head>
 <body>
     <div class="logo-container">
-        <img id="logoImg" 
-             src="images/TheLocalPick-FlatLeftAligned.svg" 
-             alt="The Local Pick" 
-             class="logo-img"
-             style="display: block;">
+        <div class="logo-spacer" aria-hidden="true"></div>
         <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
     </div>
 
