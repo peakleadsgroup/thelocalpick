@@ -61,6 +61,14 @@
             object-fit: contain;
         }
 
+        .logo-container > .local-pick-title {
+            margin-top: 0;
+            margin-bottom: 0;
+            max-width: 500px;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+
         .step-header {
             font-size: 20px;
             color: #555;
@@ -79,6 +87,7 @@
         }
 
         .global-quiz-tagline {
+            display: none;
             font-size: 24px;
             color: #000;
             margin: 0;
@@ -1185,6 +1194,7 @@
              alt="The Local Pick" 
              class="logo-img"
              style="display: block;">
+        <div class="local-pick-title" id="localPickTitle" style="display: none;">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
         <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
     </div>
 
@@ -1329,10 +1339,6 @@
         <div class="form-step" id="contactStep">
             <div>
                 <div class="post-submit-intro">
-                    <div class="post-submit-header-block">
-                        <h2 class="post-submit-main-title">You're one step closer to your dream bathroom!</h2>
-                        <p class="post-submit-subtitle">Here's what happens now...</p>
-                    </div>
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
@@ -1381,10 +1387,6 @@
         <div class="form-step" id="contactStepAddContact">
             <div>
                 <div class="post-submit-intro">
-                    <div class="post-submit-header-block">
-                        <h2 class="post-submit-main-title">You're one step closer to your dream bathroom!</h2>
-                        <p class="post-submit-subtitle">Here's what happens now...</p>
-                    </div>
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
@@ -1418,10 +1420,6 @@
         <div class="form-step" id="calendarStep">
             <div style="padding: 0 20px 20px;">
             <div class="post-submit-intro">
-                <div class="post-submit-header-block">
-                    <h2 class="post-submit-main-title">You're one step closer to your dream bathroom!</h2>
-                    <p class="post-submit-subtitle">Here's what happens now...</p>
-                </div>
                 <div class="post-submit-step">
                     <div class="post-submit-step-header">
                         <span class="post-submit-step-num">1</span>
@@ -1487,10 +1485,6 @@
         <div class="form-step" id="confirmationStep">
             <div style="padding: 40px 20px;">
                 <div class="post-submit-intro">
-                    <div class="post-submit-header-block">
-                        <h2 class="post-submit-main-title">You're one step closer to your dream bathroom!</h2>
-                        <p class="post-submit-subtitle">Here's what happens now...</p>
-                    </div>
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
@@ -1533,7 +1527,6 @@
                 <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
                     <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
                 </div>
-                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
                 <ul class="local-pick-list" id="localPickList">
                     <!-- Local Pick items will be dynamically added here -->
                 </ul>
@@ -2543,6 +2536,7 @@
                 }
                 if (localPickTitleEl) {
                     localPickTitleEl.innerHTML = 'How we choose every <span class="local-pick-highlight">Local Pick</span>';
+                    localPickTitleEl.style.display = 'none';
                 }
                 const localPickBlock = document.getElementById('localPickBlock');
                 if (localPickBlock) {
@@ -3959,6 +3953,8 @@
         }
 
         function hideMainFunnelPartnerWhySection() {
+            const localPickTitleHeader = document.getElementById('localPickTitle');
+            if (localPickTitleHeader) localPickTitleHeader.style.display = 'none';
             const reviewsSection = document.getElementById('reviewsSection');
             const reviewsContainer = document.getElementById('reviewsContainer');
             const ctaSection = document.getElementById('ctaSection');
@@ -3984,6 +3980,8 @@
 
             // Zip step uses static “how we choose” copy; Airtable partner bullets only after they’ve entered a zip
             if (!formData.initialZip) {
+                const tph = document.getElementById('localPickTitle');
+                if (tph) tph.style.display = 'none';
                 const reviewsSection = document.getElementById('reviewsSection');
                 const reviewsContainer = document.getElementById('reviewsContainer');
                 if (reviewsSection) {
@@ -4004,6 +4002,8 @@
 
             const activeClient = getActiveClient();
             if (!activeClient || !activeClient.fields) {
+                const tph = document.getElementById('localPickTitle');
+                if (tph) tph.style.display = 'none';
                 if (reviewsSection) {
                     reviewsSection.classList.remove('active');
                     reviewsSection.classList.remove('main-funnel-local-pick-only');
@@ -4121,10 +4121,12 @@
             const block = document.getElementById('localPickBlock');
             const titleSpan = document.getElementById('localPickCompanyName');
             const listEl = document.getElementById('localPickList');
+            const headerTitle = document.getElementById('localPickTitle');
             if (!block || !listEl) return;
 
             if (localPickItems.length === 0) {
                 block.style.display = 'none';
+                if (headerTitle) headerTitle.style.display = 'none';
                 setPartnerLogoForWhySection(null);
                 return;
             }
@@ -4148,6 +4150,7 @@
             setPartnerLogoForWhySection(logoUrl);
 
             block.style.display = 'block';
+            if (headerTitle) headerTitle.style.display = '';
         }
 
         function buildReviewBlocks() {
