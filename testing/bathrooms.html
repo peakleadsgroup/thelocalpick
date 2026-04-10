@@ -61,14 +61,6 @@
             object-fit: contain;
         }
 
-        .logo-container > .local-pick-title {
-            margin-top: 0;
-            margin-bottom: 0;
-            max-width: 500px;
-            padding: 0 16px;
-            box-sizing: border-box;
-        }
-
         .step-header {
             font-size: 20px;
             color: #000;
@@ -864,12 +856,33 @@
             text-align: center;
         }
 
+        .local-pick-group {
+            margin-bottom: 20px;
+        }
+
         .local-pick-block {
             background: white;
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            margin-bottom: 0;
+        }
+
+        .local-pick-happens-now-header {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+            text-align: center;
+            margin: 20px 0 18px;
+            padding: 0 16px;
+            line-height: 1.4;
+        }
+
+        .local-pick-group > .local-pick-list {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 8px;
+            box-sizing: border-box;
         }
 
         .local-pick-title {
@@ -877,8 +890,26 @@
             color: #000;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             line-height: 1.4;
+            max-width: 100%;
+            padding: 0 8px;
+            box-sizing: border-box;
+        }
+
+        .local-pick-card-tlp-logo {
+            text-align: center;
+            margin: 0 0 20px;
+        }
+
+        .local-pick-card-tlp-logo-img {
+            max-width: 280px;
+            max-height: 110px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
         }
 
         .local-pick-intro-subtext {
@@ -900,7 +931,7 @@
         }
 
         /* Post-zip (partner): icons left, like bathrooms.html */
-        .local-pick-block-partner .local-pick-item {
+        .local-pick-group .local-pick-item {
             display: flex;
             align-items: flex-start;
             gap: 16px;
@@ -910,17 +941,17 @@
             line-height: 1.5;
         }
 
-        .local-pick-block-partner .local-pick-item:last-child {
+        .local-pick-group .local-pick-item:last-child {
             margin-bottom: 0;
         }
 
-        .local-pick-block-partner .local-pick-icon {
+        .local-pick-group .local-pick-icon {
             flex-shrink: 0;
             width: 48px;
             height: 48px;
         }
 
-        .local-pick-block-partner .local-pick-item .local-pick-text {
+        .local-pick-group .local-pick-item .local-pick-text {
             text-align: left;
         }
 
@@ -1200,7 +1231,6 @@
              alt="The Local Pick" 
              class="logo-img"
              style="display: block;">
-        <div class="local-pick-title" id="localPickTitle" style="display: none;">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
         <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
     </div>
 
@@ -1528,11 +1558,18 @@
     <!-- REVIEWS SECTION -->
     <div class="reviews-section" id="reviewsSection">
         <div class="reviews-content">
-            <!-- LOCAL PICK BLOCK (above reviews) -->
-            <div class="local-pick-block local-pick-block-partner" id="localPickBlock" style="display: none;">
-                <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
-                    <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
+            <!-- LOCAL PICK: card (why + logos), then header, then bullet list -->
+            <div class="local-pick-group local-pick-block-partner" id="localPickOuter" style="display: none;">
+                <div class="local-pick-block" id="localPickBlock">
+                    <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
+                    <div class="local-pick-card-tlp-logo">
+                        <img class="local-pick-card-tlp-logo-img" src="images/TheLocalPick-FlatLeftAligned.svg" alt="The Local Pick">
+                    </div>
+                    <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
+                        <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
+                    </div>
                 </div>
+                <p class="local-pick-happens-now-header" id="localPickHappensNowHeader">Here's what happens now..</p>
                 <ul class="local-pick-list" id="localPickList">
                     <!-- Local Pick items will be dynamically added here -->
                 </ul>
@@ -2546,11 +2583,10 @@
                 }
                 if (localPickTitleEl) {
                     localPickTitleEl.innerHTML = 'How we choose every <span class="local-pick-highlight">Local Pick</span>';
-                    localPickTitleEl.style.display = 'none';
                 }
-                const localPickBlock = document.getElementById('localPickBlock');
-                if (localPickBlock) {
-                    localPickBlock.style.display = 'none';
+                const localPickOuter = document.getElementById('localPickOuter');
+                if (localPickOuter) {
+                    localPickOuter.style.display = 'none';
                 }
                 if (postFormSubmitted) {
                     applyGenericNoMatchPostSubmitCopy();
@@ -3967,8 +4003,6 @@
         }
 
         function hideMainFunnelPartnerWhySection() {
-            const localPickTitleHeader = document.getElementById('localPickTitle');
-            if (localPickTitleHeader) localPickTitleHeader.style.display = 'none';
             const reviewsSection = document.getElementById('reviewsSection');
             const reviewsContainer = document.getElementById('reviewsContainer');
             const ctaSection = document.getElementById('ctaSection');
@@ -3994,8 +4028,6 @@
 
             // Zip step uses static “how we choose” copy; Airtable partner bullets only after they’ve entered a zip
             if (!formData.initialZip) {
-                const tph = document.getElementById('localPickTitle');
-                if (tph) tph.style.display = 'none';
                 const reviewsSection = document.getElementById('reviewsSection');
                 const reviewsContainer = document.getElementById('reviewsContainer');
                 if (reviewsSection) {
@@ -4016,8 +4048,6 @@
 
             const activeClient = getActiveClient();
             if (!activeClient || !activeClient.fields) {
-                const tph = document.getElementById('localPickTitle');
-                if (tph) tph.style.display = 'none';
                 if (reviewsSection) {
                     reviewsSection.classList.remove('active');
                     reviewsSection.classList.remove('main-funnel-local-pick-only');
@@ -4135,12 +4165,10 @@
             const block = document.getElementById('localPickBlock');
             const titleSpan = document.getElementById('localPickCompanyName');
             const listEl = document.getElementById('localPickList');
-            const headerTitle = document.getElementById('localPickTitle');
             if (!block || !listEl) return;
 
             if (localPickItems.length === 0) {
                 block.style.display = 'none';
-                if (headerTitle) headerTitle.style.display = 'none';
                 setPartnerLogoForWhySection(null);
                 return;
             }
@@ -4163,8 +4191,7 @@
             const logoUrl = active && active.fields ? resolveLogoLinkField(active.fields['Logo Link']) : null;
             setPartnerLogoForWhySection(logoUrl);
 
-            block.style.display = 'block';
-            if (headerTitle) headerTitle.style.display = '';
+            outer.style.display = 'block';
         }
 
         function buildReviewBlocks() {
