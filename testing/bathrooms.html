@@ -1188,7 +1188,7 @@
 
         <!-- STEP 0: Homeowner -->
         <div class="form-step active" id="step0">
-            <div class="step-header">Are you a homeowner?</div>
+            <div class="step-header">Are you a homeowner or authorized decision maker?</div>
             <div class="options">
                 <div class="option" data-quiz-field="homeowner" data-quiz-value="yes" onclick="selectOptionAndAdvance(this, 'homeowner', 'yes')">Yes</div>
                 <div class="option" data-quiz-field="homeowner" data-quiz-value="no" onclick="selectOptionAndAdvance(this, 'homeowner', 'no')">No</div>
@@ -1201,7 +1201,7 @@
                     </svg>
                 </div>
                 <div class="homeowner-no-content">
-                    <div class="homeowner-no-text">You must be a homeowner to continue.</div>
+                    <div class="homeowner-no-text">You must be the homeowner or an authorized decision maker to continue.</div>
                 </div>
             </div>
         </div>
@@ -1238,7 +1238,7 @@
                     </svg>
                 </div>
                 <div class="repair-damage-content">
-                    <div class="homeowner-no-text"><span id="repairCompanyName">Peak Leads Group</span> doesn't offer small repairs.  They specialize exclusively in full replacements and conversions</div>
+                    <div class="homeowner-no-text" id="repairDamageCopy">Our contractors don't offer small repairs.  They specialize exclusively in full replacements and conversions</div>
                 </div>
             </div>
         </div>
@@ -1295,7 +1295,7 @@
 
         <!-- STEP 6: Phone -->
         <div class="form-step" id="step6">
-            <div class="step-header">Where can <span id="contactReachCompany">Peak Leads Group</span> reach you with your estimate?</div>
+            <div class="step-header">Where can <span id="contactReachCompany">Peak Leads Group</span> reach you?</div>
             <div class="row">
                 <div id="phoneWrap" class="address-field">
                     <label class="address-label" for="phone">Phone</label>
@@ -1311,7 +1311,7 @@
                 <button class="nav-btn" onclick="submitFinalForm()" id="phoneSubmitBtn" disabled>Get Estimate</button>
             </div>
             <div class="privacy-policy-text" id="privacyPolicyText">
-                <p>By clicking "NEXT STEP" and submitting this form, (i) I agree that <span id="partnerBusinessName">Peak Leads Group and it's marketing partners</span> may use automated technology to call or text my phone number (provided above) or email me regarding my request, and I may revoke this consent at any time, and (ii) I agree to the <a href="privacypolicy.html" class="privacy-policy-funnel-link" target="_blank" rel="noopener noreferrer">Terms & Conditions and Privacy Policy</a>.</p>
+                <p>By clicking "NEXT STEP" and submitting this form, (i) I agree that <span id="partnerBusinessName">The Local Pick and it's marketing partners</span> may use automated technology to call or text my phone number (provided above) or email me regarding my request, and I may revoke this consent at any time, and (ii) I agree to the <a href="privacypolicy.html" class="privacy-policy-funnel-link" target="_blank" rel="noopener noreferrer">Terms & Conditions and Privacy Policy</a>.</p>
                 <p>I understand that my authorization to receive calls, texts, and emails via automated technology is not a condition of purchasing any goods or services. Message frequency may vary. Msg & data rates may apply. Reply STOP to cancel. Reply HELP for assistance.</p>
             </div>
         </div>
@@ -1327,7 +1327,7 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
                         </div>
                         <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
@@ -1343,11 +1343,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="contactReadySubtitle">Can't wait to hear from <span class="post-submit-company-name">COMPANY</span>? Click the button below to call them now.</p>
+                        <p class="post-submit-cta-subtitle" id="contactReadySubtitle">Can't wait to hear from <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span>? Click the button below to call them now.</p>
                         <a id="callButtonLink" href="#" class="contact-button call-button" style="display: none;">
                     <svg class="phone-icon" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
@@ -1379,7 +1379,7 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
                         </div>
                         <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
@@ -1395,11 +1395,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="contactAddReadySubtitle"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</p>
+                        <p class="post-submit-cta-subtitle" id="contactAddReadySubtitle"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> will call you soon to schedule your free estimate!</p>
                     </div>
                 </div>
             </div>
@@ -1416,7 +1416,7 @@
                 <div class="post-submit-step">
                     <div class="post-submit-step-header">
                         <span class="post-submit-step-num">1</span>
-                        <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
+                        <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
                     </div>
                     <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                 </div>
@@ -1432,7 +1432,7 @@
                         <span class="post-submit-step-num">3</span>
                         <h3 class="post-submit-step-title">Approval & Installation</h3>
                     </div>
-                    <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
+                    <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                 </div>
                 <div class="post-submit-cta-block">
                     <h3 class="post-submit-cta-title">Ready to get started now?</h3>
@@ -1485,7 +1485,7 @@
                     <div class="post-submit-step">
                         <div class="post-submit-step-header">
                             <span class="post-submit-step-num">1</span>
-                            <h3 class="post-submit-step-title"><span class="post-submit-company-name">COMPANY</span> Will Call You</h3>
+                            <h3 class="post-submit-step-title"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> Will Call You</h3>
                         </div>
                         <p class="post-submit-step-desc">To answer any questions you have and see if it makes sense for an in-home estimate.</p>
                     </div>
@@ -1501,11 +1501,11 @@
                             <span class="post-submit-step-num">3</span>
                             <h3 class="post-submit-step-title">Approval & Installation</h3>
                         </div>
-                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
+                        <p class="post-submit-step-desc">Once you're happy with the design and estimate, <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> will handle the rest—from scheduling to professional installation.</p>
                     </div>
                     <div class="post-submit-cta-block" id="confirmationCtaBlock">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
-                        <p class="post-submit-cta-subtitle" id="confirmationReadySubtitle"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</p>
+                        <p class="post-submit-cta-subtitle" id="confirmationReadySubtitle"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> will call you soon to schedule your free estimate!</p>
                     </div>
                     <div class="post-submit-cta-block" id="confirmationAppointmentBlock" style="display: none; margin-top: 28px;">
                         <div id="confirmationAppointmentIcon" style="margin-bottom: 20px;"></div>
@@ -1544,8 +1544,8 @@
             <!-- DUPLICATE CONTACT SCREEN -->
             <div class="form-step cta-block" id="contactStepBelow">
                 <div style="text-align: center;">
-                    <div id="contactStepBelowHeadline" style="font-size: 24px; color: #000; margin-bottom: 20px; font-weight: bold;"><span class="post-submit-company-name">COMPANY</span> will call you soon to schedule your free estimate!</div>
-                    <div id="contactStepBelowSubtext" style="font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 30px;">Or if you're ready to schedule now you can contact <span class="post-submit-company-name">COMPANY</span> by clicking below</div>
+                    <div id="contactStepBelowHeadline" style="font-size: 24px; color: #000; margin-bottom: 20px; font-weight: bold;"><span class="post-submit-company-name" data-generic-label="title">COMPANY</span> will call you soon to schedule your free estimate!</div>
+                    <div id="contactStepBelowSubtext" style="font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 30px;">Or if you're ready to schedule now you can contact <span class="post-submit-company-name" data-generic-label="mid">COMPANY</span> by clicking below</div>
                     
                     <a id="callButtonLinkBelow" href="#" class="contact-button call-button" style="display: none;">
                         <svg class="phone-icon" fill="currentColor" viewBox="0 0 24 24">
@@ -2357,6 +2357,24 @@
             return matchedClientData || campaignClientData;
         }
 
+        function resetPostSubmitCtaTitlesVisibility() {
+            document.querySelectorAll('.post-submit-cta-title').forEach((el) => {
+                el.style.display = '';
+            });
+        }
+
+        /** No matching contractor: replace COMPANY placeholders and hide "Ready to get started now?" */
+        function applyGenericNoMatchPostSubmitCopy() {
+            if (!genericLeadFlow) return;
+            document.querySelectorAll('.post-submit-company-name').forEach((el) => {
+                const kind = el.getAttribute('data-generic-label') || 'mid';
+                el.textContent = kind === 'title' ? 'Our Local Pick' : 'our Local Pick';
+            });
+            document.querySelectorAll('.post-submit-cta-title').forEach((el) => {
+                el.style.display = 'none';
+            });
+        }
+
         function normalizeAirtableMultiSelectField(raw) {
             if (raw == null) return [];
             if (Array.isArray(raw)) return raw.map(s => String(s).trim()).filter(Boolean);
@@ -2369,8 +2387,7 @@
         function getProjectTypeChoicesForClient(activeClient) {
             const ORDER = [
                 { match: (t) => /^shower\s*replacement$/i.test(t), value: 'shower_replacement', label: 'Shower replacement' },
-                { match: (t) => /^tub\s*replacement$/i.test(t), value: 'tub_replacement', label: 'Tub replacement' },
-                { match: (t) => /^full\s*remodel$/i.test(t), value: 'full_remodel', label: 'Full remodel' }
+                { match: (t) => /^tub\s*replacement$/i.test(t), value: 'tub_replacement', label: 'Tub replacement' }
             ];
             const f = activeClient && activeClient.fields;
             const raw = (f && (f['Project Type'] != null ? f['Project Type'] : f['Project Types'])) != null
@@ -2487,11 +2504,7 @@
 
             if (genericLeadFlow) {
                 if (partnerNameElement) {
-                    partnerNameElement.textContent = "Peak Leads Group and it's marketing partners";
-                }
-                const repairCompanyElement = document.getElementById('repairCompanyName');
-                if (repairCompanyElement) {
-                    repairCompanyElement.textContent = 'A contractor from our network';
+                    partnerNameElement.textContent = "The Local Pick and it's marketing partners";
                 }
                 const step4AddressSubheader = document.getElementById('step4AddressSubheader');
                 if (step4AddressSubheader) {
@@ -2512,8 +2525,13 @@
                 if (localPickBlock) {
                     localPickBlock.style.display = 'none';
                 }
+                if (postFormSubmitted) {
+                    applyGenericNoMatchPostSubmitCopy();
+                }
                 return;
             }
+
+            resetPostSubmitCtaTitlesVisibility();
 
             if (localPickTitleEl) {
                 localPickTitleEl.innerHTML = 'Here\'s why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
@@ -2532,14 +2550,7 @@
             if (partnerNameElement) {
                 partnerNameElement.textContent = (postFormSubmitted && partnerName)
                     ? partnerName
-                    : "Peak Leads Group and it's marketing partners";
-            }
-
-            const repairCompanyElement = document.getElementById('repairCompanyName');
-            if (repairCompanyElement) {
-                repairCompanyElement.textContent = postFormSubmitted
-                    ? (partnerName || 'Peak Leads Group')
-                    : 'A contractor from our network';
+                    : "The Local Pick and it's marketing partners";
             }
 
             const step4AddressSubheader = document.getElementById('step4AddressSubheader');
@@ -3708,6 +3719,11 @@
         
         async function showCalendarScreen() {
             postFormSubmitted = true;
+            if (genericLeadFlow) {
+                applyGenericNoMatchPostSubmitCopy();
+            } else {
+                resetPostSubmitCtaTitlesVisibility();
+            }
             updatePartnerNameInPrivacyPolicy();
             const phoneStepEl = document.getElementById('step6');
             const calendarStep = document.getElementById('calendarStep');
@@ -3816,6 +3832,7 @@
 
         function showContactAddContactScreen() {
             postFormSubmitted = true;
+            resetPostSubmitCtaTitlesVisibility();
             updatePartnerNameInPrivacyPolicy();
             const activeClient = getActiveClient();
             if (!activeClient) {
@@ -3835,6 +3852,7 @@
 
         function showContactScreen(submitScreenType) {
             postFormSubmitted = true;
+            resetPostSubmitCtaTitlesVisibility();
             updatePartnerNameInPrivacyPolicy();
             // Set "Ready to get started now?" subtitle based on screen type
             const contactReadySubtitle = document.getElementById('contactReadySubtitle');
@@ -3921,6 +3939,11 @@
         const exclamationIconHtml = '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#F9A825" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; display: block;"><circle cx="12" cy="12" r="10" fill="#FFF9C4" stroke="#F9A825"/><path d="M12 7 v6" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.5" fill="#F9A825"/></svg>';
         function showConfirmationScreen() {
             postFormSubmitted = true;
+            if (genericLeadFlow) {
+                applyGenericNoMatchPostSubmitCopy();
+            } else {
+                resetPostSubmitCtaTitlesVisibility();
+            }
             updatePartnerNameInPrivacyPolicy();
             // Show the confirmation/thank you screen (default state: show "Ready to get started now?", hide appointment block)
             const confirmationCtaBlock = document.getElementById('confirmationCtaBlock');
@@ -3928,7 +3951,7 @@
             if (confirmationCtaBlock) confirmationCtaBlock.style.display = '';
             if (confirmationAppointmentBlock) confirmationAppointmentBlock.style.display = 'none';
             const confirmationReadySubtitle = document.getElementById('confirmationReadySubtitle');
-            if (confirmationReadySubtitle) {
+            if (confirmationReadySubtitle && !genericLeadFlow) {
                 const activeClient = getActiveClient();
                 const companyName = (activeClient && activeClient.fields && activeClient.fields['Name'])
                     ? String(activeClient.fields['Name']).trim()
