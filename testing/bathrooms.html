@@ -71,7 +71,7 @@
 
         .step-header {
             font-size: 20px;
-            color: #555;
+            color: #000;
             margin-bottom: 10px;
             line-height: 1.45;
             font-weight: 600;
@@ -87,7 +87,6 @@
         }
 
         .global-quiz-tagline {
-            display: none;
             font-size: 24px;
             color: #000;
             margin: 0;
@@ -97,6 +96,11 @@
             max-width: 500px;
             padding: 0 16px;
             box-sizing: border-box;
+        }
+
+        /* Hide quiz tagline only on post-submit / ending screens */
+        body.funnel-post-submit .global-quiz-tagline {
+            display: none;
         }
 
         .global-quiz-tagline .step-header-highlight {
@@ -390,14 +394,16 @@
 
         .nav-btn.is-loading,
         .nav-btn.is-loading:disabled {
-            background: #6190f2;
+            background: #8d8d8d;
+            color: #fff;
             cursor: wait;
-            opacity: 0.95;
+            opacity: 1;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             transform: none;
+            pointer-events: none;
         }
 
         .nav-btn-loading-spinner {
@@ -1684,6 +1690,10 @@
         let isSubmitting = false; // Flag to prevent duplicate submissions
         let currentSubmitScreenType = null; // Store the current submit screen type
         let postFormSubmitted = false; // When true, reviews/Local Pick block show after submit (not on main page)
+
+        function syncGlobalQuizTaglineVisibility() {
+            document.body.classList.toggle('funnel-post-submit', !!postFormSubmitted);
+        }
         let mainFunnelLocalPickSuppressed = false; // After first quiz step, hide "Here's why..." below form until back navigation
         let appointmentTimeSelected = false; // True after user selects a time (so bottom shows confirmation, not calendar)
         let lastAppointmentText = ''; // Formatted appointment date/time for confirmation message
@@ -3056,7 +3066,7 @@
             }
             
             if (phoneSubmitBtn) {
-                phoneSubmitBtn.disabled = !buttonShouldEnable;
+                phoneSubmitBtn.disabled = isSubmitting || !buttonShouldEnable;
             }
             persistFunnelProgress();
         }
@@ -3696,6 +3706,7 @@
         
         async function showCalendarScreen() {
             postFormSubmitted = true;
+            syncGlobalQuizTaglineVisibility();
             if (genericLeadFlow) {
                 applyGenericNoMatchPostSubmitCopy();
             } else {
@@ -3809,6 +3820,7 @@
 
         function showContactAddContactScreen() {
             postFormSubmitted = true;
+            syncGlobalQuizTaglineVisibility();
             resetPostSubmitCtaTitlesVisibility();
             updatePartnerNameInPrivacyPolicy();
             const activeClient = getActiveClient();
@@ -3829,6 +3841,7 @@
 
         function showContactScreen(submitScreenType) {
             postFormSubmitted = true;
+            syncGlobalQuizTaglineVisibility();
             resetPostSubmitCtaTitlesVisibility();
             updatePartnerNameInPrivacyPolicy();
             // Set "Ready to get started now?" subtitle based on screen type
@@ -3916,6 +3929,7 @@
         const exclamationIconHtml = '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#F9A825" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; display: block;"><circle cx="12" cy="12" r="10" fill="#FFF9C4" stroke="#F9A825"/><path d="M12 7 v6" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.5" fill="#F9A825"/></svg>';
         function showConfirmationScreen() {
             postFormSubmitted = true;
+            syncGlobalQuizTaglineVisibility();
             if (genericLeadFlow) {
                 applyGenericNoMatchPostSubmitCopy();
             } else {
@@ -4488,6 +4502,22 @@
             return options[value] || value;
         }
 
+        function setGetEstimateButtonLoading(isLoading) {
+            const btn = document.getElementById('phoneSubmitBtn');
+            if (!btn) return;
+            if (isLoading) {
+                btn.classList.add('is-loading');
+                btn.disabled = true;
+                btn.setAttribute('aria-busy', 'true');
+                btn.innerHTML = '<span class="nav-btn-loading-spinner" aria-hidden="true"></span><span>Finding your local pick</span>';
+            } else {
+                btn.classList.remove('is-loading');
+                btn.removeAttribute('aria-busy');
+                btn.textContent = 'Get Estimate';
+                if (typeof validatePhones === 'function') validatePhones();
+            }
+        }
+
         async function submitFinalForm() {
             // Prevent duplicate submissions
             if (isSubmitting) {
@@ -4496,11 +4526,7 @@
             
             // Set submission flag and disable button immediately
             isSubmitting = true;
-            const phoneSubmitBtn = document.getElementById('phoneSubmitBtn');
-            if (phoneSubmitBtn) {
-                phoneSubmitBtn.disabled = true;
-                phoneSubmitBtn.textContent = 'Submitting...';
-            }
+            setGetEstimateButtonLoading(true);
             
             try {
                 eventId = generateEventId();
@@ -4669,12 +4695,8 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 // Show generic confirmation screen instead of calendar/phone options
                 console.error('Lead submission failed, showing generic confirmation:', error);
                 showConfirmationScreen();
-                // Reset submission flag and button on error
                 isSubmitting = false;
-                if (phoneSubmitBtn) {
-                    phoneSubmitBtn.disabled = false;
-                    phoneSubmitBtn.textContent = 'Get Estimate';
-                }
+                setGetEstimateButtonLoading(false);
                 return; // Exit early - don't show calendar/phone options
             }
             
@@ -4756,12 +4778,8 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 // Catch any unexpected errors that weren't caught by the Airtable submission catch
                 console.error('Unexpected error in submitFinalForm:', error);
                 showConfirmationScreen();
-                // Reset submission flag and button on error
                 isSubmitting = false;
-                if (phoneSubmitBtn) {
-                    phoneSubmitBtn.disabled = false;
-                    phoneSubmitBtn.textContent = 'Get Estimate';
-                }
+                setGetEstimateButtonLoading(false);
             }
         }
 
