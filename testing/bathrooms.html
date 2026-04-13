@@ -51,18 +51,18 @@
         }
 
         .logo-container {
-            margin-top: 30px;
+            margin-top: 0;
             margin-bottom: 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 14px;
+            gap: 10px;
         }
 
         .logo-img {
-            max-width: 300px;
-            max-height: 120px;
+            width: 64px;
+            height: 64px;
             object-fit: contain;
         }
 
@@ -1296,14 +1296,20 @@
 </head>
 <body>
     <div class="logo-container">
-        <div class="logo-spacer" aria-hidden="true"></div>
+        <img
+            class="logo-img local-pick-brand-logo"
+            src="../icons/favicon-local-pick-48.png?v=4"
+            alt="The Local Pick logo"
+            decoding="async"
+            onerror="if(this.dataset.fallbackApplied)return;this.dataset.fallbackApplied='1';this.src='icons/favicon-local-pick-48.png?v=4';"
+        >
         <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
     </div>
 
     <div class="main-funnel-local-pick-wrap" id="mainFunnelLocalPickWrap" style="display: none;">
         <div class="local-pick-group local-pick-block-partner" id="localPickOuter" style="display: none;">
             <div class="local-pick-block" id="localPickBlock">
-                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-head-lockup"><img id="localPickHeaderLogoImg" class="local-pick-title-inline-logo" alt="" decoding="async" /><span class="local-pick-highlight">Local Pick</span></span> in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
+                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span> in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
                 <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
                     <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
                 </div>
@@ -1581,7 +1587,7 @@
             <div class="reviews-local-pick-mount main-funnel-local-pick-wrap" id="reviewsLocalPickMount" style="display: none;">
                 <div class="local-pick-group local-pick-block-partner">
                     <div class="local-pick-block">
-                        <div class="local-pick-title" id="reviewsLocalPickTitle">Here's why <span id="reviewsLocalPickCompanyName">Company</span> is our <span class="local-pick-head-lockup"><img id="reviewsLocalPickHeaderLogoImg" class="local-pick-title-inline-logo" alt="" decoding="async" /><span class="local-pick-highlight">Local Pick</span></span> in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
+                        <div class="local-pick-title" id="reviewsLocalPickTitle">Here's why <span id="reviewsLocalPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span> in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
                         <div class="partner-logo-wrap" id="reviewsPartnerLogoWrap" style="display: none;">
                             <img id="reviewsPartnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
                         </div>
@@ -2850,46 +2856,36 @@
             const w = which || 'both';
             tlpDebug('logo', 'setPartnerLogoForWhySection called', { which: w, logoUrl });
 
-            function applyHeaderImg(elId, url) {
-                const img = document.getElementById(elId);
-                if (!img) return;
+            function applyPartnerLogo(wrapId, imgId, url) {
+                const wrap = document.getElementById(wrapId);
+                const img = document.getElementById(imgId);
+                if (!wrap || !img) return;
                 if (!url) {
+                    wrap.style.display = 'none';
                     img.removeAttribute('src');
-                    img.classList.remove('is-visible');
                     img.onerror = null;
-                    tlpDebug('logo', 'Header logo cleared', { elId });
+                    tlpDebug('logo', 'Partner logo cleared', { wrapId, imgId });
                     return;
                 }
                 preloadLogo(url);
                 img.src = url;
-                img.classList.add('is-visible');
-                tlpDebug('logo', 'Header logo applied', { elId, logoUrl: url });
+                wrap.style.display = 'block';
+                tlpDebug('logo', 'Partner logo applied', { wrapId, imgId, logoUrl: url });
                 img.onerror = function() {
-                    img.classList.remove('is-visible');
+                    wrap.style.display = 'none';
                     img.removeAttribute('src');
-                    tlpDebug('logo', 'Header logo failed to load', { elId, logoUrl: url });
+                    tlpDebug('logo', 'Partner logo failed to load', { wrapId, imgId, logoUrl: url });
                     img.onerror = null;
                 };
             }
 
-            function hideLegacyPartnerLogoWraps() {
-                ['partnerLogoWrap', 'reviewsPartnerLogoWrap'].forEach((wid) => {
-                    const wrap = document.getElementById(wid);
-                    if (!wrap) return;
-                    wrap.style.display = 'none';
-                    const legacyImg = wrap.querySelector('img');
-                    if (legacyImg) legacyImg.removeAttribute('src');
-                });
-            }
-            hideLegacyPartnerLogoWraps();
-
             if (w === 'top') {
-                applyHeaderImg('localPickHeaderLogoImg', logoUrl || null);
+                applyPartnerLogo('partnerLogoWrap', 'partnerLogoImg', logoUrl || null);
             } else if (w === 'reviews') {
-                applyHeaderImg('reviewsLocalPickHeaderLogoImg', logoUrl || null);
+                applyPartnerLogo('reviewsPartnerLogoWrap', 'reviewsPartnerLogoImg', logoUrl || null);
             } else {
-                applyHeaderImg('localPickHeaderLogoImg', logoUrl || null);
-                applyHeaderImg('reviewsLocalPickHeaderLogoImg', logoUrl || null);
+                applyPartnerLogo('partnerLogoWrap', 'partnerLogoImg', logoUrl || null);
+                applyPartnerLogo('reviewsPartnerLogoWrap', 'reviewsPartnerLogoImg', logoUrl || null);
             }
         }
 
@@ -3322,12 +3318,12 @@
 
             if (localPickTitleEl) {
                 localPickTitleEl.innerHTML =
-                    'Here\'s why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-head-lockup"><img id="localPickHeaderLogoImg" class="local-pick-title-inline-logo" alt="" decoding="async" /><span class="local-pick-highlight">Local Pick</span></span> in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
+                    'Here\'s why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span> in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
             }
             const reviewsLocalPickTitleEl = document.getElementById('reviewsLocalPickTitle');
             if (reviewsLocalPickTitleEl) {
                 reviewsLocalPickTitleEl.innerHTML =
-                    'Here\'s why <span id="reviewsLocalPickCompanyName">Company</span> is our <span class="local-pick-head-lockup"><img id="reviewsLocalPickHeaderLogoImg" class="local-pick-title-inline-logo" alt="" decoding="async" /><span class="local-pick-highlight">Local Pick</span></span> in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
+                    'Here\'s why <span id="reviewsLocalPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span> in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
             }
 
             const activeClient = getActiveClient();
@@ -5150,10 +5146,6 @@
 
             const active = getActiveClient();
             const cf = active && active.fields ? active.fields : null;
-            const summaryHtml = buildClientRatingSummaryHtml(cf);
-            if (summaryHtml) {
-                container.insertAdjacentHTML('beforeend', summaryHtml);
-            }
             if (!genericLeadFlow) {
                 container.insertAdjacentHTML('beforeend', buildShowerCarouselHtml());
             }
@@ -5164,6 +5156,13 @@
                 reviewBlock.innerHTML = `
                     <div class="review-text">${escapeHtml(review.text)}</div>
                     <div class="review-name">— ${escapeHtml(review.name)}</div>
+                    <div class="review-stars" aria-label="5 out of 5 stars">
+                        <span class="review-star">★</span>
+                        <span class="review-star">★</span>
+                        <span class="review-star">★</span>
+                        <span class="review-star">★</span>
+                        <span class="review-star">★</span>
+                    </div>
                 `;
                 container.appendChild(reviewBlock);
             });
