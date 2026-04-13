@@ -2219,7 +2219,22 @@
             ];
             const clientP = zipRouteClientsCache
                 ? Promise.resolve(zipRouteClientsCache)
-                : airtableFetchAllRecords(ZIP_ROUTE.CLIENT_TABLE, { fields: clientFields });
+                : (async () => {
+                    try {
+                        return await airtableFetchAllRecords(ZIP_ROUTE.CLIENT_TABLE, { fields: clientFields });
+                    } catch (e) {
+                        tlpDebug('zipRoute', 'Client fields fetch failed; retrying minimal field set', {
+                            requestedClientFields: clientFields,
+                            error: String(e && e.message ? e.message : e)
+                        });
+                        const minimalClientFields = [
+                            ZIP_ROUTE.CLIENT_NAME_FIELD,
+                            'Status',
+                            ...ZIP_ROUTE.CLIENT_ADSET_LINK_FIELDS,
+                        ];
+                        return await airtableFetchAllRecords(ZIP_ROUTE.CLIENT_TABLE, { fields: minimalClientFields });
+                    }
+                })();
             /** No fields[] filter: Airtable 422 if any name mismatches the live Adset schema. */
             const adsetP = zipRouteAdsetById
                 ? Promise.resolve(null)
