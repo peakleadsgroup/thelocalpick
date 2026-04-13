@@ -1514,6 +1514,15 @@
                 </div>
             </div>
         </div>
+
+        <!-- Testing: ordered client list from Adset Zip junction (replaces calendar/phone/confirmation after submit) -->
+        <div class="form-step" id="zipRoutingResultStep">
+            <div style="padding: 24px 16px 40px; max-width: 720px; margin: 0 auto;">
+                <div class="step-header" style="margin-bottom: 8px;">Lead routing queue</div>
+                <p id="zipRoutingIntro" style="font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 16px;"></p>
+                <div id="zipRoutingTableHost"></div>
+            </div>
+        </div>
     </div>
 
     <!-- REVIEWS SECTION -->
@@ -1668,15 +1677,45 @@
         // ============================================
         const AIRTABLE_BASE_ID = 'appmBb0lzqRK9dI8v';
         const AIRTABLE_BASE_URL = `/api/airtable/v0/${AIRTABLE_BASE_ID}`;
+
+        /** B2C Adset table (junction zip routing uses the same table) */
+        const ADSET_TABLE_ID = 'tblee61crNCoSfurx';
         
         const TABLES = {
             CLIENTS: 'tblMl8Y97cMSbricC',
             CAMPAIGNS: 'tbl6uhtOFzGzA7EMu',
             B2C_LEADS: 'tblPt6Wc79hTBSmcD',
             B2C_ADS: 'tbl7ungQGMMLYwshw',
-            ADSET: 'tblee61crNCoSfurx',
+            ADSET: ADSET_TABLE_ID,
             URL_PARAMETERS: 'tbl5JDBRhTzuxzsc4',
         };
+
+        /** Ad-set zip junction routing (same tables/fields as Dashboards/ClientManagement.html) */
+        const ZIP_ROUTE = {
+            CLIENT_TABLE: 'tblH2nVfmGNG8pAjC',
+            ADSET_TABLE: ADSET_TABLE_ID,
+            ADSET_ZIPS_TABLE: 'tbl87JqHAdJwgq1GL',
+            US_ZIPS_TABLE: 'tblieaHIf6rDfFZFl',
+            CLIENT_NAME_FIELD: 'Name',
+            CLIENT_ADSET_FIELDS: ['Adsets'],
+            JUNCTION_ADSET_FIELD: 'Adset',
+            JUNCTION_ZIP_FIELD: 'US Zips',
+            ADSET_JUNCTION_LINK_FIELDS: ['Adset Zip Tracking', 'Ad Set Zip Tracking'],
+            JUNCTION_ADSET_FILTER_FIELDS: ['Adset'],
+            JUNCTION_ZIP_LINK_FIELDS: ['US Zips'],
+            JUNCTION_ZIP_LOOKUP_FIELDS: [],
+            JUNCTION_FALLBACK_FULL_SCAN: false,
+            US_ZIPS_MATCH_FIELD: 'Zip',
+            US_ZIPS_MATCH_AS_NUMBER: true,
+            US_ZIPS_MATCH_FIELD_CANDIDATES: [],
+            US_ZIPS_BATCH_CHUNK: 20,
+            US_ZIPS_BATCH_PAUSE_MS: 150,
+            JUNCTION_BATCH_CHUNK: 20,
+        };
+
+        const ZIP_ROUTE_BUILTIN_ZIP_FIELDS = [
+            'ZIP', 'Zip', 'zip', 'Name', 'ZCTA', 'Zcta', 'GEOID', 'Zip Code', 'ZIP Code',
+        ];
 
         const META_PIXEL_ID = '761605989609184';
         let fixedMetaPixelInitialized = false;
@@ -1713,6 +1752,8 @@
         let clientData = null;
         let campaignClientData = null;
         let matchedClientData = null;
+        /** Ordered queue from Adset Zip junction (oldest link first); filled by findClientByZipCode */
+        let lastZipRoutingQueue = [];
         let adRecordId = null;
         let adsetRecordId = null;
         let campaignRecordId = null; // Track the campaign record ID for Source Campaign linking
@@ -1946,6 +1987,262 @@
             }
         }
 
+        function sleepZipRoute(ms) {
+            return new Promise((resolve) => setTimeout(resolve, ms));
+        }
+
+        function zipRouteAirtableStringForFormula(s) {
+            return String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        }
+
+        function buildAirtableListUrl(tableId, opts, offset) {
+            const u = new URL(`${AIRTABLE_BASE_URL}/${tableId}`, window.location.origin);
+            if (opts.formula) u.searchParams.set('filterByFormula', opts.formula);
+            if (offset) u.searchParams.set('offset', offset);
+            if (opts.fields && opts.fields.length) {
+                for (const f of opts.fields) u.searchParams.append('fields[]', f);
+            }
+            return u.toString();
+        }
+
+        async function airtableFetchAllRecords(tableId, opts = {}) {
+            const all = [];
+            let url = buildAirtableListUrl(tableId, opts, null);
+            do {
+                const page = await fetchAirtableData(url);
+                if (page.records && page.records.length) all.push(...page.records);
+                url = page.offset ? buildAirtableListUrl(tableId, opts, page.offset) : null;
+            } while (url);
+            return all;
+        }
+
+        let zipRouteUsMatchField = null;
+        let zipRouteUsMatchAsNumber = false;
+        let zipRouteClientsCache = null;
+        let zipRouteAdsetById = null;
+
+        function zipRouteGetClientAdsetIds(fields) {
+            const ids = new Set();
+            for (const fname of ZIP_ROUTE.CLIENT_ADSET_FIELDS) {
+                const v = fields[fname];
+                if (!v) continue;
+                if (Array.isArray(v)) v.forEach((id) => ids.add(id));
+                else ids.add(v);
+            }
+            return [...ids];
+        }
+
+        function zipRouteAdsetLabel(fields) {
+            if (!fields) return 'Ad set';
+            return (
+                fields['Name'] ||
+                fields['Adset Name'] ||
+                (fields['Adset ID'] != null ? String(fields['Adset ID']) : '') ||
+                'Ad set'
+            );
+        }
+
+        function zipRouteNormalizeLinkIds(v) {
+            if (!v) return [];
+            return Array.isArray(v) ? v : [v];
+        }
+
+        function zipRecordIdFromJunctionFields(fields) {
+            const keys = ZIP_ROUTE.JUNCTION_ZIP_LINK_FIELDS || [ZIP_ROUTE.JUNCTION_ZIP_FIELD];
+            for (const k of keys) {
+                const z = fields[k];
+                const id = Array.isArray(z) ? z[0] : z;
+                if (id && typeof id === 'string' && id.startsWith('rec')) return id;
+            }
+            return null;
+        }
+
+        function zipRouteJunctionFieldsToRequest() {
+            const zipLink = [...(ZIP_ROUTE.JUNCTION_ZIP_LINK_FIELDS || []), ZIP_ROUTE.JUNCTION_ZIP_FIELD].filter(
+                (x, i, a) => x && a.indexOf(x) === i
+            );
+            const lookups = (ZIP_ROUTE.JUNCTION_ZIP_LOOKUP_FIELDS || []).filter(
+                (x, i, a) => x && a.indexOf(x) === i
+            );
+            return [...zipLink, ...lookups];
+        }
+
+        function zipRouteAdsetIdFromJunctionFields(fields) {
+            const f = ZIP_ROUTE.JUNCTION_ADSET_FIELD;
+            const v = fields && fields[f];
+            if (!v) return null;
+            return Array.isArray(v) ? v[0] : v;
+        }
+
+        async function zipRouteResolveUsZipsMatchField() {
+            if (zipRouteUsMatchField) return;
+            const data = await fetchAirtableData(`${AIRTABLE_BASE_URL}/${ZIP_ROUTE.US_ZIPS_TABLE}?maxRecords=1`);
+            const rec = data.records && data.records[0];
+            if (!rec) throw new Error('US Zips table has no rows.');
+            const fields = rec.fields || {};
+            const keys = Object.keys(fields);
+            const preferred = (ZIP_ROUTE.US_ZIPS_MATCH_FIELD || '').trim();
+            if (preferred) {
+                if (!keys.includes(preferred)) throw new Error(`US Zips has no field "${preferred}".`);
+                zipRouteUsMatchField = preferred;
+                zipRouteUsMatchAsNumber =
+                    typeof ZIP_ROUTE.US_ZIPS_MATCH_AS_NUMBER === 'boolean'
+                        ? ZIP_ROUTE.US_ZIPS_MATCH_AS_NUMBER
+                        : typeof fields[preferred] === 'number';
+                return;
+            }
+            const tryOrder = [...(ZIP_ROUTE.US_ZIPS_MATCH_FIELD_CANDIDATES || []), ...ZIP_ROUTE_BUILTIN_ZIP_FIELDS];
+            for (const c of tryOrder) {
+                if (c && keys.includes(c)) {
+                    zipRouteUsMatchField = c;
+                    break;
+                }
+            }
+            if (!zipRouteUsMatchField) {
+                for (const k of keys) {
+                    const v = fields[k];
+                    if (typeof v === 'number' && Number.isFinite(v) && v >= 10000 && v <= 99999) {
+                        zipRouteUsMatchField = k;
+                        zipRouteUsMatchAsNumber = true;
+                        break;
+                    }
+                    if (typeof v === 'string' && /^\d{5}$/.test(v.trim())) {
+                        zipRouteUsMatchField = k;
+                        zipRouteUsMatchAsNumber = false;
+                        break;
+                    }
+                }
+            }
+            if (!zipRouteUsMatchField) throw new Error('Set ZIP_ROUTE.US_ZIPS_MATCH_FIELD.');
+            if (typeof fields[zipRouteUsMatchField] === 'number') zipRouteUsMatchAsNumber = true;
+        }
+
+        function zipRouteZipMatchFormula(fiveDigit) {
+            if (!zipRouteUsMatchField) throw new Error('Zip match field not ready.');
+            const n = parseInt(fiveDigit, 10);
+            if (zipRouteUsMatchAsNumber) return `{${zipRouteUsMatchField}}=${n}`;
+            const z = zipRouteAirtableStringForFormula(fiveDigit);
+            return `{${zipRouteUsMatchField}}="${z}"`;
+        }
+
+        async function zipRouteFindZipRecordId(fiveDigit) {
+            const formula = encodeURIComponent(zipRouteZipMatchFormula(fiveDigit));
+            const url = `${AIRTABLE_BASE_URL}/${ZIP_ROUTE.US_ZIPS_TABLE}?maxRecords=1&filterByFormula=${formula}`;
+            const data = await fetchAirtableData(url);
+            const rec = data.records && data.records[0];
+            return rec ? rec.id : null;
+        }
+
+        function zipRouteFindClientRecordForAdset(adsetId) {
+            if (!adsetId || !zipRouteClientsCache) return null;
+            for (const c of zipRouteClientsCache) {
+                if (zipRouteGetClientAdsetIds(c.fields).includes(adsetId)) return c;
+            }
+            return null;
+        }
+
+        async function zipRouteEnsureInfrastructure() {
+            await zipRouteResolveUsZipsMatchField();
+            if (!zipRouteClientsCache) {
+                zipRouteClientsCache = await airtableFetchAllRecords(ZIP_ROUTE.CLIENT_TABLE, {
+                    fields: [ZIP_ROUTE.CLIENT_NAME_FIELD, ...ZIP_ROUTE.CLIENT_ADSET_FIELDS],
+                });
+            }
+            if (!zipRouteAdsetById) {
+                const adsets = await airtableFetchAllRecords(ZIP_ROUTE.ADSET_TABLE);
+                zipRouteAdsetById = new Map();
+                for (const r of adsets) zipRouteAdsetById.set(r.id, r);
+            }
+        }
+
+        async function zipRouteFetchJunctionRecordsForZip(zipRecordId) {
+            const reqFields = [ZIP_ROUTE.JUNCTION_ADSET_FIELD, ...zipRouteJunctionFieldsToRequest()].filter(
+                (x, i, a) => x && a.indexOf(x) === i
+            );
+            const zf = ZIP_ROUTE.JUNCTION_ZIP_FIELD;
+            const formula = `{${zf}}="${zipRecordId}"`;
+
+            let records = [];
+            try {
+                records = await airtableFetchAllRecords(ZIP_ROUTE.ADSET_ZIPS_TABLE, {
+                    formula,
+                    fields: reqFields.length ? reqFields : undefined,
+                });
+            } catch (e) {
+                console.warn('Junction filter by zip failed', e);
+            }
+
+            records = records.filter((r) => zipRecordIdFromJunctionFields(r.fields) === zipRecordId);
+            if (records.length > 0) return records;
+
+            try {
+                const zipRow = await fetchAirtableData(
+                    `${AIRTABLE_BASE_URL}/${ZIP_ROUTE.US_ZIPS_TABLE}/${encodeURIComponent(zipRecordId)}`
+                );
+                const zfields = zipRow.fields || {};
+                const cand = new Set();
+                for (const k of Object.keys(zfields)) {
+                    const v = zfields[k];
+                    if (Array.isArray(v)) {
+                        for (const x of v) {
+                            if (typeof x === 'string' && x.startsWith('rec')) cand.add(x);
+                        }
+                    }
+                }
+                const ids = [...cand];
+                if (ids.length === 0) return [];
+
+                const chunkSize = Math.max(5, Math.min(40, ZIP_ROUTE.JUNCTION_BATCH_CHUNK || 20));
+                const pauseMs = ZIP_ROUTE.US_ZIPS_BATCH_PAUSE_MS ?? 150;
+                for (let i = 0; i < ids.length; i += chunkSize) {
+                    const slice = ids.slice(i, i + chunkSize);
+                    const f = `OR(${slice.map((id) => `RECORD_ID()="${id}"`).join(',')})`;
+                    try {
+                        const batch = await airtableFetchAllRecords(ZIP_ROUTE.ADSET_ZIPS_TABLE, {
+                            formula: f,
+                            fields: reqFields.length ? reqFields : undefined,
+                        });
+                        for (const r of batch) {
+                            if (zipRecordIdFromJunctionFields(r.fields) === zipRecordId) records.push(r);
+                        }
+                    } catch (err) {
+                        console.warn('Junction batch fetch (US Zip reverse links) failed', err);
+                    }
+                    if (i + chunkSize < ids.length) await sleepZipRoute(pauseMs);
+                }
+                return records;
+            } catch (e2) {
+                console.warn('US Zip reverse-link fallback failed', e2);
+                return [];
+            }
+        }
+
+        async function getZipRoutingQueue(zipCode) {
+            await zipRouteEnsureInfrastructure();
+            const zipFive = String(zipCode || '')
+                .trim()
+                .replace(/\D/g, '')
+                .slice(0, 5);
+            if (!/^\d{5}$/.test(zipFive)) return [];
+            const zipRecId = await zipRouteFindZipRecordId(zipFive);
+            if (!zipRecId) return [];
+            const junctionRecs = await zipRouteFetchJunctionRecordsForZip(zipRecId);
+            junctionRecs.sort((a, b) => new Date(a.createdTime) - new Date(b.createdTime));
+            return junctionRecs.map((rec, idx) => {
+                const adsetId = zipRouteAdsetIdFromJunctionFields(rec.fields);
+                const clientRec = adsetId ? zipRouteFindClientRecordForAdset(adsetId) : null;
+                const adsetRec = adsetId && zipRouteAdsetById ? zipRouteAdsetById.get(adsetId) : null;
+                return {
+                    rank: idx + 1,
+                    junctionId: rec.id,
+                    linkCreated: rec.createdTime,
+                    adsetId,
+                    clientRec,
+                    adsetRec,
+                };
+            });
+        }
+
         function isLikelyIpAddress(value) {
             const v = String(value || '').trim();
             if (!v) return false;
@@ -2111,81 +2408,23 @@
 
         async function findClientByZipCode(zipCode) {
             try {
-                const landingPageNiche = 'Bathrooms';
-                const zipStr = String(zipCode).trim();
-
-                // Fetch ALL clients (Airtable returns max 100 per request; paginate to get every record)
-                let allRecords = [];
-                let url = `${AIRTABLE_BASE_URL}/${TABLES.CLIENTS}`;
-                do {
-                    const page = await fetchAirtableData(url);
-                    if (page.records && page.records.length > 0) {
-                        allRecords = allRecords.concat(page.records);
-                    }
-                    url = page.offset ? `${AIRTABLE_BASE_URL}/${TABLES.CLIENTS}?offset=${page.offset}` : null;
-                } while (url);
-
-                if (allRecords.length === 0) {
+                lastZipRoutingQueue = await getZipRoutingQueue(zipCode);
+                if (!lastZipRoutingQueue.length) {
                     return null;
                 }
-
-                const activeMatches = [];
-                const pausedMatches = [];
-
-                for (const client of allRecords) {
-                    const status = client.fields['Status'];
-                    if (status !== 'Active' && status !== 'Paused') {
-                        continue;
-                    }
-
-                    const clientNiche = client.fields['Niche'];
-                    if (!clientNiche) {
-                        continue;
-                    }
-                    const nicheMatches = Array.isArray(clientNiche)
-                        ? clientNiche.includes(landingPageNiche)
-                        : clientNiche === landingPageNiche;
-                    if (!nicheMatches) {
-                        continue;
-                    }
-
-                    const zipList = client.fields['Expanded Area Raw Zips'];
-                    if (!zipList) continue;
-
-                    const zipCodes = zipList.split(',').map(z => String(z).trim());
-                    if (zipCodes.includes(zipStr)) {
-                        if (status === 'Active') {
-                            activeMatches.push(client);
-                        } else if (status === 'Paused') {
-                            pausedMatches.push(client);
-                        }
-                    }
+                const firstWithClient = lastZipRoutingQueue.find((row) => row.clientRec);
+                if (!firstWithClient || !firstWithClient.clientRec) {
+                    return null;
                 }
-
-                function getClientCreatedMs(client) {
-                    if (client && client.createdTime) {
-                        const t = Date.parse(client.createdTime);
-                        if (!Number.isNaN(t)) return t;
-                    }
-                    const raw = client && client.fields && client.fields['Created'];
-                    if (raw != null && raw !== '') {
-                        const t = Date.parse(String(raw));
-                        if (!Number.isNaN(t)) return t;
-                    }
-                    return Number.MAX_SAFE_INTEGER;
+                const rid = firstWithClient.clientRec.id;
+                try {
+                    return await fetchAirtableData(`${AIRTABLE_BASE_URL}/${TABLES.CLIENTS}/${rid}`);
+                } catch {
+                    return firstWithClient.clientRec;
                 }
-
-                if (activeMatches.length > 0) {
-                    activeMatches.sort((a, b) => getClientCreatedMs(a) - getClientCreatedMs(b));
-                    return activeMatches[0];
-                }
-                if (pausedMatches.length > 0) {
-                    pausedMatches.sort((a, b) => getClientCreatedMs(a) - getClientCreatedMs(b));
-                    return pausedMatches[0];
-                }
-                return null;
             } catch (error) {
-                console.error('Error finding client by zip code:', error);
+                console.error('Error finding client by zip (ad-set junction routing):', error);
+                lastZipRoutingQueue = [];
                 return null;
             }
         }
@@ -2260,13 +2499,7 @@
                         console.warn('Duplicate check failed, proceeding with normal submission:', dupErr);
                     }
                 }
-                // Only set Lead Price when we have a matched client by zip; leave blank if no match
-                let leadPrice = null;
-                if (matchedClientData && matchedClientData.fields && matchedClientData.fields['Lead Price']) {
-                    leadPrice = matchedClientData.fields['Lead Price'];
-                }
-                
-                // Prepare the record
+                // Prepare the record (link Ad + Adset only — no Linked Client)
                 const record = {
                     fields: {
                         'Phone': leadData.phone,
@@ -2289,17 +2522,7 @@
                     record.fields['Email'] = leadData.email.trim();
                 }
                 
-                // Add Lead Price if available
-                if (leadPrice !== null && leadPrice !== undefined) {
-                    record.fields['Price'] = leadPrice;
-                }
-                
-                // Add linked client ONLY if we found a match by zip code (no fallback to campaign client) AND not a duplicate
-                if (matchedClientData && matchedClientData.id && !isDuplicate) {
-                    record.fields['Linked Client'] = [matchedClientData.id];
-                }
-                
-                // If duplicate, add Error field and omit linked client (already omitted above)
+                // If duplicate, add Error field
                 if (isDuplicate) {
                     record.fields['Error'] = 'DUPLICATE';
                 }
@@ -4684,6 +4907,75 @@
             return div.innerHTML;
         }
 
+        function hideAllFunnelFormSteps() {
+            document.querySelectorAll('#formSection .form-step').forEach((el) => el.classList.remove('active'));
+        }
+
+        function showZipRoutingResultScreen(zipFive) {
+            postFormSubmitted = true;
+            syncGlobalQuizTaglineVisibility();
+            hideAllFunnelFormSteps();
+            const stepEl = document.getElementById('zipRoutingResultStep');
+            const intro = document.getElementById('zipRoutingIntro');
+            const host = document.getElementById('zipRoutingTableHost');
+            if (intro) {
+                if (!lastZipRoutingQueue.length) {
+                    intro.textContent =
+                        `No ad-set zip links found for ${zipFive}. Add links in Adset Zip Tracking, or confirm this zip exists in US Zips.`;
+                } else {
+                    intro.textContent = `${lastZipRoutingQueue.length} link(s) for zip ${zipFive} — oldest junction link first (next in line at top).`;
+                }
+            }
+            if (host) {
+                if (!lastZipRoutingQueue.length) {
+                    host.innerHTML = '';
+                } else {
+                    const rows = lastZipRoutingQueue
+                        .map((row) => {
+                            const cname = row.clientRec
+                                ? (row.clientRec.fields[ZIP_ROUTE.CLIENT_NAME_FIELD] || '(unnamed)').toString()
+                                : '';
+                            const clientCell =
+                                row.clientRec == null
+                                    ? '<span style="color:#b45309;">No client linked to this ad set</span>'
+                                    : escapeHtml(cname);
+                            const adLabel = row.adsetRec
+                                ? zipRouteAdsetLabel(row.adsetRec.fields)
+                                : row.adsetId || '—';
+                            const when = row.linkCreated
+                                ? new Date(row.linkCreated).toLocaleString(undefined, {
+                                      dateStyle: 'medium',
+                                      timeStyle: 'short',
+                                  })
+                                : '—';
+                            return (
+                                '<tr>' +
+                                `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;">${row.rank}</td>` +
+                                `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;">${clientCell}</td>` +
+                                `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;">${escapeHtml(adLabel)}</td>` +
+                                `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;font-size:12px;color:#555;">${escapeHtml(when)}</td>` +
+                                '</tr>'
+                            );
+                        })
+                        .join('');
+                    host.innerHTML =
+                        '<table class="zip-routing-table" style="width:100%;border-collapse:collapse;font-size:14px;">' +
+                        '<thead><tr>' +
+                        '<th style="text-align:left;padding:8px;border-bottom:2px solid #ccc;font-size:11px;text-transform:uppercase;color:#666;">#</th>' +
+                        '<th style="text-align:left;padding:8px;border-bottom:2px solid #ccc;font-size:11px;text-transform:uppercase;color:#666;">Client</th>' +
+                        '<th style="text-align:left;padding:8px;border-bottom:2px solid #ccc;font-size:11px;text-transform:uppercase;color:#666;">Ad set</th>' +
+                        '<th style="text-align:left;padding:8px;border-bottom:2px solid #ccc;font-size:11px;text-transform:uppercase;color:#666;">Link created</th>' +
+                        '</tr></thead><tbody>' +
+                        rows +
+                        '</tbody></table>';
+                }
+            }
+            if (stepEl) stepEl.classList.add('active');
+            const pa = document.getElementById('progressArea');
+            if (pa) pa.style.display = 'none';
+            isSubmitting = false;
+            setGetEstimateButtonLoading(false);
+        }
 
         function formatPhoneForDisplay(digits) {
             if (digits && digits.length === 10) {
@@ -4765,8 +5057,7 @@
                     email: emailValue
                 };
             
-            // Final linked client is always determined by the project-location zip (address step).
-            // Selection order is preserved in findClientByZipCode: Active first (oldest Created first), then Paused.
+            // Matched client = first row in ad-set junction queue for project zip (oldest link first); see getZipRoutingQueue.
             try {
                 if (!finalData.address || !finalData.address.zip) {
                     throw new Error('Address data is missing or incomplete. Address object: ' + JSON.stringify(finalData.address));
@@ -4800,7 +5091,10 @@
                 fbq('track', 'Lead', leadEventData, { eventID: eventId });
             }
             
-            // Find ad and adset from URL
+            adRecordId = null;
+            adsetRecordId = null;
+
+            // Find ad and adset from URL (adset table = ADSET_TABLE_ID / junction ad sets)
             try {
                 const adATID = urlParams.get('adATID');
                 const adsetID = urlParams.get('adsetID');
@@ -4811,11 +5105,14 @@
 
                 if (adsetID) {
                     const adsetFilterFormula = encodeURIComponent(`{Adset ID}="${adsetID}"`);
-                    const adsetUrl = `${AIRTABLE_BASE_URL}/${TABLES.ADSET}?filterByFormula=${adsetFilterFormula}`;
+                    const adsetUrl = `${AIRTABLE_BASE_URL}/${ADSET_TABLE_ID}?filterByFormula=${adsetFilterFormula}`;
                     const adsetData = await fetchAirtableData(adsetUrl);
                     if (adsetData.records && adsetData.records.length > 0) {
                         adsetRecordId = adsetData.records[0].id;
                     }
+                }
+                if (!adsetRecordId && lastZipRoutingQueue.length > 0 && lastZipRoutingQueue[0].adsetId) {
+                    adsetRecordId = lastZipRoutingQueue[0].adsetId;
                 }
             } catch (error) {
                 console.log('Ad/adset lookup failed:', error.message);
@@ -4906,95 +5203,67 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 
                 // Submission completed successfully
             } catch (error) {
-                // Error webhook already sent in submitLeadToAirtable
-                // Show generic confirmation screen instead of calendar/phone options
-                console.error('Lead submission failed, showing generic confirmation:', error);
-                showConfirmationScreen();
-                isSubmitting = false;
-                setGetEstimateButtonLoading(false);
-                return; // Exit early - don't show calendar/phone options
+                console.error('Lead submission failed:', error);
+                try {
+                    const z = String(finalData.address && finalData.address.zip ? finalData.address.zip : '').trim();
+                    if (z) {
+                        lastZipRoutingQueue = await getZipRoutingQueue(z);
+                        showZipRoutingResultScreen(z);
+                    } else {
+                        showConfirmationScreen();
+                        isSubmitting = false;
+                        setGetEstimateButtonLoading(false);
+                    }
+                } catch {
+                    showConfirmationScreen();
+                    isSubmitting = false;
+                    setGetEstimateButtonLoading(false);
+                }
+                return;
             }
             
-            // Only proceed to show submit screen if submission was successful
             if (!submissionSuccessful) {
-                showConfirmationScreen();
+                try {
+                    const z = String(finalData.address && finalData.address.zip ? finalData.address.zip : '').trim();
+                    if (z) {
+                        lastZipRoutingQueue = await getZipRoutingQueue(z);
+                        showZipRoutingResultScreen(z);
+                    } else {
+                        showConfirmationScreen();
+                        isSubmitting = false;
+                        setGetEstimateButtonLoading(false);
+                    }
+                } catch {
+                    showConfirmationScreen();
+                    isSubmitting = false;
+                    setGetEstimateButtonLoading(false);
+                }
                 return;
             }
 
             clearPersistedFunnelProgress();
-            
-            // Determine which submit screen to show
-            // Use matched client first, but fall back to campaign client if matched client doesn't have Submit Screen
-            let activeClient = getActiveClient();
-            let submitScreenType = 'None'; // Default
-            
-            // Try to get Submit Screen from matched client first
-            if (matchedClientData && matchedClientData.fields && matchedClientData.fields['Submit Screen']) {
-                activeClient = matchedClientData;
-                submitScreenType = String(matchedClientData.fields['Submit Screen']).trim();
-            } 
-            // Fall back to campaign client if matched client doesn't have Submit Screen (not used in generic lead flow)
-            else if (!genericLeadFlow && campaignClientData && campaignClientData.fields && campaignClientData.fields['Submit Screen']) {
-                activeClient = campaignClientData;
-                submitScreenType = String(campaignClientData.fields['Submit Screen']).trim();
-            }
-            
-            // Show appropriate screen based on submit screen type (case-insensitive comparison)
-            const normalizedType = submitScreenType.toLowerCase();
-            
-            if (normalizedType === 'redirect') {
-                // Redirect to URL from Redirect URL field
-                const redirectUrl = activeClient && activeClient.fields['Redirect URL'] ? activeClient.fields['Redirect URL'] : null;
-                if (redirectUrl) {
-                    const clientId = activeClient ? activeClient.id : null;
-                    
-                    // Use leadData if available, otherwise fall back to formData
-                    const dataForParams = leadData || formData;
-                    const fullName = dataForParams.fullName || (dataForParams.firstName && dataForParams.lastName ? `${dataForParams.firstName} ${dataForParams.lastName}`.trim() : '');
-                    const phone = dataForParams.phone || '';
-                    
-                    // Use the dynamic URL parameters system
-                    const logData = {
-                        campaignID: metaCampaignID || initialCampaignID,
-                        clientAirtableID: clientId,
-                        leadAirtableID: leadRecordId
-                    };
-                    
-                    const urlParameters = await fetchUrlParametersForClient(clientId, logData);
-                    const finalRedirectUrl = await buildRedirectUrlWithParameters(redirectUrl, urlParameters, dataForParams, logData);
-                    
-                    window.location.href = finalRedirectUrl;
-                } else {
-                    // If no redirect URL, show confirmation screen
-                    console.warn('Redirect option selected but no Redirect URL found');
-                    showConfirmationScreen();
-                }
-            } else if (normalizedType === 'calendar') {
-                currentSubmitScreenType = 'calendar';
-                showCalendarScreen();
-            } else if (normalizedType === 'phone') {
-                currentSubmitScreenType = 'Phone';
-                showContactScreen('Phone');
-            } else if (normalizedType === 'text') {
-                currentSubmitScreenType = 'Text';
-                showContactScreen('Text');
-            } else if (normalizedType === 'phone/text') {
-                currentSubmitScreenType = 'Phone/Text';
-                showContactScreen('Phone/Text');
-            } else if (normalizedType === 'contact') {
-                currentSubmitScreenType = 'Contact';
-                showContactAddContactScreen();
-            } else {
-                // None or default
-                currentSubmitScreenType = null;
-                showConfirmationScreen();
-            }
+
+            const zipFiveForRoute = String(finalData.address.zip || '').trim();
+            lastZipRoutingQueue = await getZipRoutingQueue(zipFiveForRoute);
+            showZipRoutingResultScreen(zipFiveForRoute);
             } catch (error) {
-                // Catch any unexpected errors that weren't caught by the Airtable submission catch
                 console.error('Unexpected error in submitFinalForm:', error);
-                showConfirmationScreen();
-                isSubmitting = false;
-                setGetEstimateButtonLoading(false);
+                try {
+                    const addr = formData && formData.address;
+                    const z = addr && addr.zip ? String(addr.zip).trim() : '';
+                    if (z) {
+                        lastZipRoutingQueue = await getZipRoutingQueue(z);
+                        showZipRoutingResultScreen(z);
+                    } else {
+                        showConfirmationScreen();
+                        isSubmitting = false;
+                        setGetEstimateButtonLoading(false);
+                    }
+                } catch {
+                    showConfirmationScreen();
+                    isSubmitting = false;
+                    setGetEstimateButtonLoading(false);
+                }
             }
         }
 
