@@ -1713,8 +1713,9 @@
             US_ZIPS_BATCH_PAUSE_MS: 150,
             JUNCTION_BATCH_CHUNK: 20,
             /** US Zips — centroid for radius routing (try in order) */
-            US_ZIPS_LAT_FIELDS: ['Lat', 'Latitude', 'LAT'],
-            US_ZIPS_LONG_FIELDS: ['Long', 'Longitude', 'LNG', 'Lon'],
+            /** Must match real column names on US Zips — unknown names in fields[] cause Airtable 422. */
+            US_ZIPS_LAT_FIELDS: ['Lat'],
+            US_ZIPS_LONG_FIELDS: ['Long'],
         };
 
         const ROUTING_RADIUS_MILES = 30;
@@ -1730,6 +1731,9 @@
             monthlyLeadsLeft: 'Monthly Leads Left',
             totalLeadsLeft: 'Total Leads Left',
         };
+
+        /** Adset table {Niche} must match this value (single- or multi-select) for routing on this page */
+        const FUNNEL_ADSET_NICHE = 'Bathrooms';
 
         const META_PIXEL_ID = '761605989609184';
         let fixedMetaPixelInitialized = false;
@@ -2346,6 +2350,17 @@
             return s.trim().toLowerCase() === 'active';
         }
 
+        function routingAdsetNicheMatchesFunnel(adsetFields) {
+            if (!adsetFields) return false;
+            const n = adsetFields['Niche'];
+            if (n == null || n === '') return false;
+            const target = FUNNEL_ADSET_NICHE.trim().toLowerCase();
+            if (Array.isArray(n)) {
+                return n.some((x) => String(x).trim().toLowerCase() === target);
+            }
+            return String(n).trim().toLowerCase() === target;
+        }
+
         function routingIsClientActive(clientRec, adsetFields) {
             const fromAdset = adsetFields && adsetFields[ZIP_ROUTE_ADSET_METRIC_FIELDS.clientStatus];
             if (fromAdset != null && String(fromAdset).trim() !== '') {
@@ -2378,9 +2393,10 @@
             return routingNumericLeadsLeft(adsetFields, ZIP_ROUTE_ADSET_METRIC_FIELDS.monthlyLeadsLeft) > 0;
         }
 
-        /** Tier 1–4 if both client + adset active; else 0 */
+        /** Tier 1–4 if niche, client + adset active; else 0 */
         function routingComputeTier(clientRec, adsetFields) {
             if (!clientRec || !adsetFields) return 0;
+            if (!routingAdsetNicheMatchesFunnel(adsetFields)) return 0;
             if (!routingIsClientActive(clientRec, adsetFields) || !routingIsAdsetActive(adsetFields)) return 0;
             const w = routingWeeklyRemaining(adsetFields);
             const m = routingMonthlyRemaining(adsetFields);
@@ -2463,20 +2479,19 @@
                     if (!pos) continue;
                     const d = haversineMiles(leadLatLon.lat, leadLatLon.lon, pos.lat, pos.lon);
                     if (d <= ROUTING_RADIUS_MILES) {
-                        seenAdset.add(adsetId);
                         const clientRec = zipRouteFindClientRecordForAdset(adsetId);
                         const adsetRec = zipRouteAdsetById ? zipRouteAdsetById.get(adsetId) : null;
-                        if (clientRec && adsetRec) {
-                            out.push({
-                                rank: out.length + 1,
-                                junctionId: r.id,
-                                linkCreated: r.createdTime,
-                                adsetId,
-                                clientRec,
-                                adsetRec,
-                                distanceMiles: d,
-                            });
-                        }
+                        if (!clientRec || !adsetRec || !routingAdsetNicheMatchesFunnel(adsetRec.fields)) continue;
+                        seenAdset.add(adsetId);
+                        out.push({
+                            rank: out.length + 1,
+                            junctionId: r.id,
+                            linkCreated: r.createdTime,
+                            adsetId,
+                            clientRec,
+                            adsetRec,
+                            distanceMiles: d,
+                        });
                     }
                 }
                 offset = page.offset || null;
@@ -5291,20 +5306,28 @@
                     pickHost.style.display = '';
                 }
             }
+            const displayQueue = lastZipRoutingQueue.filter(
+                (row) => row.adsetRec && routingAdsetNicheMatchesFunnel(row.adsetRec.fields)
+            );
             if (intro) {
                 if (!lastZipRoutingQueue.length) {
                     intro.textContent =
                         `No exact-zip junction links for ${zipFive}. (Phase 2 still scans other zips if Lat/Long exist on the lead zip.)`;
                 } else {
-                    intro.textContent = `${lastZipRoutingQueue.length} exact-zip junction link(s) for ${zipFive} (reference table below). Routing uses tier rules on the partner pool per phase.`;
+                    intro.textContent =
+                        `${displayQueue.length} exact-zip link(s) with Adset Niche = ${FUNNEL_ADSET_NICHE} for ${zipFive} (table below). ` +
+                        `${lastZipRoutingQueue.length} total exact-zip link(s). Tier routing only considers ${FUNNEL_ADSET_NICHE} ad sets.`;
                 }
             }
             if (host) {
                 if (!lastZipRoutingQueue.length) {
                     host.innerHTML = '';
+                } else if (!displayQueue.length) {
+                    host.innerHTML =
+                        `<p style="font-size:14px;color:#666;">No ad sets linked to this zip have <strong>Niche</strong> = <strong>${escapeHtml(FUNNEL_ADSET_NICHE)}</strong> on the Adset record.</p>`;
                 } else {
-                    const rows = lastZipRoutingQueue
-                        .map((row) => {
+                    const rows = displayQueue
+                        .map((row, idx) => {
                             const cname = row.clientRec
                                 ? (row.clientRec.fields[ZIP_ROUTE.CLIENT_NAME_FIELD] || '(unnamed)').toString()
                                 : '';
@@ -5326,7 +5349,7 @@
                                 `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;font-size:13px;">${zipRouteAdsetFieldDisplay(af, fn)}</td>`;
                             return (
                                 '<tr>' +
-                                `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;">${row.rank}</td>` +
+                                `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;">${idx + 1}</td>` +
                                 `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;">${clientCell}</td>` +
                                 `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;">${escapeHtml(adLabel)}</td>` +
                                 `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;font-size:12px;color:#555;">${escapeHtml(when)}</td>` +
