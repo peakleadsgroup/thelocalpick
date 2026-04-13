@@ -44,6 +44,14 @@
             position: relative;
         }
 
+        body:not(.funnel-post-submit) {
+            padding-top: 112px;
+        }
+
+        body.funnel-post-submit {
+            padding-top: 20px;
+        }
+
         .form-wrapper {
             max-width: 500px;
             width: 100%;
@@ -59,6 +67,14 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+        }
+
+        body:not(.funnel-post-submit) .logo-container {
+            padding-top: 96px;
+        }
+
+        body.funnel-post-submit .logo-container {
+            padding-top: 16px;
         }
 
         .logo-img {
@@ -3041,7 +3057,7 @@
             }
             const starsText = escapeHtml(Number(stars).toFixed(1));
             const reviewsText = escapeHtml(String(Math.round(Number(n))));
-            return `<div class="review-aggregate"><strong>${starsText}</strong>/5.0 rating based on <strong>${reviewsText}</strong> real homeowner reviews</div>`;
+            return `<div class="review-aggregate">${starsText}/5.0 rating based on ${reviewsText} real homeowner reviews</div>`;
         }
 
         /** Plain HTML for star icon row (icon 1); line break before “reviews” matches layout mockups. */
@@ -3057,7 +3073,7 @@
             }
             const starsText = escapeHtml(Number(stars).toFixed(1));
             const reviewsText = escapeHtml(String(Math.round(Number(n))));
-            return `<strong>${starsText}</strong>/5.0 rating based on <strong>${reviewsText}</strong> real homeowner<br>reviews`;
+            return `${starsText}/5.0 rating based on ${reviewsText} real homeowner<br>reviews`;
         }
 
         function mergeStarRatingIntoLocalPickItems(localPickItems, fields) {
