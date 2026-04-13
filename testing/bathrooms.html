@@ -925,6 +925,28 @@
             box-sizing: border-box;
         }
 
+        .local-pick-head-lockup {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            vertical-align: middle;
+        }
+
+        .local-pick-title-inline-logo {
+            height: 34px;
+            width: auto;
+            max-width: 160px;
+            object-fit: contain;
+            flex-shrink: 0;
+            display: none;
+        }
+
+        .local-pick-title-inline-logo.is-visible {
+            display: inline-block;
+        }
+
         .local-pick-intro-subtext {
             display: block;
             font-size: 16px;
@@ -969,6 +991,7 @@
         }
 
         .partner-logo-wrap {
+            display: none;
             text-align: center;
             margin: 0 0 18px;
         }
@@ -1280,7 +1303,7 @@
     <div class="main-funnel-local-pick-wrap" id="mainFunnelLocalPickWrap" style="display: none;">
         <div class="local-pick-group local-pick-block-partner" id="localPickOuter" style="display: none;">
             <div class="local-pick-block" id="localPickBlock">
-                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
+                <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-head-lockup"><img id="localPickHeaderLogoImg" class="local-pick-title-inline-logo" alt="" decoding="async" /><span class="local-pick-highlight">Local Pick</span></span> in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
                 <div class="partner-logo-wrap" id="partnerLogoWrap" style="display: none;">
                     <img id="partnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
                 </div>
@@ -1558,7 +1581,7 @@
             <div class="reviews-local-pick-mount main-funnel-local-pick-wrap" id="reviewsLocalPickMount" style="display: none;">
                 <div class="local-pick-group local-pick-block-partner">
                     <div class="local-pick-block">
-                        <div class="local-pick-title" id="reviewsLocalPickTitle">Here's why <span id="reviewsLocalPickCompanyName">Company</span> is our Local Pick in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
+                        <div class="local-pick-title" id="reviewsLocalPickTitle">Here's why <span id="reviewsLocalPickCompanyName">Company</span> is our <span class="local-pick-head-lockup"><img id="reviewsLocalPickHeaderLogoImg" class="local-pick-title-inline-logo" alt="" decoding="async" /><span class="local-pick-highlight">Local Pick</span></span> in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
                         <div class="partner-logo-wrap" id="reviewsPartnerLogoWrap" style="display: none;">
                             <img id="reviewsPartnerLogoImg" class="partner-logo-img" src="" alt="Partner logo">
                         </div>
@@ -2827,31 +2850,47 @@
             const w = which || 'both';
             tlpDebug('logo', 'setPartnerLogoForWhySection called', { which: w, logoUrl });
 
-            function apply(wrapId, imgId) {
-                const wrap = document.getElementById(wrapId);
-                const img = document.getElementById(imgId);
-                if (!wrap || !img) return;
-
-                if (!logoUrl) {
+            function applyHeaderImg(elId, url) {
+                const img = document.getElementById(elId);
+                if (!img) return;
+                if (!url) {
                     img.removeAttribute('src');
-                    wrap.style.display = 'none';
-                    tlpDebug('logo', 'Logo hidden (no URL)', { wrapId, imgId });
+                    img.classList.remove('is-visible');
+                    img.onerror = null;
+                    tlpDebug('logo', 'Header logo cleared', { elId });
                     return;
                 }
-
-                preloadLogo(logoUrl);
-                img.src = logoUrl;
-                wrap.style.display = 'block';
-                tlpDebug('logo', 'Logo applied', { wrapId, imgId, logoUrl });
+                preloadLogo(url);
+                img.src = url;
+                img.classList.add('is-visible');
+                tlpDebug('logo', 'Header logo applied', { elId, logoUrl: url });
                 img.onerror = function() {
-                    wrap.style.display = 'none';
-                    tlpDebug('logo', 'Logo failed to load', { wrapId, imgId, logoUrl });
+                    img.classList.remove('is-visible');
+                    img.removeAttribute('src');
+                    tlpDebug('logo', 'Header logo failed to load', { elId, logoUrl: url });
                     img.onerror = null;
                 };
             }
 
-            if (w === 'top' || w === 'both') apply('partnerLogoWrap', 'partnerLogoImg');
-            if (w === 'reviews' || w === 'both') apply('reviewsPartnerLogoWrap', 'reviewsPartnerLogoImg');
+            function hideLegacyPartnerLogoWraps() {
+                ['partnerLogoWrap', 'reviewsPartnerLogoWrap'].forEach((wid) => {
+                    const wrap = document.getElementById(wid);
+                    if (!wrap) return;
+                    wrap.style.display = 'none';
+                    const legacyImg = wrap.querySelector('img');
+                    if (legacyImg) legacyImg.removeAttribute('src');
+                });
+            }
+            hideLegacyPartnerLogoWraps();
+
+            if (w === 'top') {
+                applyHeaderImg('localPickHeaderLogoImg', logoUrl || null);
+            } else if (w === 'reviews') {
+                applyHeaderImg('reviewsLocalPickHeaderLogoImg', logoUrl || null);
+            } else {
+                applyHeaderImg('localPickHeaderLogoImg', logoUrl || null);
+                applyHeaderImg('reviewsLocalPickHeaderLogoImg', logoUrl || null);
+            }
         }
 
         function resolveLogoLinkField(raw) {
@@ -2900,7 +2939,7 @@
             'https://thelocalpick.com/images/shower2.png',
             'https://thelocalpick.com/images/shower3.png',
             'https://thelocalpick.com/images/shower4.png',
-            'https://thelocalpick.com/images/shower6',
+            'https://thelocalpick.com/images/shower6.png',
             'https://thelocalpick.com/images/shower5.png',
         ];
         const DEFAULT_LOCAL_PICK_ITEMS = [
@@ -2995,6 +3034,34 @@
             const starsText = escapeHtml(Number(stars).toFixed(1));
             const reviewsText = escapeHtml(String(Math.round(Number(n))));
             return `<div class="review-aggregate"><strong>${starsText}</strong>/5.0 rating based on <strong>${reviewsText}</strong> real homeowner reviews</div>`;
+        }
+
+        /** Plain HTML for star icon row (icon 1); line break before “reviews” matches layout mockups. */
+        function buildLocalPickStarRatingLineHtml(fields) {
+            if (!fields) return null;
+            const stars = fields[CLIENT_DISPLAY_FIELDS.starsOutOf5];
+            const n = fields[CLIENT_DISPLAY_FIELDS.numReviews];
+            if (
+                stars == null || String(stars).trim() === '' || !Number.isFinite(Number(stars)) ||
+                n == null || String(n).trim() === '' || !Number.isFinite(Number(n))
+            ) {
+                return null;
+            }
+            const starsText = escapeHtml(Number(stars).toFixed(1));
+            const reviewsText = escapeHtml(String(Math.round(Number(n))));
+            return `<strong>${starsText}</strong>/5.0 rating based on <strong>${reviewsText}</strong> real homeowner<br>reviews`;
+        }
+
+        function mergeStarRatingIntoLocalPickItems(localPickItems, fields) {
+            const html = buildLocalPickStarRatingLineHtml(fields);
+            if (!html) return;
+            const idx = localPickItems.findIndex((x) => x.iconIndex === 1);
+            if (idx >= 0) {
+                localPickItems[idx] = { iconIndex: 1, html };
+            } else {
+                localPickItems.unshift({ iconIndex: 1, html });
+                localPickItems.sort((a, b) => a.iconIndex - b.iconIndex);
+            }
         }
 
         function buildShowerCarouselHtml() {
@@ -3254,11 +3321,13 @@
             resetPostSubmitCtaTitlesVisibility();
 
             if (localPickTitleEl) {
-                localPickTitleEl.innerHTML = 'Here\'s why <span id="localPickCompanyName">Company</span> is our Local Pick in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
+                localPickTitleEl.innerHTML =
+                    'Here\'s why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-head-lockup"><img id="localPickHeaderLogoImg" class="local-pick-title-inline-logo" alt="" decoding="async" /><span class="local-pick-highlight">Local Pick</span></span> in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
             }
             const reviewsLocalPickTitleEl = document.getElementById('reviewsLocalPickTitle');
             if (reviewsLocalPickTitleEl) {
-                reviewsLocalPickTitleEl.innerHTML = 'Here\'s why <span id="reviewsLocalPickCompanyName">Company</span> is our Local Pick in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
+                reviewsLocalPickTitleEl.innerHTML =
+                    'Here\'s why <span id="reviewsLocalPickCompanyName">Company</span> is our <span class="local-pick-head-lockup"><img id="reviewsLocalPickHeaderLogoImg" class="local-pick-title-inline-logo" alt="" decoding="async" /><span class="local-pick-highlight">Local Pick</span></span> in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
             }
 
             const activeClient = getActiveClient();
@@ -3306,6 +3375,9 @@
             if (getQuoteCompanyElement) {
                 getQuoteCompanyElement.textContent = postFormSubmitted ? (partnerName || 'Peak Leads Group') : 'The Local Pick';
             }
+
+            const headerLogoUrl = activeClient && activeClient.fields ? resolveClientLogoUrl(activeClient.fields) : null;
+            setPartnerLogoForWhySection(headerLogoUrl, 'both');
         }
         
         // Also ensure logo loads when DOM is ready (backup)
@@ -4832,7 +4904,7 @@
         }
 
         /** Partner “why they’re our Local Pick” from Airtable (Local Pick 1–5) below the form during the quiz; not post-submit. */
-        function refreshPartnerLocalPickSection() {
+        async function refreshPartnerLocalPickSection() {
             if (postFormSubmitted) return;
 
             if (mainFunnelLocalPickSuppressed) {
@@ -4864,7 +4936,10 @@
             const ctaSection = document.getElementById('ctaSection');
             const getQuoteBtn = document.getElementById('getQuoteBottomBtn');
 
-            const activeClient = getActiveClient();
+            let activeClient = getActiveClient();
+            if (activeClient && activeClient.fields) {
+                activeClient = await hydrateClientReviewsByIdIfNeeded(activeClient);
+            }
             if (!activeClient || !activeClient.fields) {
                 const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
                 if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
@@ -4896,6 +4971,8 @@
                     localPickItems.push({ text, iconIndex: idx + 1 });
                 });
             }
+
+            mergeStarRatingIntoLocalPickItems(localPickItems, fields);
 
             const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
             buildLocalPickBlock(localPickItems, partnerName);
@@ -4939,6 +5016,8 @@
                     localPickItems.push({ text, iconIndex: idx + 1 });
                 });
             }
+
+            mergeStarRatingIntoLocalPickItems(localPickItems, fields);
 
             const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
             if (postFormSubmitted) {
@@ -5014,11 +5093,22 @@
                     const li = document.createElement('li');
                     li.className = 'local-pick-item';
                     const iconPath = `${iconBase}${item.iconIndex}.svg`;
-                    tlpDebug('icons', 'Icon path', { iconIndex: item.iconIndex, iconPath });
-                    li.innerHTML = `
-                    <span class="local-pick-icon"><img src="${escapeHtml(iconPath)}" alt=""></span>
-                    <span class="local-pick-text">${escapeHtml(item.text)}</span>
-                `;
+                    tlpDebug('icons', 'Icon path', { iconIndex: item.iconIndex, iconPath, hasHtml: !!item.html });
+                    const iconSpan = document.createElement('span');
+                    iconSpan.className = 'local-pick-icon';
+                    const img = document.createElement('img');
+                    img.src = iconPath;
+                    img.alt = '';
+                    iconSpan.appendChild(img);
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'local-pick-text';
+                    if (item.html) {
+                        textSpan.innerHTML = item.html;
+                    } else {
+                        textSpan.textContent = item.text != null ? String(item.text) : '';
+                    }
+                    li.appendChild(iconSpan);
+                    li.appendChild(textSpan);
                     listEl.appendChild(li);
                 });
             }
