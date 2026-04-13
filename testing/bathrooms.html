@@ -1696,6 +1696,16 @@
         // ============================================
         const TESTING_MODE = window.TLP_TESTING_MODE === true;
         if (TESTING_MODE) console.log('[TESTING_MODE] Page loaded - Airtable writes and Meta Pixel disabled for testing');
+        const TLP_DEBUG_VERBOSE = window.TLP_DEBUG_VERBOSE !== false;
+        function tlpDebug(scope, message, details) {
+            if (!TLP_DEBUG_VERBOSE) return;
+            const prefix = `[TLP][${scope}] ${message}`;
+            if (details === undefined) {
+                console.log(prefix);
+            } else {
+                console.log(prefix, details);
+            }
+        }
         
         // ============================================
         // AIRTABLE CONFIGURATION
@@ -1715,6 +1725,26 @@
             URL_PARAMETERS: 'tbl5JDBRhTzuxzsc4',
         };
 
+        /** Site-root icons: `/icons/` breaks when this file is under `/testing/`. */
+        function getIconsBaseUrl() {
+            try {
+                const base = typeof location !== 'undefined' ? location.href : '';
+                const u = new URL(base || 'https://thelocalpick.com/');
+                const path = u.pathname || '';
+                if (path.includes('/testing/')) {
+                    const out = new URL('../icons/', u).href;
+                    tlpDebug('icons', 'Using testing-relative icons base', { path, out });
+                    return out;
+                }
+                const out = new URL('icons/', u).href;
+                tlpDebug('icons', 'Using site-root icons base', { path, out });
+                return out;
+            } catch {
+                tlpDebug('icons', 'Fell back to ../icons/ due to URL parse failure');
+                return '../icons/';
+            }
+        }
+
         /** Ad-set zip junction routing (same tables/fields as Dashboards/ClientManagement.html) */
         const ZIP_ROUTE = {
             CLIENT_TABLE: 'tblH2nVfmGNG8pAjC',
@@ -1722,10 +1752,11 @@
             ADSET_ZIPS_TABLE: 'tbl87JqHAdJwgq1GL',
             US_ZIPS_TABLE: 'tblieaHIf6rDfFZFl',
             CLIENT_NAME_FIELD: 'Name',
-            CLIENT_ADSET_FIELDS: [
-                'Adsets',
+            /** Only fields whose values are linked Adset record IDs (used by zipRouteGetClientAdsetIds). */
+            CLIENT_ADSET_LINK_FIELDS: ['Adsets'],
+            /** Extra Client fields for UI (must exist on junction Client table or Airtable returns 422). */
+            CLIENT_EXTRA_DISPLAY_FIELDS: [
                 'Logo',
-                'Logo Link',
                 'Stars/5.0',
                 '# of Reviews',
                 'Review 1',
@@ -1734,12 +1765,6 @@
                 'Reviewer 2',
                 'Review 3',
                 'Reviewer 3',
-                'Review Text 1',
-                'Review Name 1',
-                'Review Text 2',
-                'Review Name 2',
-                'Review Text 3',
-                'Review Name 3',
             ],
             JUNCTION_ADSET_FIELD: 'Adset',
             JUNCTION_ZIP_FIELD: 'US Zips',
@@ -2080,7 +2105,7 @@
 
         function zipRouteGetClientAdsetIds(fields) {
             const ids = new Set();
-            for (const fname of ZIP_ROUTE.CLIENT_ADSET_FIELDS) {
+            for (const fname of ZIP_ROUTE.CLIENT_ADSET_LINK_FIELDS) {
                 const v = fields[fname];
                 if (!v) continue;
                 if (Array.isArray(v)) v.forEach((id) => ids.add(id));
@@ -2186,7 +2211,12 @@
         async function zipRouteEnsureInfrastructure() {
             await zipRouteResolveUsZipsMatchField();
             if (zipRouteClientsCache && zipRouteAdsetById) return;
-            const clientFields = [ZIP_ROUTE.CLIENT_NAME_FIELD, 'Status', ...ZIP_ROUTE.CLIENT_ADSET_FIELDS];
+            const clientFields = [
+                ZIP_ROUTE.CLIENT_NAME_FIELD,
+                'Status',
+                ...ZIP_ROUTE.CLIENT_ADSET_LINK_FIELDS,
+                ...ZIP_ROUTE.CLIENT_EXTRA_DISPLAY_FIELDS,
+            ];
             const clientP = zipRouteClientsCache
                 ? Promise.resolve(zipRouteClientsCache)
                 : airtableFetchAllRecords(ZIP_ROUTE.CLIENT_TABLE, { fields: clientFields });
@@ -2200,6 +2230,11 @@
                 zipRouteAdsetById = new Map();
                 for (const r of adsets) zipRouteAdsetById.set(r.id, r);
             }
+            tlpDebug('zipRoute', 'Infrastructure loaded', {
+                clientCount: Array.isArray(zipRouteClientsCache) ? zipRouteClientsCache.length : 0,
+                adsetCount: zipRouteAdsetById ? zipRouteAdsetById.size : 0,
+                requestedClientFields: clientFields
+            });
         }
 
         async function zipRouteFetchJunctionRecordsForZip(zipRecordId) {
@@ -2775,6 +2810,7 @@
 
         function setPartnerLogoForWhySection(logoUrl, which) {
             const w = which || 'both';
+            tlpDebug('logo', 'setPartnerLogoForWhySection called', { which: w, logoUrl });
 
             function apply(wrapId, imgId) {
                 const wrap = document.getElementById(wrapId);
@@ -2784,14 +2820,17 @@
                 if (!logoUrl) {
                     img.removeAttribute('src');
                     wrap.style.display = 'none';
+                    tlpDebug('logo', 'Logo hidden (no URL)', { wrapId, imgId });
                     return;
                 }
 
                 preloadLogo(logoUrl);
                 img.src = logoUrl;
                 wrap.style.display = 'block';
+                tlpDebug('logo', 'Logo applied', { wrapId, imgId, logoUrl });
                 img.onerror = function() {
                     wrap.style.display = 'none';
+                    tlpDebug('logo', 'Logo failed to load', { wrapId, imgId, logoUrl });
                     img.onerror = null;
                 };
             }
@@ -2804,6 +2843,10 @@
             if (raw == null) return null;
             if (typeof raw === 'string') {
                 const s = raw.trim();
+                return s || null;
+            }
+            if (typeof raw === 'object' && !Array.isArray(raw) && raw.url && typeof raw.url === 'string') {
+                const s = raw.url.trim();
                 return s || null;
             }
             if (Array.isArray(raw) && raw.length > 0) {
@@ -2837,9 +2880,14 @@
             timezone: 'Timezone',
         };
 
-        const SHOWER_IMAGE_URLS = [1, 2, 3, 4, 5].map(
-            (n) => `https://thelocalpick.com/images/shower${n}.png`
-        );
+        const SHOWER_IMAGE_URLS = [
+            'https://thelocalpick.com/images/shower1.png',
+            'https://thelocalpick.com/images/shower2.png',
+            'https://thelocalpick.com/images/shower3.png',
+            'https://thelocalpick.com/images/shower4.png',
+            'https://thelocalpick.com/images/shower6',
+            'https://thelocalpick.com/images/shower5.png',
+        ];
         const DEFAULT_LOCAL_PICK_ITEMS = [
             'Top-rated service backed by real homeowner reviews',
             'Fully licensed and insured local installation team',
@@ -2851,8 +2899,13 @@
         function resolveClientLogoUrl(fields) {
             if (!fields) return null;
             const fromLogo = resolveLogoLinkField(fields[CLIENT_DISPLAY_FIELDS.logo]);
-            if (fromLogo) return fromLogo;
-            return resolveLogoLinkField(fields['Logo Link']);
+            if (fromLogo) {
+                tlpDebug('logo', 'Resolved logo from Client.Logo', { logo: fromLogo });
+                return fromLogo;
+            }
+            const fallback = resolveLogoLinkField(fields['Logo Link']);
+            tlpDebug('logo', 'Resolved logo fallback from Logo Link', { logo: fallback || null });
+            return fallback;
         }
 
         function collectReviewsFromClientFields(fields) {
@@ -2890,14 +2943,26 @@
             const currentFields = activeClient.fields;
             const alreadyHasReviewKeys = fieldsContainAnyReviewKeys(currentFields);
             const alreadyHasReviews = collectReviewsFromClientFields(currentFields).length > 0;
+            tlpDebug('reviews', 'hydrateClientReviewsByIdIfNeeded check', {
+                clientId: activeClient.id,
+                alreadyHasReviewKeys,
+                alreadyHasReviews
+            });
             if (alreadyHasReviewKeys && alreadyHasReviews) return activeClient;
             try {
                 const fresh = await fetchAirtableData(
                     `${AIRTABLE_BASE_URL}/${ZIP_ROUTE.CLIENT_TABLE}/${encodeURIComponent(activeClient.id)}`
                 );
-                if (fresh && fresh.fields) return fresh;
+                if (fresh && fresh.fields) {
+                    tlpDebug('reviews', 'Hydrated client review fields by ID', {
+                        clientId: activeClient.id,
+                        keys: Object.keys(fresh.fields || {})
+                    });
+                    return fresh;
+                }
             } catch (e) {
                 console.warn('Unable to hydrate client review fields by id:', e);
+                tlpDebug('reviews', 'Hydrate failed', { clientId: activeClient.id, error: String(e && e.message ? e.message : e) });
             }
             return activeClient;
         }
@@ -2928,8 +2993,19 @@
         function getActiveClient() {
             if (genericLeadFlow) return null;
             const sel = lastLeadRoutePick && lastLeadRoutePick.selected;
-            if (sel && sel.clientRec && sel.clientRec.fields) return sel.clientRec;
-            return matchedClientData || null;
+            if (sel && sel.clientRec && sel.clientRec.fields) {
+                tlpDebug('client', 'getActiveClient resolved', {
+                    source: 'route.selected.clientRec',
+                    clientId: sel.clientRec.id || null
+                });
+                return sel.clientRec;
+            }
+            const out = matchedClientData || null;
+            tlpDebug('client', 'getActiveClient resolved', {
+                source: sel && sel.clientRec ? 'route.selected.clientRec' : (out ? 'matchedClientData' : 'none'),
+                clientId: (sel && sel.clientRec && sel.clientRec.id) || (out && out.id) || null
+            });
+            return out;
         }
 
         function getRoutedAdsetFields() {
@@ -4826,6 +4902,7 @@
             let activeClient = getActiveClient();
             
             if (!activeClient || !activeClient.fields) {
+                tlpDebug('reviews', 'showReviewsModal skipped: no active client');
                 return;
             }
             activeClient = await hydrateClientReviewsByIdIfNeeded(activeClient);
@@ -4862,6 +4939,12 @@
             }
 
             reviews = collectReviewsFromClientFields(fields);
+            tlpDebug('reviews', 'Collected reviews for modal', {
+                clientId: activeClient.id || null,
+                reviewCount: reviews.length,
+                hasRating: fields[CLIENT_DISPLAY_FIELDS.starsOutOf5] != null,
+                hasReviewCount: fields[CLIENT_DISPLAY_FIELDS.numReviews] != null
+            });
 
             // After submit: show reviews + partner Local Pick below the post-submit screen; duplicate CTA under that
             if (postFormSubmitted) {
@@ -4907,12 +4990,18 @@
 
             function fillList(listEl, iconBase) {
                 listEl.innerHTML = '';
+                tlpDebug('icons', 'Rendering local pick icon list', {
+                    iconBase,
+                    itemCount: localPickItems.length,
+                    partnerName
+                });
                 localPickItems.forEach((item) => {
                     const li = document.createElement('li');
                     li.className = 'local-pick-item';
                     const iconPath = `${iconBase}${item.iconIndex}.svg`;
+                    tlpDebug('icons', 'Icon path', { iconIndex: item.iconIndex, iconPath });
                     li.innerHTML = `
-                    <span class="local-pick-icon"><img src="${escapeHtml(iconPath)}" alt="" onerror="this.parentElement.style.display='none'"></span>
+                    <span class="local-pick-icon"><img src="${escapeHtml(iconPath)}" alt=""></span>
                     <span class="local-pick-text">${escapeHtml(item.text)}</span>
                 `;
                     listEl.appendChild(li);
@@ -4927,7 +5016,7 @@
                 const co = document.getElementById('reviewsLocalPickCompanyName');
                 if (!reviewsMount || !listEl) return;
                 if (co) co.textContent = partnerName;
-                fillList(listEl, '/icons/');
+                fillList(listEl, getIconsBaseUrl());
                 const rz = document.getElementById('reviewsLocalPickZipCode');
                 if (rz) {
                     const z = (formData.address && formData.address.zip) || formData.initialZip;
@@ -4943,7 +5032,7 @@
                 const titleSpan = document.getElementById('localPickCompanyName');
                 if (!mainWrap || !topOuter || !block || !listEl) return;
                 if (titleSpan) titleSpan.textContent = partnerName;
-                fillList(listEl, '/icons/');
+                fillList(listEl, getIconsBaseUrl());
                 setPartnerLogoForWhySection(logoUrl, 'top');
                 topOuter.style.display = 'block';
                 mainWrap.style.display = 'block';
