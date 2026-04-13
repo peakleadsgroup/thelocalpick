@@ -1719,6 +1719,15 @@
         };
 
         const ROUTING_RADIUS_MILES = 30;
+        /** Phase 2 junction pagination cap (lower = faster; may miss very late table rows). */
+        const ZIP_ROUTE_PHASE2_MAX_PAGES = 200;
+        /** Slight slack on flat-earth miles vs true geodesic (speed over precision). */
+        const ZIP_ROUTE_FAST_RADIUS_SLACK = 1.03;
+
+        /** Last zip we fully computed; enables reuse after prefetch. */
+        let zipRouteCacheZip = null;
+        /** zipFive → Promise while a compute is in flight (dedupes prefetch + submit). */
+        const zipRouteLeadComputeByZip = new Map();
 
         const ZIP_ROUTE_BUILTIN_ZIP_FIELDS = [
             'ZIP', 'Zip', 'zip', 'Name', 'ZCTA', 'Zcta', 'GEOID', 'Zip Code', 'ZIP Code',
@@ -2285,6 +2294,24 @@
             return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
         }
 
+        /**
+         * Fast "close enough" check: axis-aligned mile rejects (no trig per candidate),
+         * then one flat-earth distance using cos(leadLat) computed once per Phase 2 scan.
+         */
+        /** Approx miles; returns Infinity if N/S or E/W component alone exceeds radius (safe reject). */
+        function zipRouteFastDistanceMiles(leadLat, leadLon, candLat, candLon, cosLeadLat) {
+            const clampCos = Math.max(0.2, Math.min(1, cosLeadLat));
+            const mPerDegLat = 69.172;
+            const mPerDegLon = 69.172 * clampCos;
+            const dlat = Math.abs(candLat - leadLat);
+            const dlon = Math.abs(candLon - leadLon);
+            if (dlat * mPerDegLat > ROUTING_RADIUS_MILES) return Infinity;
+            if (dlon * mPerDegLon > ROUTING_RADIUS_MILES) return Infinity;
+            const ns = (candLat - leadLat) * mPerDegLat;
+            const ew = (candLon - leadLon) * mPerDegLon;
+            return Math.sqrt(ns * ns + ew * ew);
+        }
+
         function zipRouteReadLatLonFromUsZipFields(fields) {
             if (!fields) return null;
             let lat = NaN;
@@ -2447,13 +2474,15 @@
         async function zipRouteScanPhase2CandidateRows(leadLatLon, excludeAdsetIds, leadZipRecId) {
             const out = [];
             const seenAdset = new Set();
+            const cosLeadLat = Math.cos((leadLatLon.lat * Math.PI) / 180);
             const fields = [ZIP_ROUTE.JUNCTION_ADSET_FIELD, ZIP_ROUTE.JUNCTION_ZIP_FIELD].filter(
                 (x, i, a) => x && a.indexOf(x) === i
             );
             let offset = null;
             let safety = 0;
-            const maxPages = 500;
-            const junctionPagePauseMs = 100;
+            const maxPages = ZIP_ROUTE_PHASE2_MAX_PAGES;
+            const junctionPagePauseMs = 50;
+            const radiusSlack = ROUTING_RADIUS_MILES * ZIP_ROUTE_FAST_RADIUS_SLACK;
             do {
                 const url = buildAirtableListUrl(ZIP_ROUTE.ADSET_ZIPS_TABLE, { fields }, offset);
                 const page = await fetchAirtableData(url);
@@ -2477,8 +2506,14 @@
                     if (seenAdset.has(adsetId)) continue;
                     const pos = zipLatLonCache.get(zipId);
                     if (!pos) continue;
-                    const d = haversineMiles(leadLatLon.lat, leadLatLon.lon, pos.lat, pos.lon);
-                    if (d <= ROUTING_RADIUS_MILES) {
+                    const d = zipRouteFastDistanceMiles(
+                        leadLatLon.lat,
+                        leadLatLon.lon,
+                        pos.lat,
+                        pos.lon,
+                        cosLeadLat
+                    );
+                    if (d <= radiusSlack) {
                         const clientRec = zipRouteFindClientRecordForAdset(adsetId);
                         const adsetRec = zipRouteAdsetById ? zipRouteAdsetById.get(adsetId) : null;
                         if (!clientRec || !adsetRec || !routingAdsetNicheMatchesFunnel(adsetRec.fields)) continue;
@@ -2501,84 +2536,126 @@
             return out;
         }
 
-        async function computeLeadRoute(zipInput) {
-            const zipFive = zipRouteNormalizeZipFive(zipInput);
-            const empty = { phase: 3, tier: null, selected: null, phase1Rows: [], message: 'No match' };
-            lastLeadRoutePick = empty;
-            lastZipRoutingQueue = [];
+        /** Starts full routing in background after address step (Next). Submit reuses result when zip matches. */
+        function prefetchZipLeadRouteFromAddressNext() {
+            const zipRaw =
+                (formData.address && formData.address.zip) ||
+                (document.getElementById('zip') && document.getElementById('zip').value.trim()) ||
+                '';
+            const zipFive = zipRouteNormalizeZipFive(zipRaw);
+            if (!/^\d{5}$/.test(zipFive)) return;
+            void computeLeadRoute(zipFive).catch((e) => console.warn('[zip route] prefetch failed', e));
+        }
 
+        async function computeLeadRoute(zipInput, opts = {}) {
+            const zipFive = zipRouteNormalizeZipFive(zipInput);
+            const force = opts.force === true;
+
+            const empty = { phase: 3, tier: null, selected: null, phase1Rows: [], message: 'No match' };
             if (!/^\d{5}$/.test(zipFive)) {
                 lastZipRoutingQueue = [];
                 lastLeadRoutePick = { ...empty, message: 'Invalid zip' };
+                zipRouteCacheZip = null;
                 return lastLeadRoutePick;
             }
 
-            try {
-                await zipRouteEnsureInfrastructure();
-                const phase1Rows = await zipRouteBuildPhase1Rows(zipFive);
-                lastZipRoutingQueue = phase1Rows;
-
-                const phase1AdsetIds = new Set(phase1Rows.map((r) => r.adsetId).filter(Boolean));
-                const phase1Candidates = routingDedupeCandidatesByAdset(phase1Rows);
-                const pick1 = routingPickPartnerFromPool(phase1Candidates);
-                if (pick1) {
-                    lastLeadRoutePick = {
-                        phase: 1,
-                        tier: pick1.tier,
-                        selected: pick1,
-                        phase1Rows,
-                        message: `Phase 1 exact zip — Tier ${pick1.tier}`,
-                    };
-                    return lastLeadRoutePick;
-                }
-
-                const leadZipRecId = await zipRouteFindZipRecordId(zipFive);
-                if (!leadZipRecId) {
-                    lastLeadRoutePick = { ...empty, phase1Rows, message: 'Zip not in US Zips' };
-                    return lastLeadRoutePick;
-                }
-
-                const leadLatLon = await zipRouteGetLeadZipLatLon(leadZipRecId);
-                if (!leadLatLon) {
-                    lastLeadRoutePick = {
-                        ...empty,
-                        phase1Rows,
-                        message: 'Lead zip missing Lat/Long in US Zips — cannot run Phase 2',
-                    };
-                    return lastLeadRoutePick;
-                }
-
-                const phase2Rows = await zipRouteScanPhase2CandidateRows(
-                    leadLatLon,
-                    phase1AdsetIds,
-                    leadZipRecId
-                );
-                const phase2Candidates = routingDedupeCandidatesByAdset(phase2Rows);
-                const pick2 = routingPickPartnerFromPool(phase2Candidates);
-                if (pick2) {
-                    lastLeadRoutePick = {
-                        phase: 2,
-                        tier: pick2.tier,
-                        selected: pick2,
-                        phase1Rows,
-                        message: `Phase 2 within ${ROUTING_RADIUS_MILES} mi — Tier ${pick2.tier}`,
-                    };
-                    return lastLeadRoutePick;
-                }
-
-                lastLeadRoutePick = {
-                    phase: 3,
-                    tier: null,
-                    selected: null,
-                    phase1Rows,
-                    message: 'No qualifying partner (Phase 3)',
-                };
+            if (!force && zipRouteCacheZip === zipFive && lastLeadRoutePick) {
                 return lastLeadRoutePick;
-            } catch (e) {
-                console.error('computeLeadRoute failed:', e);
-                lastLeadRoutePick = { ...empty, message: e.message || String(e) };
+            }
+
+            const inflight = zipRouteLeadComputeByZip.get(zipFive);
+            if (inflight) {
+                await inflight;
+                if (!force && zipRouteCacheZip === zipFive && lastLeadRoutePick) {
+                    return lastLeadRoutePick;
+                }
+            }
+
+            const work = (async () => {
+                lastLeadRoutePick = empty;
                 lastZipRoutingQueue = [];
-                return lastLeadRoutePick;
+                try {
+                    await zipRouteEnsureInfrastructure();
+                    const phase1Rows = await zipRouteBuildPhase1Rows(zipFive);
+                    lastZipRoutingQueue = phase1Rows;
+
+                    const phase1AdsetIds = new Set(phase1Rows.map((r) => r.adsetId).filter(Boolean));
+                    const phase1Candidates = routingDedupeCandidatesByAdset(phase1Rows);
+                    const pick1 = routingPickPartnerFromPool(phase1Candidates);
+                    if (pick1) {
+                        lastLeadRoutePick = {
+                            phase: 1,
+                            tier: pick1.tier,
+                            selected: pick1,
+                            phase1Rows,
+                            message: `Phase 1 exact zip — Tier ${pick1.tier}`,
+                        };
+                        zipRouteCacheZip = zipFive;
+                        return lastLeadRoutePick;
+                    }
+
+                    const leadZipRecId = await zipRouteFindZipRecordId(zipFive);
+                    if (!leadZipRecId) {
+                        lastLeadRoutePick = { ...empty, phase1Rows, message: 'Zip not in US Zips' };
+                        zipRouteCacheZip = zipFive;
+                        return lastLeadRoutePick;
+                    }
+
+                    const leadLatLon = await zipRouteGetLeadZipLatLon(leadZipRecId);
+                    if (!leadLatLon) {
+                        lastLeadRoutePick = {
+                            ...empty,
+                            phase1Rows,
+                            message: 'Lead zip missing Lat/Long in US Zips — cannot run Phase 2',
+                        };
+                        zipRouteCacheZip = zipFive;
+                        return lastLeadRoutePick;
+                    }
+
+                    const phase2Rows = await zipRouteScanPhase2CandidateRows(
+                        leadLatLon,
+                        phase1AdsetIds,
+                        leadZipRecId
+                    );
+                    const phase2Candidates = routingDedupeCandidatesByAdset(phase2Rows);
+                    const pick2 = routingPickPartnerFromPool(phase2Candidates);
+                    if (pick2) {
+                        lastLeadRoutePick = {
+                            phase: 2,
+                            tier: pick2.tier,
+                            selected: pick2,
+                            phase1Rows,
+                            message: `Phase 2 ~${ROUTING_RADIUS_MILES} mi (fast check) — Tier ${pick2.tier}`,
+                        };
+                        zipRouteCacheZip = zipFive;
+                        return lastLeadRoutePick;
+                    }
+
+                    lastLeadRoutePick = {
+                        phase: 3,
+                        tier: null,
+                        selected: null,
+                        phase1Rows,
+                        message: 'No qualifying partner (Phase 3)',
+                    };
+                    zipRouteCacheZip = zipFive;
+                    return lastLeadRoutePick;
+                } catch (e) {
+                    console.error('computeLeadRoute failed:', e);
+                    lastLeadRoutePick = { ...empty, message: e.message || String(e) };
+                    lastZipRoutingQueue = [];
+                    zipRouteCacheZip = null;
+                    return lastLeadRoutePick;
+                }
+            })();
+
+            zipRouteLeadComputeByZip.set(zipFive, work);
+            try {
+                return await work;
+            } finally {
+                if (zipRouteLeadComputeByZip.get(zipFive) === work) {
+                    zipRouteLeadComputeByZip.delete(zipFive);
+                }
             }
         }
 
@@ -3420,6 +3497,7 @@
         function goFromAddressToNameStep() {
             validateAddressForm();
             if (formData.address) {
+                prefetchZipLeadRouteFromAddressNext();
                 nextStep();
             }
         }
