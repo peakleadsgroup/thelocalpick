@@ -1722,7 +1722,25 @@
             ADSET_ZIPS_TABLE: 'tbl87JqHAdJwgq1GL',
             US_ZIPS_TABLE: 'tblieaHIf6rDfFZFl',
             CLIENT_NAME_FIELD: 'Name',
-            CLIENT_ADSET_FIELDS: ['Adsets'],
+            CLIENT_ADSET_FIELDS: [
+                'Adsets',
+                'Logo',
+                'Logo Link',
+                'Stars/5.0',
+                '# of Reviews',
+                'Review 1',
+                'Reviewer 1',
+                'Review 2',
+                'Reviewer 2',
+                'Review 3',
+                'Reviewer 3',
+                'Review Text 1',
+                'Review Name 1',
+                'Review Text 2',
+                'Review Name 2',
+                'Review Text 3',
+                'Review Name 3',
+            ],
             JUNCTION_ADSET_FIELD: 'Adset',
             JUNCTION_ZIP_FIELD: 'US Zips',
             ADSET_JUNCTION_LINK_FIELDS: ['Adset Zip Tracking', 'Ad Set Zip Tracking'],
@@ -2858,19 +2876,45 @@
             return out;
         }
 
+        function fieldsContainAnyReviewKeys(fields) {
+            if (!fields) return false;
+            for (let i = 1; i <= 3; i++) {
+                if (fields[`Review ${i}`] != null || fields[`Reviewer ${i}`] != null) return true;
+                if (fields[`Review Text ${i}`] != null || fields[`Review Name ${i}`] != null) return true;
+            }
+            return false;
+        }
+
+        async function hydrateClientReviewsByIdIfNeeded(activeClient) {
+            if (!activeClient || !activeClient.id || !activeClient.fields) return activeClient;
+            const currentFields = activeClient.fields;
+            const alreadyHasReviewKeys = fieldsContainAnyReviewKeys(currentFields);
+            const alreadyHasReviews = collectReviewsFromClientFields(currentFields).length > 0;
+            if (alreadyHasReviewKeys && alreadyHasReviews) return activeClient;
+            try {
+                const fresh = await fetchAirtableData(
+                    `${AIRTABLE_BASE_URL}/${ZIP_ROUTE.CLIENT_TABLE}/${encodeURIComponent(activeClient.id)}`
+                );
+                if (fresh && fresh.fields) return fresh;
+            } catch (e) {
+                console.warn('Unable to hydrate client review fields by id:', e);
+            }
+            return activeClient;
+        }
+
         function buildClientRatingSummaryHtml(fields) {
             if (!fields) return '';
             const stars = fields[CLIENT_DISPLAY_FIELDS.starsOutOf5];
             const n = fields[CLIENT_DISPLAY_FIELDS.numReviews];
-            const parts = [];
-            if (stars != null && String(stars).trim() !== '' && Number.isFinite(Number(stars))) {
-                parts.push(`<strong>${escapeHtml(Number(stars).toFixed(1))}</strong> out of 5 stars`);
+            if (
+                stars == null || String(stars).trim() === '' || !Number.isFinite(Number(stars)) ||
+                n == null || String(n).trim() === '' || !Number.isFinite(Number(n))
+            ) {
+                return '';
             }
-            if (n != null && String(n).trim() !== '' && Number.isFinite(Number(n))) {
-                parts.push(`${escapeHtml(String(Math.round(Number(n))))} reviews`);
-            }
-            if (!parts.length) return '';
-            return `<div class="review-aggregate">${parts.join(' · ')}</div>`;
+            const starsText = escapeHtml(Number(stars).toFixed(1));
+            const reviewsText = escapeHtml(String(Math.round(Number(n))));
+            return `<div class="review-aggregate"><strong>${starsText}</strong>/5.0 rating based on <strong>${reviewsText}</strong> real homeowner reviews</div>`;
         }
 
         function buildShowerCarouselHtml() {
@@ -4777,13 +4821,14 @@
             }, 100);
         }
 
-        function showReviewsModal() {
+        async function showReviewsModal() {
             // Get reviews from client data
-            const activeClient = getActiveClient();
+            let activeClient = getActiveClient();
             
             if (!activeClient || !activeClient.fields) {
                 return;
             }
+            activeClient = await hydrateClientReviewsByIdIfNeeded(activeClient);
 
             reviews = [];
             const fields = activeClient.fields;
@@ -4882,7 +4927,7 @@
                 const co = document.getElementById('reviewsLocalPickCompanyName');
                 if (!reviewsMount || !listEl) return;
                 if (co) co.textContent = partnerName;
-                fillList(listEl, 'icons/');
+                fillList(listEl, '/icons/');
                 const rz = document.getElementById('reviewsLocalPickZipCode');
                 if (rz) {
                     const z = (formData.address && formData.address.zip) || formData.initialZip;
@@ -4898,7 +4943,7 @@
                 const titleSpan = document.getElementById('localPickCompanyName');
                 if (!mainWrap || !topOuter || !block || !listEl) return;
                 if (titleSpan) titleSpan.textContent = partnerName;
-                fillList(listEl, 'icons/');
+                fillList(listEl, '/icons/');
                 setPartnerLogoForWhySection(logoUrl, 'top');
                 topOuter.style.display = 'block';
                 mainWrap.style.display = 'block';
