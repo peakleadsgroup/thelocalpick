@@ -1710,17 +1710,30 @@
             US_ZIPS_MATCH_AS_NUMBER: true,
             US_ZIPS_MATCH_FIELD_CANDIDATES: [],
             US_ZIPS_BATCH_CHUNK: 20,
-            US_ZIPS_BATCH_PAUSE_MS: 150,
             JUNCTION_BATCH_CHUNK: 20,
             /** US Zips — centroid for radius routing (try in order) */
             /** Must match real column names on US Zips — unknown names in fields[] cause Airtable 422. */
             US_ZIPS_LAT_FIELDS: ['Lat'],
             US_ZIPS_LONG_FIELDS: ['Long'],
+            /** No pause between US-Zip / junction batch requests (speed over rate-limit comfort on this test page). */
+            US_ZIPS_BATCH_PAUSE_MS: 0,
         };
 
         const ROUTING_RADIUS_MILES = 30;
-        /** Phase 2 junction pagination cap (lower = faster; may miss very late table rows). */
-        const ZIP_ROUTE_PHASE2_MAX_PAGES = 200;
+        /**
+         * Emergency: skip Phase 2 (exact-zip only). Keep false for normal neighbor routing.
+         */
+        const ZIP_ROUTE_SPEED_SKIP_PHASE2 = false;
+        /** Fallback only: unfiltered junction list pages if geo-filter path returns nothing. */
+        const ZIP_ROUTE_PHASE2_FALLBACK_MAX_PAGES = 12;
+        /** Degrees padding on US-Zips bounding box (~radius * this / 69mi). */
+        const ZIP_ROUTE_PHASE2_BOX_PAD = 1.22;
+        /** Stop reading US Zips in the box after this many rows (safety). */
+        const ZIP_ROUTE_PHASE2_MAX_US_ZIP_CANDIDATES = 2000;
+        /** Only query junction for the N closest zip centroids in the box (speed; may miss fringe partners). */
+        const ZIP_ROUTE_PHASE2_MAX_ZIP_IDS_FOR_JUNCTION = 450;
+        /** Record IDs per junction filterByFormula OR(...) — keep modest for formula limits. */
+        const ZIP_ROUTE_PHASE2_JUNCTION_OR_CHUNK = 22;
         /** Slight slack on flat-earth miles vs true geodesic (speed over precision). */
         const ZIP_ROUTE_FAST_RADIUS_SLACK = 1.03;
 
@@ -1740,6 +1753,17 @@
             monthlyLeadsLeft: 'Monthly Leads Left',
             totalLeadsLeft: 'Total Leads Left',
         };
+
+        /** Minimal Adset columns for routing + UI labels (smaller payloads than full-row list). */
+        const ZIP_ROUTE_ADSET_FETCH_FIELDS = [
+            'Name',
+            'Niche',
+            ZIP_ROUTE_ADSET_METRIC_FIELDS.clientStatus,
+            ZIP_ROUTE_ADSET_METRIC_FIELDS.adsetStatus,
+            ZIP_ROUTE_ADSET_METRIC_FIELDS.weeklyLeadsLeft,
+            ZIP_ROUTE_ADSET_METRIC_FIELDS.monthlyLeadsLeft,
+            ZIP_ROUTE_ADSET_METRIC_FIELDS.totalLeadsLeft,
+        ];
 
         /** Adset table {Niche} must match this value (single- or multi-select) for routing on this page */
         const FUNNEL_ADSET_NICHE = 'Bathrooms';
@@ -2045,6 +2069,22 @@
             return all;
         }
 
+        /** Paginated list until `cap` records (for Phase 2 US-Zips geo prefilter). */
+        async function airtableFetchRecordsUpTo(tableId, opts, cap) {
+            const all = [];
+            let url = buildAirtableListUrl(tableId, opts, null);
+            do {
+                const page = await fetchAirtableData(url);
+                const recs = page.records || [];
+                for (const r of recs) {
+                    all.push(r);
+                    if (all.length >= cap) return all;
+                }
+                url = page.offset ? buildAirtableListUrl(tableId, opts, page.offset) : null;
+            } while (url);
+            return all;
+        }
+
         let zipRouteUsMatchField = null;
         let zipRouteUsMatchAsNumber = false;
         let zipRouteClientsCache = null;
@@ -2174,13 +2214,17 @@
 
         async function zipRouteEnsureInfrastructure() {
             await zipRouteResolveUsZipsMatchField();
-            if (!zipRouteClientsCache) {
-                zipRouteClientsCache = await airtableFetchAllRecords(ZIP_ROUTE.CLIENT_TABLE, {
-                    fields: [ZIP_ROUTE.CLIENT_NAME_FIELD, 'Status', ...ZIP_ROUTE.CLIENT_ADSET_FIELDS],
-                });
-            }
-            if (!zipRouteAdsetById) {
-                const adsets = await airtableFetchAllRecords(ZIP_ROUTE.ADSET_TABLE);
+            if (zipRouteClientsCache && zipRouteAdsetById) return;
+            const clientFields = [ZIP_ROUTE.CLIENT_NAME_FIELD, 'Status', ...ZIP_ROUTE.CLIENT_ADSET_FIELDS];
+            const clientP = zipRouteClientsCache
+                ? Promise.resolve(zipRouteClientsCache)
+                : airtableFetchAllRecords(ZIP_ROUTE.CLIENT_TABLE, { fields: clientFields });
+            const adsetP = zipRouteAdsetById
+                ? Promise.resolve(null)
+                : airtableFetchAllRecords(ZIP_ROUTE.ADSET_TABLE, { fields: ZIP_ROUTE_ADSET_FETCH_FIELDS });
+            const [clients, adsets] = await Promise.all([clientP, adsetP]);
+            if (!zipRouteClientsCache) zipRouteClientsCache = clients;
+            if (!zipRouteAdsetById && adsets) {
                 zipRouteAdsetById = new Map();
                 for (const r of adsets) zipRouteAdsetById.set(r.id, r);
             }
@@ -2224,7 +2268,7 @@
                 if (ids.length === 0) return [];
 
                 const chunkSize = Math.max(5, Math.min(40, ZIP_ROUTE.JUNCTION_BATCH_CHUNK || 20));
-                const pauseMs = ZIP_ROUTE.US_ZIPS_BATCH_PAUSE_MS ?? 150;
+                const pauseMs = ZIP_ROUTE.US_ZIPS_BATCH_PAUSE_MS ?? 0;
                 for (let i = 0; i < ids.length; i += chunkSize) {
                     const slice = ids.slice(i, i + chunkSize);
                     const f = `OR(${slice.map((id) => `RECORD_ID()="${id}"`).join(',')})`;
@@ -2283,17 +2327,6 @@
             return zipRouteBuildPhase1Rows(zipRouteNormalizeZipFive(zipCode));
         }
 
-        function haversineMiles(lat1, lon1, lat2, lon2) {
-            const R = 3958.8;
-            const toR = (d) => (d * Math.PI) / 180;
-            const dLat = toR(lat2 - lat1);
-            const dLon = toR(lon2 - lon1);
-            const a =
-                Math.sin(dLat / 2) ** 2 +
-                Math.cos(toR(lat1)) * Math.cos(toR(lat2)) * Math.sin(dLon / 2) ** 2;
-            return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
-        }
-
         /**
          * Fast "close enough" check: axis-aligned mile rejects (no trig per candidate),
          * then one flat-earth distance using cos(leadLat) computed once per Phase 2 scan.
@@ -2336,7 +2369,7 @@
             );
             if (unique.length === 0) return;
             const chunkSize = Math.max(5, Math.min(40, ZIP_ROUTE.US_ZIPS_BATCH_CHUNK || 20));
-            const pauseMs = ZIP_ROUTE.US_ZIPS_BATCH_PAUSE_MS ?? 150;
+            const pauseMs = ZIP_ROUTE.US_ZIPS_BATCH_PAUSE_MS ?? 0;
             for (let i = 0; i < unique.length; i += chunkSize) {
                 const chunk = unique.slice(i, i + chunkSize);
                 const orInner = chunk.map((id) => `RECORD_ID()="${id}"`).join(',');
@@ -2471,7 +2504,8 @@
             return pool[0];
         }
 
-        async function zipRouteScanPhase2CandidateRows(leadLatLon, excludeAdsetIds, leadZipRecId) {
+        /** Last resort: scan first N pages of junction (slow; crude). */
+        async function zipRouteScanPhase2FullTableFallback(leadLatLon, excludeAdsetIds, leadZipRecId) {
             const out = [];
             const seenAdset = new Set();
             const cosLeadLat = Math.cos((leadLatLon.lat * Math.PI) / 180);
@@ -2480,8 +2514,7 @@
             );
             let offset = null;
             let safety = 0;
-            const maxPages = ZIP_ROUTE_PHASE2_MAX_PAGES;
-            const junctionPagePauseMs = 50;
+            const maxPages = ZIP_ROUTE_PHASE2_FALLBACK_MAX_PAGES;
             const radiusSlack = ROUTING_RADIUS_MILES * ZIP_ROUTE_FAST_RADIUS_SLACK;
             do {
                 const url = buildAirtableListUrl(ZIP_ROUTE.ADSET_ZIPS_TABLE, { fields }, offset);
@@ -2531,8 +2564,135 @@
                 }
                 offset = page.offset || null;
                 safety += 1;
-                if (safety < maxPages && offset) await sleepZipRoute(junctionPagePauseMs);
             } while (offset && safety < maxPages);
+            return out;
+        }
+
+        /**
+         * Phase 2: US Zips bounding box → nearest zip IDs → junction OR-queries only for those zips.
+         * Much faster than scanning the entire Adset–Zips table.
+         */
+        async function zipRouteScanPhase2CandidateRows(leadLatLon, excludeAdsetIds, leadZipRecId) {
+            if (ZIP_ROUTE_SPEED_SKIP_PHASE2) return [];
+
+            const out = [];
+            const seenAdset = new Set();
+            const cosLeadLat = Math.cos((leadLatLon.lat * Math.PI) / 180);
+            const radiusSlack = ROUTING_RADIUS_MILES * ZIP_ROUTE_FAST_RADIUS_SLACK;
+            const latF = (ZIP_ROUTE.US_ZIPS_LAT_FIELDS && ZIP_ROUTE.US_ZIPS_LAT_FIELDS[0]) || 'Lat';
+            const lonF = (ZIP_ROUTE.US_ZIPS_LONG_FIELDS && ZIP_ROUTE.US_ZIPS_LONG_FIELDS[0]) || 'Long';
+            const pad = ZIP_ROUTE_PHASE2_BOX_PAD;
+            const dLat = ((ROUTING_RADIUS_MILES / 69.172) * pad);
+            const cosClamp = Math.max(0.2, Math.cos((leadLatLon.lat * Math.PI) / 180));
+            const dLon = ((ROUTING_RADIUS_MILES / (69.172 * cosClamp)) * pad);
+            const minLat = leadLatLon.lat - dLat;
+            const maxLat = leadLatLon.lat + dLat;
+            const minLon = leadLatLon.lon - dLon;
+            const maxLon = leadLatLon.lon + dLon;
+            const fmt = (x) => Number(x).toFixed(6);
+            const boxFormula = `AND({${latF}}<=${fmt(maxLat)},{${latF}}>=${fmt(minLat)},{${lonF}}<=${fmt(maxLon)},{${lonF}}>=${fmt(minLon)})`;
+
+            let nearZipRecs = [];
+            try {
+                nearZipRecs = await airtableFetchRecordsUpTo(
+                    ZIP_ROUTE.US_ZIPS_TABLE,
+                    { formula: boxFormula, fields: [latF, lonF] },
+                    ZIP_ROUTE_PHASE2_MAX_US_ZIP_CANDIDATES
+                );
+            } catch (e) {
+                console.warn('Phase 2 US Zips bounding-box query failed', e);
+                return zipRouteScanPhase2FullTableFallback(leadLatLon, excludeAdsetIds, leadZipRecId);
+            }
+
+            const zipPosMap = new Map();
+            for (const rec of nearZipRecs) {
+                const pos = zipRouteReadLatLonFromUsZipFields(rec.fields || {});
+                if (pos) {
+                    zipPosMap.set(rec.id, pos);
+                    zipLatLonCache.set(rec.id, pos);
+                }
+            }
+
+            let zipIds = [...zipPosMap.keys()].filter((id) => id !== leadZipRecId);
+            if (zipIds.length === 0) {
+                return zipRouteScanPhase2FullTableFallback(leadLatLon, excludeAdsetIds, leadZipRecId);
+            }
+
+            zipIds.sort((a, b) => {
+                const pa = zipPosMap.get(a);
+                const pb = zipPosMap.get(b);
+                const da = zipRouteFastDistanceMiles(
+                    leadLatLon.lat,
+                    leadLatLon.lon,
+                    pa.lat,
+                    pa.lon,
+                    cosLeadLat
+                );
+                const db = zipRouteFastDistanceMiles(
+                    leadLatLon.lat,
+                    leadLatLon.lon,
+                    pb.lat,
+                    pb.lon,
+                    cosLeadLat
+                );
+                return da - db;
+            });
+            const maxZipsForJunction = ZIP_ROUTE_PHASE2_MAX_ZIP_IDS_FOR_JUNCTION;
+            if (zipIds.length > maxZipsForJunction) zipIds = zipIds.slice(0, maxZipsForJunction);
+
+            const zf = ZIP_ROUTE.JUNCTION_ZIP_FIELD;
+            const juncFields = [ZIP_ROUTE.JUNCTION_ADSET_FIELD, ZIP_ROUTE.JUNCTION_ZIP_FIELD].filter(
+                (x, i, a) => x && a.indexOf(x) === i
+            );
+            const orChunk = Math.max(5, ZIP_ROUTE_PHASE2_JUNCTION_OR_CHUNK);
+
+            for (let i = 0; i < zipIds.length; i += orChunk) {
+                const chunk = zipIds.slice(i, i + orChunk);
+                const inner = chunk.map((id) => `{${zf}}="${zipRouteAirtableStringForFormula(id)}"`).join(',');
+                const formula = `OR(${inner})`;
+                let junctionRecs = [];
+                try {
+                    junctionRecs = await airtableFetchAllRecords(ZIP_ROUTE.ADSET_ZIPS_TABLE, {
+                        formula,
+                        fields: juncFields,
+                    });
+                } catch (e) {
+                    console.warn('Phase 2 junction OR-chunk failed', e);
+                    continue;
+                }
+                for (const r of junctionRecs) {
+                    const adsetId = zipRouteAdsetIdFromJunctionFields(r.fields);
+                    const zipId = zipRecordIdFromJunctionFields(r.fields);
+                    if (!adsetId || !zipId) continue;
+                    if (excludeAdsetIds.has(adsetId)) continue;
+                    if (zipId === leadZipRecId) continue;
+                    if (seenAdset.has(adsetId)) continue;
+                    const pos = zipPosMap.get(zipId) || zipLatLonCache.get(zipId);
+                    if (!pos) continue;
+                    const d = zipRouteFastDistanceMiles(
+                        leadLatLon.lat,
+                        leadLatLon.lon,
+                        pos.lat,
+                        pos.lon,
+                        cosLeadLat
+                    );
+                    if (d > radiusSlack) continue;
+                    const clientRec = zipRouteFindClientRecordForAdset(adsetId);
+                    const adsetRec = zipRouteAdsetById ? zipRouteAdsetById.get(adsetId) : null;
+                    if (!clientRec || !adsetRec || !routingAdsetNicheMatchesFunnel(adsetRec.fields)) continue;
+                    seenAdset.add(adsetId);
+                    out.push({
+                        rank: out.length + 1,
+                        junctionId: r.id,
+                        linkCreated: r.createdTime,
+                        adsetId,
+                        clientRec,
+                        adsetRec,
+                        distanceMiles: d,
+                    });
+                }
+            }
+
             return out;
         }
 
@@ -2589,6 +2749,18 @@
                             selected: pick1,
                             phase1Rows,
                             message: `Phase 1 exact zip — Tier ${pick1.tier}`,
+                        };
+                        zipRouteCacheZip = zipFive;
+                        return lastLeadRoutePick;
+                    }
+
+                    if (ZIP_ROUTE_SPEED_SKIP_PHASE2) {
+                        lastLeadRoutePick = {
+                            phase: 3,
+                            tier: null,
+                            selected: null,
+                            phase1Rows,
+                            message: 'No qualifying partner (Phase 3)',
                         };
                         zipRouteCacheZip = zipFive;
                         return lastLeadRoutePick;
@@ -5389,8 +5561,9 @@
             );
             if (intro) {
                 if (!lastZipRoutingQueue.length) {
-                    intro.textContent =
-                        `No exact-zip junction links for ${zipFive}. (Phase 2 still scans other zips if Lat/Long exist on the lead zip.)`;
+                    intro.textContent = ZIP_ROUTE_SPEED_SKIP_PHASE2
+                        ? `No exact-zip junction links for ${zipFive}. Neighbor routing is off (speed mode — exact zip only).`
+                        : `No exact-zip junction links for ${zipFive}. (Phase 2 may still scan other zips if Lat/Long exist on the lead zip.)`;
                 } else {
                     intro.textContent =
                         `${displayQueue.length} exact-zip link(s) with Adset Niche = ${FUNNEL_ADSET_NICHE} for ${zipFive} (table below). ` +
