@@ -22,7 +22,7 @@ const BASE_ID = process.env.AIRTABLE_BASE_ID || 'appmBb0lzqRK9dI8v';
 const TOKEN = process.env.AIRTABLE_TOKEN || process.env.AIRTABLE_API_KEY;
 const RECORDS_ONLY = process.argv.includes('--records-only');
 
-/** Table IDs referenced by testing/bathrooms.html (deduped). */
+/** Table IDs referenced by bathrooms.html (deduped). */
 const KNOWN_TABLES = [
     { id: 'tblH2nVfmGNG8pAjC', label: 'Clients (ZIP_ROUTE / junction)' },
     { id: 'tblee61crNCoSfurx', label: 'Adset' },
