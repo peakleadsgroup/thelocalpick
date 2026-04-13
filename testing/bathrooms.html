@@ -1064,6 +1064,40 @@
             margin-bottom: 20px;
         }
 
+        .review-aggregate {
+            text-align: center;
+            font-size: 17px;
+            color: #444;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .shower-carousel-wrap {
+            margin: 0 0 24px;
+        }
+
+        .shower-carousel {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 10px;
+        }
+
+        .shower-carousel-slide {
+            flex: 0 0 86%;
+            max-width: 400px;
+            scroll-snap-align: center;
+        }
+
+        .shower-carousel-slide img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .local-pick-block {
                 padding: 30px 20px;
@@ -1918,7 +1952,7 @@
                             genericLeadFlow = false;
                             clientData = matchedClientData;
                             campaignClientData = matchedClientData;
-                            const logoUrl = resolveLogoLinkField(matchedClientData.fields && matchedClientData.fields['Logo Link']);
+                            const logoUrl = resolveClientLogoUrl(matchedClientData.fields);
                             if (logoUrl) {
                                 setPartnerLogoForWhySection(logoUrl);
                             }
@@ -2775,9 +2809,122 @@
             return null;
         }
 
+        /**
+         * Junction Client (tblH2nVfmGNG8pAjC) — partner face: logo, ratings, review text.
+         * Legacy campaign client (tblMl8Y97cMSbricC) may use Logo Link + Review Text/Name instead.
+         */
+        const CLIENT_DISPLAY_FIELDS = {
+            logo: 'Logo',
+            starsOutOf5: 'Stars/5.0',
+            numReviews: '# of Reviews',
+            review1: 'Review 1',
+            reviewer1: 'Reviewer 1',
+            review2: 'Review 2',
+            reviewer2: 'Reviewer 2',
+            review3: 'Review 3',
+            reviewer3: 'Reviewer 3',
+        };
+
+        /** Adset (tblee61crNCoSfurx) — post-submit path + calendar (from routed ad set) */
+        const ADSET_FUNNEL_FIELDS = {
+            submitScreen: 'Submit Screen',
+            availabilityApiUrl: 'Availability API URL',
+            minCalendarHours: 'Minimum Calendar Hours',
+            maxCalendarDays: 'Maximum Calendar Days',
+            timezone: 'Timezone',
+        };
+
+        const SHOWER_IMAGE_URLS = [1, 2, 3, 4, 5].map(
+            (n) => `https://thelocalpick.com/images/shower${n}.png`
+        );
+
+        function resolveClientLogoUrl(fields) {
+            if (!fields) return null;
+            const fromLogo = resolveLogoLinkField(fields[CLIENT_DISPLAY_FIELDS.logo]);
+            if (fromLogo) return fromLogo;
+            return resolveLogoLinkField(fields['Logo Link']);
+        }
+
+        function collectReviewsFromClientFields(fields) {
+            const out = [];
+            if (!fields) return out;
+            for (let i = 1; i <= 3; i++) {
+                const t = fields[`Review ${i}`];
+                const n = fields[`Reviewer ${i}`];
+                if (t && String(t).trim() && n && String(n).trim()) {
+                    out.push({ text: String(t).trim(), name: String(n).trim() });
+                }
+            }
+            if (out.length) return out;
+            for (let i = 1; i <= 3; i++) {
+                const t = fields[`Review Text ${i}`];
+                const n = fields[`Review Name ${i}`];
+                if (t && String(t).trim() && n && String(n).trim()) {
+                    out.push({ text: String(t).trim(), name: String(n).trim() });
+                }
+            }
+            return out;
+        }
+
+        function buildClientRatingSummaryHtml(fields) {
+            if (!fields) return '';
+            const stars = fields[CLIENT_DISPLAY_FIELDS.starsOutOf5];
+            const n = fields[CLIENT_DISPLAY_FIELDS.numReviews];
+            const parts = [];
+            if (stars != null && String(stars).trim() !== '' && Number.isFinite(Number(stars))) {
+                parts.push(`<strong>${escapeHtml(Number(stars).toFixed(1))}</strong> out of 5 stars`);
+            }
+            if (n != null && String(n).trim() !== '' && Number.isFinite(Number(n))) {
+                parts.push(`${escapeHtml(String(Math.round(Number(n))))} reviews`);
+            }
+            if (!parts.length) return '';
+            return `<div class="review-aggregate">${parts.join(' · ')}</div>`;
+        }
+
+        function buildShowerCarouselHtml() {
+            const slides = SHOWER_IMAGE_URLS.map(
+                (src) =>
+                    `<div class="shower-carousel-slide"><img src="${escapeHtml(src)}" alt="" loading="lazy"></div>`
+            ).join('');
+            return `<div class="shower-carousel-wrap"><div class="shower-carousel" role="region" aria-label="Project photos">${slides}</div></div>`;
+        }
+
         function getActiveClient() {
             if (genericLeadFlow) return null;
             return matchedClientData || campaignClientData;
+        }
+
+        function getRoutedAdsetFields() {
+            const sel = lastLeadRoutePick && lastLeadRoutePick.selected;
+            if (!sel || !sel.adsetRec || !sel.adsetRec.fields) return null;
+            return sel.adsetRec.fields;
+        }
+
+        function adsetOverlayValuePresent(v) {
+            if (v == null) return false;
+            if (typeof v === 'string' && !v.trim()) return false;
+            if (Array.isArray(v) && v.length === 0) return false;
+            return true;
+        }
+
+        /** Calendar + API URL: Adset overrides Client when the ad set has a value. */
+        function mergeCalendarFromClientAndAdset(clientFields, adsetFields) {
+            const base = clientFields ? { ...clientFields } : {};
+            if (!adsetFields) return base;
+            const overlayKeys = [
+                ADSET_FUNNEL_FIELDS.timezone,
+                ...CALENDAR_WEEKDAY_FIELDS,
+                ADSET_FUNNEL_FIELDS.minCalendarHours,
+                ADSET_FUNNEL_FIELDS.maxCalendarDays,
+                ADSET_FUNNEL_FIELDS.availabilityApiUrl,
+            ];
+            for (const k of overlayKeys) {
+                const v = adsetFields[k];
+                if (adsetOverlayValuePresent(v)) {
+                    base[k] = v;
+                }
+            }
+            return base;
         }
 
         function resetPostSubmitCtaTitlesVisibility() {
@@ -4262,43 +4409,50 @@
             apiDatesWithSlots.clear();
             clientWeekdayTimes = [[], [], [], [], [], [], []];
             
-            // Get client timezone, per-weekday times, and days
-            const activeClient = getActiveClient();
-            
-            if (activeClient && activeClient.fields) {
-                // Set timezone from client data
-                if (activeClient.fields['Timezone']) {
-                    clientTimezone = activeClient.fields['Timezone'];
+            const clientFields = getActiveClient() && getActiveClient().fields;
+            const adsetCalFields = getRoutedAdsetFields();
+            const f = mergeCalendarFromClientAndAdset(clientFields, adsetCalFields);
+
+            if (clientFields || adsetCalFields) {
+                const tz = f[ADSET_FUNNEL_FIELDS.timezone] || f['Timezone'];
+                if (tz) {
+                    clientTimezone = tz;
                 }
-                
-                applyClientWeekdayTimesFromFields(activeClient.fields);
-                console.log('[Calendar] Client weekday times (Airtable):', clientWeekdayTimes);
-                // Hardcoded 48 hours in advance for all clients (including Home Pro)
-                clientMinHoursInAdvance = 48;
+
+                applyClientWeekdayTimesFromFields(f);
+                console.log('[Calendar] Weekday times (client + routed adset):', clientWeekdayTimes);
+
+                const minH = f[ADSET_FUNNEL_FIELDS.minCalendarHours];
+                if (minH != null && Number.isFinite(Number(minH)) && Number(minH) >= 0) {
+                    clientMinHoursInAdvance = Number(minH);
+                } else {
+                    clientMinHoursInAdvance = 48;
+                }
                 console.log('[Calendar] clientMinHoursInAdvance:', clientMinHoursInAdvance);
-                
-                // Set available days from client data
-                if (activeClient.fields['Days']) {
-                    const daysArray = Array.isArray(activeClient.fields['Days']) 
-                        ? activeClient.fields['Days'] 
-                        : [activeClient.fields['Days']];
-                    
-                    // Convert day names to day numbers
+
+                const hasWeekdaySlots = clientWeekdayTimes.some((arr) => Array.isArray(arr) && arr.length > 0);
+                if (hasWeekdaySlots) {
+                    clientAvailableDays = [0, 1, 2, 3, 4, 5, 6].filter((d) => (clientWeekdayTimes[d] || []).length > 0);
+                    if (clientAvailableDays.length === 0) {
+                        clientAvailableDays = [1, 2, 3, 4, 5];
+                    }
+                } else if (f['Days']) {
+                    const daysArray = Array.isArray(f['Days']) ? f['Days'] : [f['Days']];
                     clientAvailableDays = daysArray
-                        .map(dayName => convertDayNameToNumber(dayName))
-                        .filter(dayNum => dayNum !== null);
-                    
-                    // If no valid days found, use default
+                        .map((dayName) => convertDayNameToNumber(dayName))
+                        .filter((dayNum) => dayNum !== null);
                     if (clientAvailableDays.length === 0) {
                         clientAvailableDays = [1, 2, 3, 4, 5];
                     }
                 } else {
                     clientAvailableDays = [1, 2, 3, 4, 5];
                 }
-                
-                // Set days out from client data
-                if (activeClient.fields['Days Out'] !== undefined && activeClient.fields['Days Out'] !== null) {
-                    const daysOutValue = Number(activeClient.fields['Days Out']);
+
+                const maxDaysField = f[ADSET_FUNNEL_FIELDS.maxCalendarDays];
+                if (maxDaysField != null && Number.isFinite(Number(maxDaysField)) && Number(maxDaysField) > 0) {
+                    clientDaysOut = Number(maxDaysField);
+                } else if (f['Days Out'] !== undefined && f['Days Out'] !== null) {
+                    const daysOutValue = Number(f['Days Out']);
                     if (!isNaN(daysOutValue) && daysOutValue > 0) {
                         clientDaysOut = daysOutValue;
                     } else {
@@ -4308,7 +4462,7 @@
                     clientDaysOut = 14;
                 }
 
-                const apiUrlRaw = activeClient.fields['Availability API URL'];
+                const apiUrlRaw = f[ADSET_FUNNEL_FIELDS.availabilityApiUrl];
                 if (apiUrlRaw != null && String(apiUrlRaw).trim()) {
                     calendarAvailabilityFromApi = true;
                     const zipForApi = ((formData.address && formData.address.zip) || formData.initialZip || '').trim();
@@ -4535,8 +4689,8 @@
                 return;
             }
 
-            // Zip step uses static “how we choose” copy; Airtable partner bullets only after they’ve entered a zip
-            if (!formData.initialZip) {
+            // Partner bullets after address zip (or legacy initialZip from saved progress)
+            if (!(formData.address && formData.address.zip) && !formData.initialZip) {
                 const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
                 if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
                 const topOuter = document.getElementById('localPickOuter');
@@ -4648,30 +4802,14 @@
                 }
             }
 
-            // Collect reviews (up to 3)
-            for (let i = 1; i <= 3; i++) {
-                const reviewTextField = `Review Text ${i}`;
-                const reviewNameField = `Review Name ${i}`;
-                const productUrlField = `Product URL ${i}`;
-                const reviewText = fields[reviewTextField];
-                const reviewName = fields[reviewNameField];
-                const productUrl = fields[productUrlField];
-                
-                if (reviewText && reviewText.trim() && reviewName && reviewName.trim()) {
-                    reviews.push({
-                        text: reviewText.trim(),
-                        name: reviewName.trim(),
-                        productUrl: productUrl ? productUrl.trim() : null
-                    });
-                }
-            }
+            reviews = collectReviewsFromClientFields(fields);
 
             // After submit: show reviews + partner Local Pick below the post-submit screen; duplicate CTA under that
             if (postFormSubmitted) {
                 const reviewsSection = document.getElementById('reviewsSection');
                 const ctaSection = document.getElementById('ctaSection');
                 if (reviewsSection) reviewsSection.classList.remove('main-funnel-local-pick-only');
-                if (reviews.length > 0 || localPickItems.length > 0) {
+                if (reviews.length > 0 || localPickItems.length > 0 || !genericLeadFlow) {
                     buildReviewBlocks();
                     if (reviewsSection) reviewsSection.classList.add('active');
                     const getQuoteBtn = document.getElementById('getQuoteBottomBtn');
@@ -4706,7 +4844,7 @@
             }
 
             const active = getActiveClient();
-            const logoUrl = active && active.fields ? resolveLogoLinkField(active.fields['Logo Link']) : null;
+            const logoUrl = active && active.fields ? resolveClientLogoUrl(active.fields) : null;
 
             function fillList(listEl, iconBase) {
                 listEl.innerHTML = '';
@@ -4755,31 +4893,24 @@
 
         function buildReviewBlocks() {
             const container = document.getElementById('reviewsContainer');
-            
-            // Clear existing content
             container.innerHTML = '';
 
-            // Build review blocks
+            const active = getActiveClient();
+            const cf = active && active.fields ? active.fields : null;
+            const summaryHtml = buildClientRatingSummaryHtml(cf);
+            if (summaryHtml) {
+                container.insertAdjacentHTML('beforeend', summaryHtml);
+            }
+            if (!genericLeadFlow) {
+                container.insertAdjacentHTML('beforeend', buildShowerCarouselHtml());
+            }
+
             reviews.forEach((review) => {
                 const reviewBlock = document.createElement('div');
                 reviewBlock.className = 'review-block';
-                
-                let imageHtml = '';
-                if (review.productUrl && review.productUrl.trim()) {
-                    imageHtml = `<img src="${escapeHtml(review.productUrl)}" alt="Product image" class="review-product-image" onerror="this.style.display='none'">`;
-                }
-                
                 reviewBlock.innerHTML = `
-                    ${imageHtml}
                     <div class="review-text">${escapeHtml(review.text)}</div>
-                    <div class="review-stars">
-                        <span class="review-star">&#9733;</span>
-                        <span class="review-star">&#9733;</span>
-                        <span class="review-star">&#9733;</span>
-                        <span class="review-star">&#9733;</span>
-                        <span class="review-star">&#9733;</span>
-                    </div>
-                    <div class="review-name">${escapeHtml(review.name)}</div>
+                    <div class="review-name">— ${escapeHtml(review.name)}</div>
                 `;
                 container.appendChild(reviewBlock);
             });
@@ -5301,8 +5432,15 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             
             let activeClient = getActiveClient();
             let submitScreenType = 'None';
-            
-            if (matchedClientData && matchedClientData.fields && matchedClientData.fields['Submit Screen']) {
+
+            const routedAdsetForSubmit = getRoutedAdsetFields();
+            if (
+                routedAdsetForSubmit &&
+                adsetOverlayValuePresent(routedAdsetForSubmit[ADSET_FUNNEL_FIELDS.submitScreen])
+            ) {
+                submitScreenType = String(routedAdsetForSubmit[ADSET_FUNNEL_FIELDS.submitScreen]).trim();
+                if (matchedClientData) activeClient = matchedClientData;
+            } else if (matchedClientData && matchedClientData.fields && matchedClientData.fields['Submit Screen']) {
                 activeClient = matchedClientData;
                 submitScreenType = String(matchedClientData.fields['Submit Screen']).trim();
             } else if (!genericLeadFlow && campaignClientData && campaignClientData.fields && campaignClientData.fields['Submit Screen']) {
