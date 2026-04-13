@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <link rel="icon" type="image/png" href="../icons/favicon-local-pick-48.png?v=4">
+    <link rel="icon" type="image/png" href="icons/favicon-local-pick-48.png?v=4">
     <title>Find Your Local Pick - Bathroom Remodel</title>
-    <base href="../">
-    
-    <!-- Meta Pixel -->
+    <base href="./">
     <script>
+    window.TLP_TESTING_MODE = true;
+    </script>
+    
+    <!-- Meta Pixel (skipped while TLP_TESTING_MODE — see main script ensureFixedMetaPixel) -->
+    <script>
+    if (!window.TLP_TESTING_MODE) {
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -18,6 +22,7 @@
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
+    }
     </script>
     <noscript id="metaPixelNoscript"></noscript>
     
@@ -1652,9 +1657,9 @@
 
     <script>
         // ============================================
-        // TESTING MODE - Disables Airtable writes and Meta Pixel
+        // TESTING MODE - Disables Airtable writes and Meta Pixel (set window.TLP_TESTING_MODE in <head>)
         // ============================================
-        const TESTING_MODE = true; // Disables Meta Pixel and all Airtable writes (and duplicate-check reads on submit).
+        const TESTING_MODE = window.TLP_TESTING_MODE === true;
         if (TESTING_MODE) console.log('[TESTING_MODE] Page loaded - Airtable writes and Meta Pixel disabled for testing');
         
         // ============================================
@@ -1672,6 +1677,24 @@
             ADSET: 'tblee61crNCoSfurx',
             URL_PARAMETERS: 'tbl5JDBRhTzuxzsc4',
         };
+
+        const META_PIXEL_ID = '761605989609184';
+        let fixedMetaPixelInitialized = false;
+
+        function ensureFixedMetaPixel() {
+            if (TESTING_MODE || fixedMetaPixelInitialized || typeof fbq === 'undefined') return;
+            try {
+                fbq('init', META_PIXEL_ID);
+                fbq('track', 'PageView');
+                fixedMetaPixelInitialized = true;
+                const noscript = document.getElementById('metaPixelNoscript');
+                if (noscript) {
+                    noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1" />`;
+                }
+            } catch (error) {
+                console.error('Meta Pixel initialization error:', error);
+            }
+        }
         
         // Calendar Configuration (defaults, will be overridden by client data)
         const CALENDAR_CONFIG = {
@@ -1723,7 +1746,7 @@
         const DEFAULT_LOGO_SRC = 'images/TheLocalPick-FlatLeftAligned.svg';
 
         const FUNNEL_RESUME_STORAGE_KEY = 'localpick_funnel_resume_v1';
-        const FUNNEL_PAGE_FILE = 'testing/bathrooms.html';
+        const FUNNEL_PAGE_FILE = 'bathrooms.html';
         const DISABLE_FUNNEL_PROGRESS_PERSIST = true; // Off for now (no save/resume). Set false to turn progress persistence back on.
         let funnelResumeRestored = false;
         let phoneValidationListenersAttached = false;
@@ -1852,10 +1875,7 @@
                             if (logoUrl) {
                                 setPartnerLogoForWhySection(logoUrl);
                             }
-                            const metaPixel = matchedClientData.fields && matchedClientData.fields['Meta Pixel'];
-                            if (metaPixel) {
-                                initializeMetaPixel(metaPixel);
-                            }
+                            ensureFixedMetaPixel();
                         } else {
                             genericLeadFlow = true;
                             matchedClientData = null;
@@ -2331,23 +2351,6 @@
             }
         }
 
-        function initializeMetaPixel(pixelId) {
-            if (TESTING_MODE || !pixelId || typeof fbq === 'undefined') return;
-            
-            try {
-                fbq('init', pixelId);
-                fbq('track', 'PageView');
-                
-                // Update noscript tag
-                const noscript = document.getElementById('metaPixelNoscript');
-                if (noscript) {
-                    noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1" />`;
-                }
-            } catch (error) {
-                console.error('Meta Pixel initialization error:', error);
-            }
-        }
-
         function preloadLogo(logoUrl) {
             // Preload the image immediately for faster display
             if (logoUrl) {
@@ -2500,6 +2503,8 @@
         // Load campaign from URL when present (Source Campaign + Meta campaignID for redirects); Local Pick match uses project address zip at submit.
         (async function() {
             try {
+                ensureFixedMetaPixel();
+
                 const loadedCampaignClient = await loadClientFromCampaign(initialCampaignID);
 
                 if (genericLeadFlow) {
@@ -2523,16 +2528,9 @@
                 if (campaignClientData) {
                     clientData = campaignClientData;
 
-                    const metaPixel = campaignClientData.fields['Meta Pixel'];
-                    if (metaPixel) {
-                        initializeMetaPixel(metaPixel);
-                    }
                     updatePartnerNameInPrivacyPolicy();
                     updateProjectTypeStepOptions();
                 } else {
-                    if (typeof fbq !== 'undefined') {
-                        fbq('track', 'PageView');
-                    }
                     applyDefaultLocalPickLogo();
                     updatePartnerNameInPrivacyPolicy();
                     updateProjectTypeStepOptions();
@@ -2540,9 +2538,7 @@
                 await tryRestoreFunnelProgressAfterBootstrap();
             } catch (error) {
                 console.error('Error initializing page:', error);
-                if (typeof fbq !== 'undefined') {
-                    fbq('track', 'PageView');
-                }
+                ensureFixedMetaPixel();
                 applyDefaultLocalPickLogo();
                 updatePartnerNameInPrivacyPolicy();
                 updateProjectTypeStepOptions();
@@ -2744,14 +2740,12 @@
             persistFunnelProgress();
             
             if (!hasTrackedEngagement) {
-                if (!TESTING_MODE && typeof fbq !== 'undefined' && !genericLeadFlow && clientData && clientData.fields['Meta Pixel']) {
+                if (!TESTING_MODE && typeof fbq !== 'undefined' && !genericLeadFlow && clientData) {
+                    const vcEventId = generateEventId();
                     fbq('track', 'ViewContent', {
                         content_category: 'home_improvement',
                         content_name: 'bathroom_remodel_quiz_start'
-                    });
-                }
-                if (TESTING_MODE) {
-                    console.log('[TESTING_MODE] Meta Pixel ViewContent would fire (quiz start)');
+                    }, { eventID: vcEventId });
                 }
                 hasTrackedEngagement = true;
             }
@@ -4791,8 +4785,8 @@
                 console.error('Error finding client by project zip code:', error);
             }
             
-            // Track Meta Pixel Lead event - only when matching zip code is found
-            if (!TESTING_MODE && typeof fbq !== 'undefined' && matchedClientData && matchedClientData.fields && matchedClientData.fields['Meta Pixel']) {
+            // Meta Pixel Lead — fixed pixel; eventID matches generated id used for Airtable Unique ID
+            if (!TESTING_MODE && typeof fbq !== 'undefined') {
                 const leadEventData = {
                     content_category: 'home_improvement',
                     content_name: 'bathroom_remodel_quote',
@@ -4803,13 +4797,7 @@
                     project_type: finalData.projectType,
                     main_goal: finalData.mainGoal
                 };
-                
-                fbq('track', 'Lead', leadEventData, {
-                    eventID: eventId
-                });
-            }
-            if (TESTING_MODE) {
-                console.log('[TESTING_MODE] Meta Pixel Lead event would fire with:', { homeowner_status: finalData.homeowner, bathroom_last_updated: finalData.bathroomLastUpdated, project_type: finalData.projectType, main_goal: finalData.mainGoal });
+                fbq('track', 'Lead', leadEventData, { eventID: eventId });
             }
             
             // Find ad and adset from URL
