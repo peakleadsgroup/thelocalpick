@@ -1754,17 +1754,6 @@
             totalLeadsLeft: 'Total Leads Left',
         };
 
-        /** Minimal Adset columns for routing + UI labels (smaller payloads than full-row list). */
-        const ZIP_ROUTE_ADSET_FETCH_FIELDS = [
-            'Name',
-            'Niche',
-            ZIP_ROUTE_ADSET_METRIC_FIELDS.clientStatus,
-            ZIP_ROUTE_ADSET_METRIC_FIELDS.adsetStatus,
-            ZIP_ROUTE_ADSET_METRIC_FIELDS.weeklyLeadsLeft,
-            ZIP_ROUTE_ADSET_METRIC_FIELDS.monthlyLeadsLeft,
-            ZIP_ROUTE_ADSET_METRIC_FIELDS.totalLeadsLeft,
-        ];
-
         /** Adset table {Niche} must match this value (single- or multi-select) for routing on this page */
         const FUNNEL_ADSET_NICHE = 'Bathrooms';
 
@@ -2106,8 +2095,8 @@
         function zipRouteAdsetLabel(fields) {
             if (!fields) return 'Ad set';
             return (
-                fields['Name'] ||
                 fields['Adset Name'] ||
+                fields['Name'] ||
                 (fields['Adset ID'] != null ? String(fields['Adset ID']) : '') ||
                 'Ad set'
             );
@@ -2219,9 +2208,10 @@
             const clientP = zipRouteClientsCache
                 ? Promise.resolve(zipRouteClientsCache)
                 : airtableFetchAllRecords(ZIP_ROUTE.CLIENT_TABLE, { fields: clientFields });
+            /** No fields[] filter: Airtable 422 if any name mismatches the live Adset schema. */
             const adsetP = zipRouteAdsetById
                 ? Promise.resolve(null)
-                : airtableFetchAllRecords(ZIP_ROUTE.ADSET_TABLE, { fields: ZIP_ROUTE_ADSET_FETCH_FIELDS });
+                : airtableFetchAllRecords(ZIP_ROUTE.ADSET_TABLE);
             const [clients, adsets] = await Promise.all([clientP, adsetP]);
             if (!zipRouteClientsCache) zipRouteClientsCache = clients;
             if (!zipRouteAdsetById && adsets) {
