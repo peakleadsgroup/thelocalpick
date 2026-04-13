@@ -4911,6 +4911,34 @@
             document.querySelectorAll('#formSection .form-step').forEach((el) => el.classList.remove('active'));
         }
 
+        /** Read display value from an Adset record field (handles numbers, selects, empty). */
+        function zipRouteAdsetFieldDisplay(fields, fieldName) {
+            if (!fields || !fieldName) return '—';
+            let v = fields[fieldName];
+            if (v == null || v === '') return '—';
+            if (Array.isArray(v)) {
+                if (v.length === 0) return '—';
+                const parts = v.map((x) => (x == null ? '' : String(x))).filter(Boolean);
+                return parts.length ? escapeHtml(parts.join(', ')) : '—';
+            }
+            if (typeof v === 'number' && Number.isFinite(v)) {
+                return escapeHtml(Number.isInteger(v) ? String(v) : String(v));
+            }
+            if (typeof v === 'object') {
+                return escapeHtml(JSON.stringify(v));
+            }
+            const s = String(v).trim();
+            return s === '' ? '—' : escapeHtml(s);
+        }
+
+        const ZIP_ROUTE_ADSET_METRIC_FIELDS = {
+            clientStatus: 'Client Status',
+            adsetStatus: 'Adset Status',
+            weeklyLeadsLeft: 'Weekly Leads Left',
+            monthlyLeadsLeft: 'Monthly Leads Left',
+            totalLeadsLeft: 'Total Leads Left',
+        };
+
         function showZipRoutingResultScreen(zipFive) {
             postFormSubmitted = true;
             syncGlobalQuizTaglineVisibility();
@@ -4948,26 +4976,42 @@
                                       timeStyle: 'short',
                                   })
                                 : '—';
+                            const af = row.adsetRec && row.adsetRec.fields ? row.adsetRec.fields : null;
+                            const td = (fn) =>
+                                `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;font-size:13px;">${zipRouteAdsetFieldDisplay(af, fn)}</td>`;
                             return (
                                 '<tr>' +
                                 `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;">${row.rank}</td>` +
                                 `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;">${clientCell}</td>` +
                                 `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;">${escapeHtml(adLabel)}</td>` +
                                 `<td style="padding:10px 8px;border-bottom:1px solid #e5e5e5;font-size:12px;color:#555;">${escapeHtml(when)}</td>` +
+                                td(ZIP_ROUTE_ADSET_METRIC_FIELDS.clientStatus) +
+                                td(ZIP_ROUTE_ADSET_METRIC_FIELDS.adsetStatus) +
+                                td(ZIP_ROUTE_ADSET_METRIC_FIELDS.weeklyLeadsLeft) +
+                                td(ZIP_ROUTE_ADSET_METRIC_FIELDS.monthlyLeadsLeft) +
+                                td(ZIP_ROUTE_ADSET_METRIC_FIELDS.totalLeadsLeft) +
                                 '</tr>'
                             );
                         })
                         .join('');
+                    const th = (label) =>
+                        `<th style="text-align:left;padding:8px;border-bottom:2px solid #ccc;font-size:10px;text-transform:uppercase;color:#666;white-space:nowrap;">${escapeHtml(label)}</th>`;
                     host.innerHTML =
-                        '<table class="zip-routing-table" style="width:100%;border-collapse:collapse;font-size:14px;">' +
+                        '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">' +
+                        '<table class="zip-routing-table" style="width:100%;border-collapse:collapse;font-size:14px;min-width:920px;">' +
                         '<thead><tr>' +
-                        '<th style="text-align:left;padding:8px;border-bottom:2px solid #ccc;font-size:11px;text-transform:uppercase;color:#666;">#</th>' +
-                        '<th style="text-align:left;padding:8px;border-bottom:2px solid #ccc;font-size:11px;text-transform:uppercase;color:#666;">Client</th>' +
-                        '<th style="text-align:left;padding:8px;border-bottom:2px solid #ccc;font-size:11px;text-transform:uppercase;color:#666;">Ad set</th>' +
-                        '<th style="text-align:left;padding:8px;border-bottom:2px solid #ccc;font-size:11px;text-transform:uppercase;color:#666;">Link created</th>' +
+                        th('#') +
+                        th('Client') +
+                        th('Ad set') +
+                        th('Link created') +
+                        th('Client Status') +
+                        th('Adset Status') +
+                        th('Weekly Leads Left') +
+                        th('Monthly Leads Left') +
+                        th('Total Leads Left') +
                         '</tr></thead><tbody>' +
                         rows +
-                        '</tbody></table>';
+                        '</tbody></table></div>';
                 }
             }
             if (stepEl) stepEl.classList.add('active');
