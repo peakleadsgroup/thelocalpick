@@ -1708,7 +1708,6 @@
         const ADSET_TABLE_ID = 'tblee61crNCoSfurx';
         
         const TABLES = {
-            CLIENTS: 'tblMl8Y97cMSbricC',
             CAMPAIGNS: 'tbl6uhtOFzGzA7EMu',
             B2C_LEADS: 'tblPt6Wc79hTBSmcD',
             B2C_ADS: 'tbl7ungQGMMLYwshw',
@@ -2574,13 +2573,7 @@
                     return null;
                 }
                 
-                const clientRecordId = campaign.fields.Client[0];
-                
-                // Fetch client data
-                const clientUrl = `${AIRTABLE_BASE_URL}/${TABLES.CLIENTS}/${clientRecordId}`;
-                const clientData = await fetchAirtableData(clientUrl);
-                
-                return clientData;
+                return null;
             } catch (error) {
                 console.error('Error loading client from campaign:', error);
                 return null;
@@ -2593,12 +2586,7 @@
                 if (!route.selected || !route.selected.clientRec) {
                     return null;
                 }
-                const rid = route.selected.clientRec.id;
-                try {
-                    return await fetchAirtableData(`${AIRTABLE_BASE_URL}/${TABLES.CLIENTS}/${rid}`);
-                } catch {
-                    return route.selected.clientRec;
-                }
+                return route.selected.clientRec;
             } catch (error) {
                 console.error('Error finding client by zip (lead routing):', error);
                 lastZipRoutingQueue = [];
@@ -2809,10 +2797,7 @@
             return null;
         }
 
-        /**
-         * Junction Client (tblH2nVfmGNG8pAjC) — partner face: logo, ratings, review text.
-         * Legacy campaign client (tblMl8Y97cMSbricC) may use Logo Link + Review Text/Name instead.
-         */
+        /** Client (tblH2nVfmGNG8pAjC) — partner face: logo, ratings, review text. */
         const CLIENT_DISPLAY_FIELDS = {
             logo: 'Logo',
             starsOutOf5: 'Stars/5.0',
@@ -2837,6 +2822,13 @@
         const SHOWER_IMAGE_URLS = [1, 2, 3, 4, 5].map(
             (n) => `https://thelocalpick.com/images/shower${n}.png`
         );
+        const DEFAULT_LOCAL_PICK_ITEMS = [
+            'Top-rated service backed by real homeowner reviews',
+            'Fully licensed and insured local installation team',
+            'Strong product warranties for peace of mind',
+            'High-quality materials with modern design options',
+            'Transparent pricing and flexible financing options'
+        ];
 
         function resolveClientLogoUrl(fields) {
             if (!fields) return null;
@@ -2891,7 +2883,9 @@
 
         function getActiveClient() {
             if (genericLeadFlow) return null;
-            return matchedClientData || campaignClientData;
+            const sel = lastLeadRoutePick && lastLeadRoutePick.selected;
+            if (sel && sel.clientRec && sel.clientRec.fields) return sel.clientRec;
+            return matchedClientData || null;
         }
 
         function getRoutedAdsetFields() {
@@ -2925,6 +2919,32 @@
                 }
             }
             return base;
+        }
+
+        function normalizeContactFieldValue(raw) {
+            if (raw == null) return '';
+            if (Array.isArray(raw)) {
+                for (const v of raw) {
+                    if (v == null) continue;
+                    const s = String(v).trim();
+                    if (s) return s;
+                }
+                return '';
+            }
+            return String(raw).trim();
+        }
+
+        /** Prefer Adset Call/Text, then client fallbacks. */
+        function getPreferredContactNumbers(activeClient) {
+            const clientFields = activeClient && activeClient.fields ? activeClient.fields : {};
+            const adsetFields = getRoutedAdsetFields() || {};
+            const callNumber = normalizeContactFieldValue(adsetFields['Call'])
+                || normalizeContactFieldValue(clientFields['Call'])
+                || normalizeContactFieldValue(clientFields['Phone']);
+            const textNumber = normalizeContactFieldValue(adsetFields['Text'])
+                || normalizeContactFieldValue(clientFields['Text'])
+                || normalizeContactFieldValue(clientFields['Phone']);
+            return { callNumber, textNumber };
         }
 
         function resetPostSubmitCtaTitlesVisibility() {
@@ -3106,15 +3126,10 @@
                 reviewsLocalPickTitleEl.innerHTML = 'Here\'s why <span id="reviewsLocalPickCompanyName">Company</span> is our Local Pick in <span id="reviewsLocalPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span>';
             }
 
-            // Try to get partner name from matched client first, then campaign client
-            let partnerName = null;
-            if (matchedClientData && matchedClientData.fields && matchedClientData.fields['Name']) {
-                partnerName = matchedClientData.fields['Name'];
-            } else if (campaignClientData && campaignClientData.fields && campaignClientData.fields['Name']) {
-                partnerName = campaignClientData.fields['Name'];
-            } else if (clientData && clientData.fields && clientData.fields['Name']) {
-                partnerName = clientData.fields['Name'];
-            }
+            const activeClient = getActiveClient();
+            const partnerName = (activeClient && activeClient.fields && activeClient.fields['Name'])
+                ? activeClient.fields['Name']
+                : null;
             
             if (partnerNameElement) {
                 partnerNameElement.textContent = (postFormSubmitted && partnerName)
@@ -4563,8 +4578,9 @@
                 return;
             }
             
-            const phoneField = activeClient.fields['Phone'];
-            const textField = activeClient.fields['Text'];
+            const preferredNumbers = getPreferredContactNumbers(activeClient);
+            const phoneField = preferredNumbers.callNumber;
+            const textField = preferredNumbers.textNumber;
             
             // Format phone numbers
             const phoneForDisplay = phoneField ? formatClientPhoneForDisplay(phoneField) : '';
@@ -4740,29 +4756,22 @@
                     localPickItems.push({ text: text.trim(), iconIndex: i });
                 }
             }
+            if (localPickItems.length === 0) {
+                DEFAULT_LOCAL_PICK_ITEMS.forEach((text, idx) => {
+                    localPickItems.push({ text, iconIndex: idx + 1 });
+                });
+            }
 
             const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
             buildLocalPickBlock(localPickItems, partnerName);
 
-            if (localPickItems.length > 0) {
-                if (reviewsContainer) reviewsContainer.innerHTML = '';
-                if (reviewsSection) {
-                    reviewsSection.classList.add('active');
-                    reviewsSection.classList.add('main-funnel-local-pick-only');
-                }
-                if (ctaSection) ctaSection.classList.remove('active');
-                if (getQuoteBtn) getQuoteBtn.style.display = '';
-            } else {
-                const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
-                if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
-                const topOuter = document.getElementById('localPickOuter');
-                if (topOuter) topOuter.style.display = 'none';
-                if (reviewsSection) {
-                    reviewsSection.classList.remove('active');
-                    reviewsSection.classList.remove('main-funnel-local-pick-only');
-                }
-                if (ctaSection) ctaSection.classList.remove('active');
+            if (reviewsContainer) reviewsContainer.innerHTML = '';
+            if (reviewsSection) {
+                reviewsSection.classList.add('active');
+                reviewsSection.classList.add('main-funnel-local-pick-only');
             }
+            if (ctaSection) ctaSection.classList.remove('active');
+            if (getQuoteBtn) getQuoteBtn.style.display = '';
             setTimeout(() => {
                 if (typeof updateBackgroundHeight === 'function') updateBackgroundHeight();
             }, 100);
@@ -4787,6 +4796,11 @@
                 if (text && text.trim()) {
                     localPickItems.push({ text: text.trim(), iconIndex: i });
                 }
+            }
+            if (localPickItems.length === 0) {
+                DEFAULT_LOCAL_PICK_ITEMS.forEach((text, idx) => {
+                    localPickItems.push({ text, iconIndex: idx + 1 });
+                });
             }
 
             const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
@@ -4992,8 +5006,9 @@
             const activeClient = getActiveClient();
             if (!activeClient) return;
             
-            const phoneField = activeClient.fields['Phone'];
-            const textField = activeClient.fields['Text'];
+            const preferredNumbers = getPreferredContactNumbers(activeClient);
+            const phoneField = preferredNumbers.callNumber;
+            const textField = preferredNumbers.textNumber;
             
             // Format phone numbers
             const phoneForDisplay = phoneField ? formatClientPhoneForDisplay(phoneField) : '';
@@ -5439,13 +5454,8 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 adsetOverlayValuePresent(routedAdsetForSubmit[ADSET_FUNNEL_FIELDS.submitScreen])
             ) {
                 submitScreenType = String(routedAdsetForSubmit[ADSET_FUNNEL_FIELDS.submitScreen]).trim();
-                if (matchedClientData) activeClient = matchedClientData;
-            } else if (matchedClientData && matchedClientData.fields && matchedClientData.fields['Submit Screen']) {
-                activeClient = matchedClientData;
-                submitScreenType = String(matchedClientData.fields['Submit Screen']).trim();
-            } else if (!genericLeadFlow && campaignClientData && campaignClientData.fields && campaignClientData.fields['Submit Screen']) {
-                activeClient = campaignClientData;
-                submitScreenType = String(campaignClientData.fields['Submit Screen']).trim();
+            } else if (activeClient && activeClient.fields && activeClient.fields['Submit Screen']) {
+                submitScreenType = String(activeClient.fields['Submit Screen']).trim();
             }
             
             const normalizedType = submitScreenType.toLowerCase();

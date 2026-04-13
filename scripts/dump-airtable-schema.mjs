@@ -24,7 +24,6 @@ const RECORDS_ONLY = process.argv.includes('--records-only');
 
 /** Table IDs referenced by testing/bathrooms.html (deduped). */
 const KNOWN_TABLES = [
-    { id: 'tblMl8Y97cMSbricC', label: 'Clients (TABLES.CLIENTS legacy)' },
     { id: 'tblH2nVfmGNG8pAjC', label: 'Clients (ZIP_ROUTE / junction)' },
     { id: 'tblee61crNCoSfurx', label: 'Adset' },
     { id: 'tbl87JqHAdJwgq1GL', label: 'Adset Zips junction' },
