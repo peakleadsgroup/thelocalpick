@@ -53,6 +53,54 @@
             text-align: center;
         }
 
+        .project-select-card {
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            background: #fff;
+            border-radius: 14px;
+            padding: 26px 22px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .project-select-title {
+            font-size: 30px;
+            color: #000;
+            margin-bottom: 22px;
+            font-weight: bold;
+            line-height: 1.25;
+        }
+
+        .project-select-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .project-select-btn {
+            background: #6190f2;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 16px 18px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .project-select-btn:hover {
+            background: #4f7fe6;
+            transform: translateY(-1px);
+        }
+
+        body.project-select-mode #mainFunnelLocalPickWrap,
+        body.project-select-mode #formSection,
+        body.project-select-mode #reviewsSection,
+        body.project-select-mode #ctaSection {
+            display: none !important;
+        }
+
         .logo-container {
             margin-top: 0;
             margin-bottom: 24px;
@@ -1317,7 +1365,7 @@
         }
     </style>
 </head>
-<body>
+<body class="project-select-mode">
     <div class="logo-container">
         <img
             class="logo-img local-pick-brand-logo"
@@ -1327,6 +1375,14 @@
             onerror="if(this.dataset.fallbackApplied)return;this.dataset.fallbackApplied='1';this.src='icons/favicon-local-pick-48.png?v=4';"
         >
         <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
+    </div>
+
+    <div class="project-select-card" id="projectSelectCard">
+        <div class="project-select-title">Select your project</div>
+        <div class="project-select-options">
+            <button class="project-select-btn" onclick="forwardToProjectPage('bathrooms.html')">Bathroom remodel</button>
+            <button class="project-select-btn" onclick="forwardToProjectPage('floorcoating.html')">Concrete floor coating</button>
+        </div>
     </div>
 
     <div class="main-funnel-local-pick-wrap" id="mainFunnelLocalPickWrap" style="display: none;">
@@ -3481,6 +3537,13 @@
         // ============================================
         // FORM FUNCTIONS
         // ============================================
+
+        function forwardToProjectPage(targetFile) {
+            if (!targetFile) return;
+            const query = window.location.search || '';
+            const hash = window.location.hash || '';
+            window.location.href = targetFile + query + hash;
+        }
 
         function generateEventId() {
             return 'event_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
