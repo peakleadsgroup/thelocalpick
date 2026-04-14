@@ -63,38 +63,15 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
         }
 
-        .project-select-title {
-            font-size: 30px;
-            color: #000;
-            margin-bottom: 22px;
-            font-weight: bold;
-            line-height: 1.25;
-        }
-
-        .project-select-options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
         .project-select-option {
             width: 100%;
             appearance: none;
-            background: #fff;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 15px 20px;
-            font-size: 16px;
-            color: #666;
-            font-weight: 400;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s ease;
+            font-family: 'Arial', sans-serif;
         }
 
-        .project-select-option:hover {
-            background: #f5f5f5;
-            border-color: #bdbdbd;
+        .project-select-progress-fill {
+            width: 0 !important;
+            background: transparent !important;
         }
 
         body.project-select-mode #mainFunnelLocalPickWrap,
@@ -1380,11 +1357,16 @@
         <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
     </div>
 
-    <div class="project-select-card" id="projectSelectCard">
-        <div class="project-select-title">Select your project</div>
-        <div class="project-select-options">
-            <button class="project-select-option" onclick="forwardToProjectPage('bathrooms.html')">Bathroom remodel</button>
-            <button class="project-select-option" onclick="forwardToProjectPage('floorcoating.html')">Concrete floor coating</button>
+    <div class="project-select-card form-wrapper" id="projectSelectCard">
+        <div class="progress-area">
+            <div class="progress-bar">
+                <div class="progress-fill project-select-progress-fill"></div>
+            </div>
+        </div>
+        <div class="step-header">Select your project</div>
+        <div class="options">
+            <button class="option project-select-option" onclick="forwardToProjectPage('bathrooms.html')">Bathroom remodel</button>
+            <button class="option project-select-option" onclick="forwardToProjectPage('floorcoating.html')">Concrete floor coating</button>
         </div>
     </div>
 
