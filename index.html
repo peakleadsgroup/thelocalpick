@@ -74,24 +74,27 @@
         .project-select-options {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
 
-        .project-select-btn {
-            background: #6190f2;
-            color: white;
-            border: none;
+        .project-select-option {
+            width: 100%;
+            appearance: none;
+            background: #fff;
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
-            padding: 16px 18px;
-            font-size: 18px;
-            font-weight: 700;
+            padding: 15px 20px;
+            font-size: 16px;
+            color: #666;
+            font-weight: 400;
             cursor: pointer;
-            transition: transform 0.2s ease, background-color 0.2s ease;
+            text-align: center;
+            transition: all 0.3s ease;
         }
 
-        .project-select-btn:hover {
-            background: #4f7fe6;
-            transform: translateY(-1px);
+        .project-select-option:hover {
+            background: #f5f5f5;
+            border-color: #bdbdbd;
         }
 
         body.project-select-mode #mainFunnelLocalPickWrap,
@@ -1380,8 +1383,8 @@
     <div class="project-select-card" id="projectSelectCard">
         <div class="project-select-title">Select your project</div>
         <div class="project-select-options">
-            <button class="project-select-btn" onclick="forwardToProjectPage('bathrooms.html')">Bathroom remodel</button>
-            <button class="project-select-btn" onclick="forwardToProjectPage('floorcoating.html')">Concrete floor coating</button>
+            <button class="project-select-option" onclick="forwardToProjectPage('bathrooms.html')">Bathroom remodel</button>
+            <button class="project-select-option" onclick="forwardToProjectPage('floorcoating.html')">Concrete floor coating</button>
         </div>
     </div>
 
