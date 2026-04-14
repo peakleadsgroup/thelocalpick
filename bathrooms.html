@@ -19,7 +19,7 @@
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
     </script>
-    <noscript id="metaPixelNoscript"></noscript>
+    
     
     <style>
         * {
@@ -448,6 +448,29 @@
             to {
                 transform: rotate(360deg);
             }
+        }
+
+        .finding-local-pick-wrap {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .finding-local-pick-spinner {
+            width: 52px;
+            height: 52px;
+            margin: 0 auto 18px;
+            border: 4px solid rgba(97, 144, 242, 0.22);
+            border-top-color: #6190f2;
+            border-radius: 50%;
+            animation: nav-btn-spin 0.75s linear infinite;
+        }
+
+        .finding-local-pick-title {
+            font-size: 26px;
+            color: #000;
+            font-weight: 700;
+            line-height: 1.3;
+            margin: 0;
         }
 
         .privacy-policy-text {
@@ -1502,6 +1525,13 @@
             </div>
         </div>
 
+        <div class="form-step" id="findingLocalPickStep">
+            <div class="finding-local-pick-wrap">
+                <div class="finding-local-pick-spinner" aria-hidden="true"></div>
+                <div class="finding-local-pick-title">Finding your local pick!</div>
+            </div>
+        </div>
+
         <!-- PHONE/TEXT CONTACT SCREEN -->
         <div class="form-step" id="contactStep">
             <div>
@@ -1811,6 +1841,7 @@
                 'Logo',
                 'Stars/5.0',
                 '# of Reviews',
+                'Lead Price',
                 'Review 1',
                 'Reviewer 1',
                 'Review 2',
@@ -1849,23 +1880,7 @@
         /** Adset table {Niche} must match this value (single- or multi-select) for routing on this page */
         const FUNNEL_ADSET_NICHE = 'Bathrooms';
 
-        const META_PIXEL_ID = '761605989609184';
-        let fixedMetaPixelInitialized = false;
-
-        function ensureFixedMetaPixel() {
-            if (TESTING_MODE || fixedMetaPixelInitialized || typeof fbq === 'undefined') return;
-            try {
-                fbq('init', META_PIXEL_ID);
-                fbq('track', 'PageView');
-                fixedMetaPixelInitialized = true;
-                const noscript = document.getElementById('metaPixelNoscript');
-                if (noscript) {
-                    noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1" />`;
-                }
-            } catch (error) {
-                console.error('Meta Pixel initialization error:', error);
-            }
-        }
+        const initializedMetaPixels = new Set();
         
         // Calendar Configuration (defaults, will be overridden by client data)
         const CALENDAR_CONFIG = {
@@ -1880,14 +1895,13 @@
         const TOTAL_STEPS = 7;
         let formData = {};
         let eventId = null;
-        let hasTrackedEngagement = false;
-        let clientData = null;
-        let campaignClientData = null;
         let matchedClientData = null;
         /** Ordered queue from Adset Zip junction — Phase 1 exact zip (oldest link first); filled by computeLeadRoute */
         let lastZipRoutingQueue = [];
         /** Last full routing decision: phase, tier, selected partner, phase1Rows */
         let lastLeadRoutePick = null;
+        /** Step-by-step routing trace used for B2C Leads Log debugging. */
+        let lastClientSearchTrace = [];
         let adRecordId = null;
         let adsetRecordId = null;
         let campaignRecordId = null; // Track the campaign record ID for Source Campaign linking
@@ -2044,18 +2058,13 @@
                         matchedClientData = await findClientByZipCode(zip);
                         if (matchedClientData) {
                             genericLeadFlow = false;
-                            clientData = matchedClientData;
-                            campaignClientData = matchedClientData;
                             const logoUrl = resolveClientLogoUrl(matchedClientData.fields);
                             if (logoUrl) {
                                 setPartnerLogoForWhySection(logoUrl);
                             }
-                            ensureFixedMetaPixel();
                         } else {
                             genericLeadFlow = true;
                             matchedClientData = null;
-                            clientData = null;
-                            campaignClientData = null;
                             applyDefaultLocalPickLogo();
                         }
                         updatePartnerNameInPrivacyPolicy();
@@ -2501,23 +2510,63 @@
             return pool[0];
         }
 
+        function routingBoolLabel(v) {
+            return v ? 'yes' : 'no';
+        }
+
         /** Exact-zip junction only: pick tier-qualified Bathrooms ad set, else no partner. */
         async function computeLeadRoute(zipInput) {
             const zipFive = zipRouteNormalizeZipFive(zipInput);
             const empty = { phase: 3, tier: null, selected: null, phase1Rows: [], message: 'No match' };
+            const trace = [];
+            const traceStep = (msg) => trace.push(msg);
             lastLeadRoutePick = empty;
             lastZipRoutingQueue = [];
+            lastClientSearchTrace = trace;
+            traceStep(`[S1] rawZip="${String(zipInput || '')}" normalizedZip="${zipFive}"`);
             if (!/^\d{5}$/.test(zipFive)) {
+                traceStep('[S2] zip validation failed (expected 5 digits)');
                 lastLeadRoutePick = { ...empty, message: 'Invalid zip' };
                 return lastLeadRoutePick;
             }
             try {
+                traceStep('[S2] zip validation passed');
+                traceStep('[S3] loading routing infrastructure (US Zips field + Clients cache + Adsets cache)');
                 await zipRouteEnsureInfrastructure();
+                traceStep(`[S3] infrastructure loaded: usZipField="${zipRouteUsMatchField || 'unknown'}" usZipAsNumber=${routingBoolLabel(!!zipRouteUsMatchAsNumber)} clientsCached=${Array.isArray(zipRouteClientsCache) ? zipRouteClientsCache.length : 0} adsetsCached=${zipRouteAdsetById ? zipRouteAdsetById.size : 0}`);
+                traceStep('[S4] building phase-1 exact-zip queue from junction table');
                 const phase1Rows = await zipRouteBuildPhase1Rows(zipFive);
                 lastZipRoutingQueue = phase1Rows;
+                traceStep(`[S4] phase-1 rows found: ${phase1Rows.length}`);
+
+                phase1Rows.forEach((row, idx) => {
+                    const rowClientName = row && row.clientRec && row.clientRec.fields
+                        ? String(row.clientRec.fields.Name || '').trim()
+                        : '';
+                    const rowClientId = row && row.clientRec ? row.clientRec.id : '';
+                    const rowAdsetId = row && row.adsetId ? row.adsetId : '';
+                    const hasClient = !!(row && row.clientRec);
+                    const hasAdset = !!(row && row.adsetRec && row.adsetRec.fields);
+                    const adsetFields = hasAdset ? row.adsetRec.fields : null;
+                    const nicheMatch = hasAdset ? routingAdsetNicheMatchesFunnel(adsetFields) : false;
+                    const clientActive = hasAdset ? routingIsClientActive(row.clientRec, adsetFields) : false;
+                    const adsetActive = hasAdset ? routingIsAdsetActive(adsetFields) : false;
+                    const weeklyRemaining = hasAdset ? routingWeeklyRemaining(adsetFields) : false;
+                    const monthlyRemaining = hasAdset ? routingMonthlyRemaining(adsetFields) : false;
+                    const tier = hasAdset ? routingComputeTier(row.clientRec, adsetFields) : 0;
+                    traceStep(
+                        `[S4.${idx + 1}] junction=${row && row.junctionId ? row.junctionId : 'none'} adset=${rowAdsetId || 'none'} client="${rowClientName || 'unknown'}" clientId=${rowClientId || 'none'} hasClient=${routingBoolLabel(hasClient)} hasAdset=${routingBoolLabel(hasAdset)} nicheMatch=${routingBoolLabel(nicheMatch)} clientActive=${routingBoolLabel(clientActive)} adsetActive=${routingBoolLabel(adsetActive)} weeklyRemaining=${routingBoolLabel(weeklyRemaining)} monthlyRemaining=${routingBoolLabel(monthlyRemaining)} tier=${tier}`
+                    );
+                });
+
                 const phase1Candidates = routingDedupeCandidatesByAdset(phase1Rows);
+                traceStep(`[S5] deduped phase-1 candidates by adset: ${phase1Candidates.length}`);
                 const pick1 = routingPickPartnerFromPool(phase1Candidates);
                 if (pick1) {
+                    const pickedName = pick1.clientRec && pick1.clientRec.fields
+                        ? String(pick1.clientRec.fields.Name || '').trim()
+                        : '';
+                    traceStep(`[S6] selected candidate: adset=${pick1.adsetId || 'none'} client="${pickedName || 'unknown'}" clientId=${pick1.clientRec ? pick1.clientRec.id : 'none'} tier=${pick1.tier}`);
                     lastLeadRoutePick = {
                         phase: 1,
                         tier: pick1.tier,
@@ -2527,6 +2576,7 @@
                     };
                     return lastLeadRoutePick;
                 }
+                traceStep('[S6] no qualifying candidate after tier checks');
                 lastLeadRoutePick = {
                     phase: 3,
                     tier: null,
@@ -2537,6 +2587,7 @@
                 return lastLeadRoutePick;
             } catch (e) {
                 console.error('computeLeadRoute failed:', e);
+                traceStep(`[SERR] computeLeadRoute exception: ${String(e && e.message ? e.message : e)}`);
                 lastLeadRoutePick = { ...empty, message: e.message || String(e) };
                 lastZipRoutingQueue = [];
                 return lastLeadRoutePick;
@@ -2687,12 +2738,6 @@
                     }
                 }
                 
-                // Get linked client record ID
-                if (!campaign.fields || !campaign.fields.Client || campaign.fields.Client.length === 0) {
-                    console.error('Campaign has no linked Client');
-                    return null;
-                }
-                
                 return null;
             } catch (error) {
                 console.error('Error loading client from campaign:', error);
@@ -2785,7 +2830,7 @@
                         console.warn('Duplicate check failed, proceeding with normal submission:', dupErr);
                     }
                 }
-                // Prepare the record (link Ad + Adset only — no Linked Client)
+                // Prepare the record (link Ad + Adset only)
                 const record = {
                     fields: {
                         'Phone': leadData.phone,
@@ -2799,7 +2844,8 @@
                         'City': leadData.city,
                         'State': leadData.state,
                         'Zip': leadData.zip,
-                        'IP': leadData.ip || ''
+                        'IP': leadData.ip || '',
+                        'Log': 'Client search pending...'
                     }
                 };
                 
@@ -2857,6 +2903,101 @@
             } catch (error) {
                 console.error('Error submitting lead to Airtable:', error);
                 throw error;
+            }
+        }
+
+        async function updateLeadFields(leadId, fields) {
+            if (!leadId || !fields || TESTING_MODE) return;
+            const response = await fetch(`${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}/${leadId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    fields
+                })
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to update lead fields: ${response.status} ${response.statusText} - ${errorText}`);
+            }
+        }
+
+        function buildClientSearchLog(zipForRouting, routingErrorText, adsetLinked) {
+            const nowIso = new Date().toISOString();
+            const route = lastLeadRoutePick || {};
+            const selected = route.selected || null;
+            const selectedClientName = selected && selected.clientRec && selected.clientRec.fields
+                ? String(selected.clientRec.fields.Name || '').trim()
+                : '';
+            const selectedClientId = selected && selected.clientRec ? selected.clientRec.id : '';
+            const selectedAdsetId = selected && selected.adsetId ? selected.adsetId : '';
+            const queue = Array.isArray(lastZipRoutingQueue) ? lastZipRoutingQueue : [];
+            const phaseRows = Array.isArray(route.phase1Rows) ? route.phase1Rows : [];
+            const queueToUse = queue.length ? queue : phaseRows;
+            const rowLines = queueToUse.slice(0, 30).map((row, idx) => {
+                const rowClientName = row && row.clientRec && row.clientRec.fields
+                    ? String(row.clientRec.fields.Name || '').trim()
+                    : '';
+                const rowClientId = row && row.clientRec ? row.clientRec.id : '';
+                const rowAdsetId = row && row.adsetId ? row.adsetId : '';
+                const rowTier = row && row.adsetRec && row.adsetRec.fields
+                    ? routingComputeTier(row.clientRec, row.adsetRec.fields)
+                    : 0;
+                return `${idx + 1}. adset=${rowAdsetId || 'none'} client="${rowClientName || 'unknown'}" clientId=${rowClientId || 'none'} tier=${rowTier}`;
+            });
+
+            const lines = [
+                `Client Search Log (${nowIso})`,
+                `Zip: ${zipForRouting || 'unknown'}`,
+                `Result: ${route.message || (routingErrorText ? 'Routing error' : 'No route message')}`,
+                `Phase: ${route.phase != null ? route.phase : 'n/a'}`,
+                `Selected Tier: ${route.tier != null ? route.tier : 'none'}`,
+                `Selected Client: ${selectedClientName || 'none'}`,
+                `Selected Client ID: ${selectedClientId || 'none'}`,
+                `Selected Adset ID: ${selectedAdsetId || 'none'}`,
+                `Adset Linked To Lead: ${adsetLinked ? 'yes' : 'no'}`,
+                `Queue Count: ${queueToUse.length}`
+            ];
+
+            if (routingErrorText) {
+                lines.push(`Routing Error: ${routingErrorText}`);
+            }
+            if (Array.isArray(lastClientSearchTrace) && lastClientSearchTrace.length > 0) {
+                lines.push('', 'Detailed Search Trace:');
+                lines.push(...lastClientSearchTrace);
+            }
+            if (rowLines.length > 0) {
+                lines.push('', 'Queue Detail:');
+                lines.push(...rowLines);
+            }
+            return lines.join('\n');
+        }
+
+        function normalizeMetaPixelId(rawPixel) {
+            if (rawPixel == null) return '';
+            const v = Array.isArray(rawPixel) ? rawPixel[0] : rawPixel;
+            if (v == null) return '';
+            return String(v).trim();
+        }
+
+        function fireDynamicMetaLead(adsetFields, leadEventData, currentEventId) {
+            if (TESTING_MODE || typeof fbq === 'undefined') return false;
+            const pixelId = normalizeMetaPixelId(adsetFields && adsetFields[ADSET_FUNNEL_FIELDS.metaPixel]);
+            if (!pixelId) {
+                console.warn('Meta Lead skipped: routed adset has no Meta Pixel value');
+                return false;
+            }
+            try {
+                if (!initializedMetaPixels.has(pixelId)) {
+                    fbq('init', pixelId);
+                    initializedMetaPixels.add(pixelId);
+                }
+                fbq('trackSingle', pixelId, 'Lead', leadEventData, { eventID: currentEventId });
+                return true;
+            } catch (error) {
+                console.error('Dynamic Meta Lead tracking failed:', error);
+                return false;
             }
         }
 
@@ -2951,6 +3092,7 @@
             minCalendarHours: 'Minimum Calendar Hours',
             maxCalendarDays: 'Maximum Calendar Days',
             timezone: 'Timezone',
+            metaPixel: 'Meta Pixel',
         };
 
         const SHOWER_IMAGE_URLS = [
@@ -3258,13 +3400,9 @@
         // Load campaign from URL when present (Source Campaign + Meta campaignID for redirects); Local Pick match uses project address zip at submit.
         (async function() {
             try {
-                ensureFixedMetaPixel();
-
-                const loadedCampaignClient = await loadClientFromCampaign(initialCampaignID);
+                await loadClientFromCampaign(initialCampaignID);
 
                 if (genericLeadFlow) {
-                    campaignClientData = null;
-                    clientData = null;
                     applyDefaultLocalPickLogo();
                     updatePartnerNameInPrivacyPolicy();
                     updateProjectTypeStepOptions();
@@ -3272,28 +3410,17 @@
                     return;
                 }
                 if (matchedClientData) {
-                    campaignClientData = matchedClientData;
-                    clientData = matchedClientData;
                     updateProjectTypeStepOptions();
                     await tryRestoreFunnelProgressAfterBootstrap();
                     return;
                 }
 
-                campaignClientData = loadedCampaignClient;
-                if (campaignClientData) {
-                    clientData = campaignClientData;
-
-                    updatePartnerNameInPrivacyPolicy();
-                    updateProjectTypeStepOptions();
-                } else {
-                    applyDefaultLocalPickLogo();
-                    updatePartnerNameInPrivacyPolicy();
-                    updateProjectTypeStepOptions();
-                }
+                applyDefaultLocalPickLogo();
+                updatePartnerNameInPrivacyPolicy();
+                updateProjectTypeStepOptions();
                 await tryRestoreFunnelProgressAfterBootstrap();
             } catch (error) {
                 console.error('Error initializing page:', error);
-                ensureFixedMetaPixel();
                 applyDefaultLocalPickLogo();
                 updatePartnerNameInPrivacyPolicy();
                 updateProjectTypeStepOptions();
@@ -3493,17 +3620,6 @@
             element.classList.add('selected');
             formData[field] = value;
             persistFunnelProgress();
-            
-            if (!hasTrackedEngagement) {
-                if (!TESTING_MODE && typeof fbq !== 'undefined' && !genericLeadFlow && clientData) {
-                    const vcEventId = generateEventId();
-                    fbq('track', 'ViewContent', {
-                        content_category: 'home_improvement',
-                        content_name: 'bathroom_remodel_quiz_start'
-                    }, { eventID: vcEventId });
-                }
-                hasTrackedEngagement = true;
-            }
             
             // Homeowner step: show red message when "No" selected, don't advance
             if (field === 'homeowner') {
@@ -4111,9 +4227,8 @@
                 if (rawSlots.length === 0) return [];
                 const slots = [];
                 const nowReal = new Date();
-                const activeForCalendar = getActiveClient();
-                const linkedClientId = activeForCalendar && activeForCalendar.id;
-                const bookedTimes = await getBookedAppointments(dateObj, linkedClientId);
+                const linkedAdsetId = getActiveAdsetRecordIdForCalendar();
+                const bookedTimes = await getBookedAppointments(dateObj, linkedAdsetId);
                 for (const item of rawSlots) {
                     if (!item || typeof item !== 'object' || !item.start) continue;
                     const wall = wallClockPartsInTimezone(item.start, clientTimezone);
@@ -4147,10 +4262,9 @@
             const slots = [];
             const now = getCurrentDateInTimezone();
             const dateStr = date.toLocaleDateString('en-US', { timeZone: clientTimezone });
-            const activeForCalendar = getActiveClient();
-            const linkedClientId = activeForCalendar && activeForCalendar.id;
-            const bookedTimes = await getBookedAppointments(date, linkedClientId);
-            console.log('[Calendar] getAvailableTimesForDate', { date: dateStr, linkedClientId, timesForDay, bookedTimes, clientMinHoursInAdvance });
+            const linkedAdsetId = getActiveAdsetRecordIdForCalendar();
+            const bookedTimes = await getBookedAppointments(date, linkedAdsetId);
+            console.log('[Calendar] getAvailableTimesForDate', { date: dateStr, linkedAdsetId, timesForDay, bookedTimes, clientMinHoursInAdvance });
             
             let parsed = 0;
             let skippedTooSoon = 0;
@@ -4229,11 +4343,18 @@
             
             return `${month}/${day}/${year} at ${timeDisplay}`;
         }
+
+        function getActiveAdsetRecordIdForCalendar() {
+            if (adsetRecordId) return adsetRecordId;
+            const selected = lastLeadRoutePick && lastLeadRoutePick.selected;
+            if (selected && selected.adsetId) return selected.adsetId;
+            return null;
+        }
         
-        async function getBookedAppointments(date, linkedClientId) {
+        async function getBookedAppointments(date, linkedAdsetId) {
             try {
-                // Only count appointments for this client's leads; otherwise we'd block slots used by other clients
-                if (!linkedClientId) {
+                // Only count appointments for this adset's leads; otherwise we'd block slots used by other adsets.
+                if (!linkedAdsetId) {
                     return [];
                 }
                 const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -4254,10 +4375,10 @@
                 
                 const bookedTimes = [];
                 leadsData.records.forEach(lead => {
-                    // Filter client-side: only count leads linked to this client
-                    const linkedClients = lead.fields['Linked Client'];
-                    const isLinkedToClient = Array.isArray(linkedClients) && linkedClients.includes(linkedClientId);
-                    if (!isLinkedToClient) return;
+                    // Filter client-side: only count leads linked to this adset.
+                    const linkedAdsets = lead.fields['Adset'];
+                    const isLinkedToAdset = Array.isArray(linkedAdsets) && linkedAdsets.includes(linkedAdsetId);
+                    if (!isLinkedToAdset) return;
                     
                     const appt = lead.fields['Appt'];
                     if (!appt) return;
@@ -4641,7 +4762,6 @@
                 resetPostSubmitCtaTitlesVisibility();
             }
             updatePartnerNameInPrivacyPolicy();
-            const phoneStepEl = document.getElementById('step6');
             const calendarStep = document.getElementById('calendarStep');
             const progressArea = document.getElementById('progressArea');
             
@@ -4717,7 +4837,7 @@
                 }
             }
             
-            if (phoneStepEl) phoneStepEl.classList.remove('active');
+            deactivateSubmitSourceSteps();
             if (calendarStep) {
                 calendarStep.classList.add('active');
             } else {
@@ -4765,7 +4885,7 @@
                 return;
             }
 
-            document.getElementById('step6').classList.remove('active');
+            deactivateSubmitSourceSteps();
             document.getElementById('contactStep').classList.remove('active');
             document.getElementById('contactStepAddContact').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
@@ -4851,7 +4971,7 @@
             }
             
             // Show the contact screen
-            document.getElementById('step6').classList.remove('active');
+            deactivateSubmitSourceSteps();
             document.getElementById('contactStepAddContact').classList.remove('active');
             document.getElementById('contactStep').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
@@ -4864,6 +4984,21 @@
 
         const checkMarkIconHtml = '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#6190f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; display: block;"><circle cx="12" cy="12" r="10" fill="#e8ecfb"/><path d="M9 12l2 2 4-4" stroke="#6190f2" stroke-width="3"/></svg>';
         const exclamationIconHtml = '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#F9A825" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; display: block;"><circle cx="12" cy="12" r="10" fill="#FFF9C4" stroke="#F9A825"/><path d="M12 7 v6" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.5" fill="#F9A825"/></svg>';
+        function deactivateSubmitSourceSteps() {
+            const phoneStep = document.getElementById('step6');
+            const findingStep = document.getElementById('findingLocalPickStep');
+            if (phoneStep) phoneStep.classList.remove('active');
+            if (findingStep) findingStep.classList.remove('active');
+        }
+        function showFindingLocalPickScreen() {
+            postFormSubmitted = true;
+            syncGlobalQuizTaglineVisibility();
+            deactivateSubmitSourceSteps();
+            const findingStep = document.getElementById('findingLocalPickStep');
+            if (findingStep) findingStep.classList.add('active');
+            const progressArea = document.getElementById('progressArea');
+            if (progressArea) progressArea.style.display = 'none';
+        }
         function showConfirmationScreen() {
             postFormSubmitted = true;
             syncGlobalQuizTaglineVisibility();
@@ -4886,7 +5021,7 @@
                     : 'COMPANY';
                 confirmationReadySubtitle.textContent = `${companyName} will call you soon to schedule your free estimate!`;
             }
-            document.getElementById('step6').classList.remove('active');
+            deactivateSubmitSourceSteps();
             document.getElementById('confirmationStep').classList.add('active');
             document.getElementById('progressArea').style.display = 'none';
             
@@ -5538,68 +5673,26 @@
                     email: emailValue
                 };
             
-            // Matched client from exact-zip routing; Adset link only when a tier-qualified partner was selected.
-            try {
-                if (!finalData.address || !finalData.address.zip) {
-                    throw new Error('Address data is missing or incomplete. Address object: ' + JSON.stringify(finalData.address));
-                }
-
-                matchedClientData = await findClientByZipCode(finalData.address.zip);
-                genericLeadFlow = !matchedClientData;
-                if (!matchedClientData) {
-                    clientData = null;
-                    campaignClientData = null;
-                } else {
-                    clientData = matchedClientData;
-                    campaignClientData = matchedClientData;
-                }
-                updatePartnerNameInPrivacyPolicy();
-                refreshPartnerLocalPickSection();
-                updateProjectTypeStepOptions();
-            } catch (error) {
-                console.error('Error finding client by project zip code:', error);
-            }
-            
-            // Meta Pixel Lead — fixed pixel; eventID matches generated id used for Airtable Unique ID
-            if (!TESTING_MODE && typeof fbq !== 'undefined') {
-                const leadEventData = {
-                    content_category: 'home_improvement',
-                    content_name: 'bathroom_remodel_quote',
-                    value: 1.00,
-                    currency: 'USD',
-                    homeowner_status: finalData.homeowner,
-                    bathroom_last_updated: finalData.bathroomLastUpdated,
-                    project_type: finalData.projectType,
-                    main_goal: finalData.mainGoal
-                };
-                fbq('track', 'Lead', leadEventData, { eventID: eventId });
-            }
+            const leadEventData = {
+                content_category: 'home_improvement',
+                content_name: 'bathroom_remodel_quote',
+                value: 1.00,
+                currency: 'USD',
+                homeowner_status: finalData.homeowner,
+                bathroom_last_updated: finalData.bathroomLastUpdated,
+                project_type: finalData.projectType,
+                main_goal: finalData.mainGoal
+            };
             
             adRecordId = null;
             adsetRecordId = null;
 
-            // Find ad and adset from URL (adset table = ADSET_TABLE_ID / junction ad sets)
+            // Find ad from URL (adset lookup is deferred until after first Airtable write).
             try {
                 const adATID = urlParams.get('adATID');
-                const adsetID = urlParams.get('adsetID');
 
                 if (adATID) {
                     adRecordId = await findAdByATID(adATID);
-                }
-
-                if (adsetID) {
-                    const adsetFilterFormula = encodeURIComponent(`{Adset ID}="${adsetID}"`);
-                    const adsetUrl = `${AIRTABLE_BASE_URL}/${ADSET_TABLE_ID}?filterByFormula=${adsetFilterFormula}`;
-                    const adsetData = await fetchAirtableData(adsetUrl);
-                    if (adsetData.records && adsetData.records.length > 0) {
-                        adsetRecordId = adsetData.records[0].id;
-                    }
-                }
-                if (!adsetRecordId && lastLeadRoutePick && lastLeadRoutePick.selected && lastLeadRoutePick.selected.adsetId) {
-                    adsetRecordId = lastLeadRoutePick.selected.adsetId;
-                }
-                if (!lastLeadRoutePick || !lastLeadRoutePick.selected) {
-                    adsetRecordId = null;
                 }
             } catch (error) {
                 console.log('Ad/adset lookup failed:', error.message);
@@ -5705,6 +5798,72 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             }
 
             clearPersistedFunnelProgress();
+
+            showFindingLocalPickScreen();
+            let routingErrorText = '';
+            let adsetLinked = false;
+
+            // Run routing after write while user sees loading state.
+            try {
+                if (!finalData.address || !finalData.address.zip) {
+                    throw new Error('Address data is missing or incomplete. Address object: ' + JSON.stringify(finalData.address));
+                }
+
+                matchedClientData = await findClientByZipCode(finalData.address.zip);
+                genericLeadFlow = !matchedClientData;
+                updatePartnerNameInPrivacyPolicy();
+                refreshPartnerLocalPickSection();
+                updateProjectTypeStepOptions();
+            } catch (error) {
+                console.error('Error finding client by project zip code:', error);
+                routingErrorText = String(error && error.message ? error.message : error || '');
+                genericLeadFlow = true;
+            }
+
+            // Resolve and link adset after initial lead write.
+            try {
+                const adsetID = urlParams.get('adsetID');
+                adsetRecordId = null;
+                if (adsetID) {
+                    const adsetFilterFormula = encodeURIComponent(`{Adset ID}="${adsetID}"`);
+                    const adsetUrl = `${AIRTABLE_BASE_URL}/${ADSET_TABLE_ID}?filterByFormula=${adsetFilterFormula}`;
+                    const adsetData = await fetchAirtableData(adsetUrl);
+                    if (adsetData.records && adsetData.records.length > 0) {
+                        adsetRecordId = adsetData.records[0].id;
+                    }
+                }
+                if (!adsetRecordId && lastLeadRoutePick && lastLeadRoutePick.selected && lastLeadRoutePick.selected.adsetId) {
+                    adsetRecordId = lastLeadRoutePick.selected.adsetId;
+                }
+            } catch (error) {
+                console.warn('Deferred adset link failed:', error);
+                adsetLinked = false;
+            }
+
+            try {
+                if (leadRecordId) {
+                    const logText = buildClientSearchLog(finalData.address && finalData.address.zip, routingErrorText, adsetLinked);
+                    const leadPatchFields = { Log: logText };
+                    if (adsetRecordId) {
+                        leadPatchFields.Adset = [adsetRecordId];
+                        const routedClient = getActiveClient();
+                        const rawLeadPrice = routedClient && routedClient.fields ? routedClient.fields['Lead Price'] : null;
+                        const leadPriceValue = Array.isArray(rawLeadPrice) ? rawLeadPrice[0] : rawLeadPrice;
+                        if (leadPriceValue != null && String(leadPriceValue).trim() !== '') {
+                            leadPatchFields.Price = leadPriceValue;
+                        }
+                    }
+                    await updateLeadFields(leadRecordId, leadPatchFields);
+                    adsetLinked = !!adsetRecordId;
+                }
+            } catch (error) {
+                console.warn('Lead log/adset patch failed:', error);
+            }
+
+            if (adsetLinked && adsetRecordId) {
+                const routedAdsetForPixel = getRoutedAdsetFields();
+                fireDynamicMetaLead(routedAdsetForPixel, leadEventData, eventId);
+            }
             
             let activeClient = getActiveClient();
             let submitScreenType = 'None';

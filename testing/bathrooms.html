@@ -1841,6 +1841,7 @@
                 'Logo',
                 'Stars/5.0',
                 '# of Reviews',
+                'Lead Price',
                 'Review 1',
                 'Reviewer 1',
                 'Review 2',
@@ -5845,6 +5846,12 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                     const leadPatchFields = { Log: logText };
                     if (adsetRecordId) {
                         leadPatchFields.Adset = [adsetRecordId];
+                        const routedClient = getActiveClient();
+                        const rawLeadPrice = routedClient && routedClient.fields ? routedClient.fields['Lead Price'] : null;
+                        const leadPriceValue = Array.isArray(rawLeadPrice) ? rawLeadPrice[0] : rawLeadPrice;
+                        if (leadPriceValue != null && String(leadPriceValue).trim() !== '') {
+                            leadPatchFields.Price = leadPriceValue;
+                        }
                     }
                     await updateLeadFields(leadRecordId, leadPatchFields);
                     adsetLinked = !!adsetRecordId;
