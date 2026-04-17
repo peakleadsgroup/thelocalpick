@@ -2801,7 +2801,7 @@
         async function submitLeadToAirtable(leadData) {
             if (TESTING_MODE) {
                 console.log('[TESTING_MODE] Airtable writes and duplicate checks skipped; payload:', JSON.stringify(leadData, null, 2));
-                return { records: [{ id: 'test-record-id' }] };
+                return { records: [{ id: 'test-record-id' }], submissionMeta: { isDuplicate: false } };
             }
             try {
                 // Check for duplicate: same phone with any lead created in last 90 days (regardless of linked client).
@@ -2899,7 +2899,12 @@
                     leadRecordId = result.records[0].id;
                 }
                 
-                return result;
+                return {
+                    ...result,
+                    submissionMeta: {
+                        isDuplicate
+                    }
+                };
             } catch (error) {
                 console.error('Error submitting lead to Airtable:', error);
                 throw error;
@@ -2923,7 +2928,7 @@
             }
         }
 
-        function buildClientSearchLog(zipForRouting, routingErrorText, adsetLinked) {
+        function buildClientSearchLog(zipForRouting, routingErrorText, adsetLinked, extraDetails = {}) {
             const nowIso = new Date().toISOString();
             const route = lastLeadRoutePick || {};
             const selected = route.selected || null;
@@ -2959,6 +2964,16 @@
                 `Adset Linked To Lead: ${adsetLinked ? 'yes' : 'no'}`,
                 `Queue Count: ${queueToUse.length}`
             ];
+
+            const detailKeys = Object.keys(extraDetails || {});
+            if (detailKeys.length > 0) {
+                lines.push('', 'Adset Link Diagnostics:');
+                for (const key of detailKeys) {
+                    const val = extraDetails[key];
+                    if (val == null || val === '') continue;
+                    lines.push(`${key}: ${String(val)}`);
+                }
+            }
 
             if (routingErrorText) {
                 lines.push(`Routing Error: ${routingErrorText}`);
@@ -5777,8 +5792,10 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             
             // Submit to Airtable
             let submissionSuccessful = false;
+            let isDuplicateLead = false;
             try {
-                await submitLeadToAirtable(leadData);
+                const submissionResult = await submitLeadToAirtable(leadData);
+                isDuplicateLead = !!(submissionResult && submissionResult.submissionMeta && submissionResult.submissionMeta.isDuplicate);
                 submissionSuccessful = true;
                 
                 // Submission completed successfully
@@ -5821,28 +5838,66 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             }
 
             // Resolve and link adset after initial lead write.
-            try {
-                const adsetID = urlParams.get('adsetID');
+            const adsetLinkDiagnostics = {
+                leadRecordId: leadRecordId || 'none',
+                duplicateLead: isDuplicateLead ? 'yes' : 'no',
+                urlAdsetIdParam: 'none',
+                routedAdsetId: 'none',
+                resolvedAdsetId: 'none',
+                resolutionSource: 'none',
+                linkEligibility: 'eligible',
+                urlLookupStatus: 'not-run',
+                patchAttempted: 'no',
+                patchOutcome: 'not-run',
+            };
+            const adsetID = urlParams.get('adsetID');
+            const routedAdsetId = (lastLeadRoutePick && lastLeadRoutePick.selected && lastLeadRoutePick.selected.adsetId)
+                ? String(lastLeadRoutePick.selected.adsetId)
+                : '';
+            adsetLinkDiagnostics.urlAdsetIdParam = adsetID || 'none';
+            adsetLinkDiagnostics.routedAdsetId = routedAdsetId || 'none';
+
+            if (isDuplicateLead) {
                 adsetRecordId = null;
+                adsetLinkDiagnostics.linkEligibility = 'ineligible (duplicate)';
+                adsetLinkDiagnostics.resolutionSource = 'skipped-duplicate';
+                adsetLinkDiagnostics.urlLookupStatus = 'skipped-duplicate';
+            } else {
+                // Prefer routed adset so URL lookup failures cannot block linking.
+                adsetRecordId = routedAdsetId || null;
+                if (adsetRecordId) adsetLinkDiagnostics.resolutionSource = 'routing';
+
                 if (adsetID) {
-                    const adsetFilterFormula = encodeURIComponent(`{Adset ID}="${adsetID}"`);
-                    const adsetUrl = `${AIRTABLE_BASE_URL}/${ADSET_TABLE_ID}?filterByFormula=${adsetFilterFormula}`;
-                    const adsetData = await fetchAirtableData(adsetUrl);
-                    if (adsetData.records && adsetData.records.length > 0) {
-                        adsetRecordId = adsetData.records[0].id;
+                    try {
+                        const adsetFilterFormula = encodeURIComponent(`{Adset ID}="${adsetID}"`);
+                        const adsetUrl = `${AIRTABLE_BASE_URL}/${ADSET_TABLE_ID}?filterByFormula=${adsetFilterFormula}`;
+                        const adsetData = await fetchAirtableData(adsetUrl);
+                        const found = adsetData && Array.isArray(adsetData.records) ? adsetData.records.length : 0;
+                        adsetLinkDiagnostics.urlLookupStatus = `ok (records=${found})`;
+                        if (found > 0) {
+                            adsetRecordId = adsetData.records[0].id;
+                            adsetLinkDiagnostics.resolutionSource = 'url-adsetID';
+                        }
+                    } catch (error) {
+                        const msg = error && error.message ? error.message : String(error || 'unknown');
+                        adsetLinkDiagnostics.urlLookupStatus = `failed (${msg})`;
+                        console.warn('Deferred adset lookup failed; keeping routed fallback:', error);
                     }
                 }
-                if (!adsetRecordId && lastLeadRoutePick && lastLeadRoutePick.selected && lastLeadRoutePick.selected.adsetId) {
-                    adsetRecordId = lastLeadRoutePick.selected.adsetId;
-                }
-            } catch (error) {
-                console.warn('Deferred adset link failed:', error);
-                adsetLinked = false;
             }
+            adsetLinkDiagnostics.resolvedAdsetId = adsetRecordId || 'none';
 
             try {
                 if (leadRecordId) {
-                    const logText = buildClientSearchLog(finalData.address && finalData.address.zip, routingErrorText, adsetLinked);
+                    adsetLinkDiagnostics.patchAttempted = 'yes';
+                    adsetLinkDiagnostics.patchOutcome = 'attempting';
+                    adsetLinked = !!adsetRecordId;
+                    const logText = buildClientSearchLog(
+                        finalData.address && finalData.address.zip,
+                        routingErrorText,
+                        adsetLinked,
+                        adsetLinkDiagnostics
+                    );
                     const leadPatchFields = { Log: logText };
                     if (adsetRecordId) {
                         leadPatchFields.Adset = [adsetRecordId];
@@ -5854,9 +5909,21 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                         }
                     }
                     await updateLeadFields(leadRecordId, leadPatchFields);
-                    adsetLinked = !!adsetRecordId;
+                    adsetLinkDiagnostics.patchOutcome = 'success';
+                    // Write final diagnostics state to lead log after successful patch.
+                    const finalLogText = buildClientSearchLog(
+                        finalData.address && finalData.address.zip,
+                        routingErrorText,
+                        adsetLinked,
+                        adsetLinkDiagnostics
+                    );
+                    await updateLeadFields(leadRecordId, { Log: finalLogText });
+                } else {
+                    adsetLinkDiagnostics.patchAttempted = 'no (missing leadRecordId)';
                 }
             } catch (error) {
+                const msg = error && error.message ? error.message : String(error || 'unknown');
+                adsetLinkDiagnostics.patchOutcome = `failed (${msg})`;
                 console.warn('Lead log/adset patch failed:', error);
             }
 
