@@ -1847,6 +1847,7 @@
                 'Stars/5.0',
                 '# of Reviews',
                 'Lead Price',
+                'TCPA Contact',
                 'Review 1',
                 'Reviewer 1',
                 'Review 2',
@@ -2303,6 +2304,7 @@
                         const minimalClientFields = [
                             ZIP_ROUTE.CLIENT_NAME_FIELD,
                             'Status',
+                            'TCPA Contact',
                             ...ZIP_ROUTE.CLIENT_ADSET_LINK_FIELDS,
                         ];
                         return await airtableFetchAllRecords(ZIP_ROUTE.CLIENT_TABLE, { fields: minimalClientFields });
@@ -2763,7 +2765,7 @@
                 if (!route.selected || !route.selected.clientRec) {
                     return null;
                 }
-                return route.selected.clientRec;
+                return await hydrateClientTcpaContactIfMissing(route.selected.clientRec);
             } catch (error) {
                 console.error('Error finding client by zip (lead routing):', error);
                 lastZipRoutingQueue = [];
@@ -2796,14 +2798,15 @@
             zipRoutingPrefetch.completed = false;
             zipRoutingPrefetch.result = null;
             zipRoutingPrefetch.promise = findClientByZipCode(zip)
-                .then((client) => {
-                    zipRoutingPrefetch.result = client || null;
+                .then(async (client) => {
+                    const hydrated = client ? await hydrateClientTcpaContactIfMissing(client) : null;
+                    zipRoutingPrefetch.result = hydrated || null;
                     zipRoutingPrefetch.completed = true;
-                    matchedClientData = client || null;
+                    matchedClientData = hydrated || null;
                     genericLeadFlow = !matchedClientData;
                     tlpDebug('routing', 'Zip prefetch resolved', {
                         zip,
-                        matchedClientId: client && client.id ? client.id : null,
+                        matchedClientId: hydrated && hydrated.id ? hydrated.id : null,
                         genericLeadFlow
                     });
                     try {
@@ -2813,7 +2816,7 @@
                             error: String(e && e.message ? e.message : e)
                         });
                     }
-                    return client;
+                    return hydrated;
                 })
                 .catch((error) => {
                     zipRoutingPrefetch.result = null;
@@ -3415,6 +3418,42 @@
             return String(raw).trim();
         }
 
+        function getTcpaContactFromClientFields(fields) {
+            if (!fields) return '';
+            const candidates = ['TCPA Contact', 'TCPA contact', 'Tcpa Contact'];
+            for (const k of candidates) {
+                if (Object.prototype.hasOwnProperty.call(fields, k)) {
+                    const v = normalizeContactFieldValue(fields[k]);
+                    if (v) return v;
+                }
+            }
+            return '';
+        }
+
+        async function hydrateClientTcpaContactIfMissing(clientRec) {
+            try {
+                if (!clientRec || !clientRec.id || !clientRec.fields) return clientRec;
+                if (getTcpaContactFromClientFields(clientRec.fields)) return clientRec;
+                const url = `${AIRTABLE_BASE_URL}/${ZIP_ROUTE.CLIENT_TABLE}/${encodeURIComponent(clientRec.id)}`;
+                const data = await fetchAirtableData(url);
+                const f = data && data.fields ? data.fields : null;
+                if (!f) return clientRec;
+                const merged = { ...clientRec.fields, ...f };
+                const next = { ...clientRec, fields: merged };
+                tlpDebug('tcpa', 'Hydrated TCPA Contact from direct client fetch', {
+                    clientId: clientRec.id,
+                    hasTcpaAfter: !!getTcpaContactFromClientFields(merged)
+                });
+                return next;
+            } catch (e) {
+                tlpDebug('tcpa', 'TCPA Contact hydration failed', {
+                    clientId: clientRec && clientRec.id ? clientRec.id : null,
+                    error: String(e && e.message ? e.message : e)
+                });
+                return clientRec;
+            }
+        }
+
         /** Prefer Adset Call/Text, then client fallbacks. */
         function getPreferredContactNumbers(activeClient) {
             const clientFields = activeClient && activeClient.fields ? activeClient.fields : {};
@@ -3559,7 +3598,7 @@
                 /** Prefetch can resolve a routed client before submit while genericLeadFlow is still true. */
                 const routedEarly = matchedClientData && matchedClientData.fields ? matchedClientData : null;
                 const routedName = routedEarly && routedEarly.fields['Name'] ? String(routedEarly.fields['Name']).trim() : '';
-                const routedTcpa = normalizeContactFieldValue(routedEarly && routedEarly.fields ? routedEarly.fields['TCPA Contact'] : '');
+                const routedTcpa = getTcpaContactFromClientFields(routedEarly && routedEarly.fields ? routedEarly.fields : null);
                 const tcpaNameForDisplay = routedName || genericPartnerName;
                 const tcpaContactForDisplay = routedTcpa || genericTcpaContact;
                 tlpDebug('tcpa', 'Generic flow TCPA labels', {
@@ -3620,7 +3659,7 @@
             const partnerName = (activeClient && activeClient.fields && activeClient.fields['Name'])
                 ? activeClient.fields['Name']
                 : null;
-            const tcpaContact = normalizeContactFieldValue(activeClient && activeClient.fields ? activeClient.fields['TCPA Contact'] : '');
+            const tcpaContact = getTcpaContactFromClientFields(activeClient && activeClient.fields ? activeClient.fields : null);
             
             if (partnerNameElement) {
                 partnerNameElement.textContent = partnerName || genericPartnerName;
