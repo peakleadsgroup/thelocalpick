@@ -1520,8 +1520,8 @@
                 <button class="nav-btn" onclick="submitFinalForm()" id="phoneSubmitBtn" disabled>Get Estimate</button>
             </div>
             <div class="privacy-policy-text" id="privacyPolicyText">
-                <p>By clicking "NEXT STEP" and submitting this form, (i) I agree that <span id="partnerBusinessName">Peak Leads Group LLC and its marketing partners</span> may use automated technology to call or text my phone number (provided above) or email me regarding my request, and I may revoke this consent at any time, and (ii) I agree to the <a href="privacypolicy.html" class="privacy-policy-funnel-link" target="_blank" rel="noopener noreferrer">Terms & Conditions and Privacy Policy</a>.</p>
-                <p>I understand that my authorization to receive calls, texts, and emails via automated technology is not a condition of purchasing any goods or services. Message frequency may vary. Msg & data rates may apply. Reply STOP to cancel. Reply HELP for assistance.</p>
+                <p>By clicking "Get Estimate", I consent to receive autodialed and/or prerecorded calls, text messages, and emails from <span id="partnerBusinessName">The Local Pick and it's marketing partners</span> to verify my contact information, provide information about my account and/or purchases, and/or advertise its products and services, at the phone number provided above, including my wireless number if provided, even if my number is currently listed on any state, federal or internal Do Not Call list. I understand that consent is not a condition of purchase. I understand that I may revoke this consent at any time by contacting <span id="tcpaCompanyName">The Local Pick and it's marketing partners</span> at <span id="tcpaContactValue">contact@thelocalpick.com</span>.</p>
+                <p>I also agree to the <a href="privacypolicy.html" class="privacy-policy-funnel-link" target="_blank" rel="noopener noreferrer">Terms & Conditions and Privacy Policy</a>.</p>
             </div>
         </div>
 
@@ -1776,9 +1776,9 @@
         // ============================================
         // TESTING MODE - Disables Airtable writes and Meta Pixel
         // ============================================
-        const TESTING_MODE = false; // Set to true to disable Airtable writes and Meta Pixel for testing
+        const TESTING_MODE = false; // Production: Airtable writes + Meta enabled
         if (TESTING_MODE) console.log('[TESTING_MODE] Page loaded - Airtable writes and Meta Pixel disabled for testing');
-        const TLP_DEBUG_VERBOSE = window.TLP_DEBUG_VERBOSE !== false;
+        const TLP_DEBUG_VERBOSE = window.TLP_DEBUG_VERBOSE === true;
         function tlpDebug(scope, message, details) {
             if (!TLP_DEBUG_VERBOSE) return;
             const prefix = `[TLP][${scope}] ${message}`;
@@ -1842,6 +1842,7 @@
                 'Stars/5.0',
                 '# of Reviews',
                 'Lead Price',
+                'TCPA Contact',
                 'Review 1',
                 'Reviewer 1',
                 'Review 2',
@@ -1932,6 +1933,13 @@
         let clientIpAddress = null; // Cached client IP for lead submission
         /** True when zip had no Local Pick match—use network-wide copy and default logo; lead still submits. */
         let genericLeadFlow = false;
+        /** Cache zip routing work so submit can reuse prefetch done after address step. */
+        let zipRoutingPrefetch = {
+            zip: '',
+            promise: null,
+            result: null,
+            completed: false,
+        };
         const DEFAULT_LOGO_SRC = 'images/TheLocalPick-FlatLeftAligned.svg';
 
         const FUNNEL_RESUME_STORAGE_KEY = 'localpick_funnel_resume_v1';
@@ -2291,6 +2299,7 @@
                         const minimalClientFields = [
                             ZIP_ROUTE.CLIENT_NAME_FIELD,
                             'Status',
+                            'TCPA Contact',
                             ...ZIP_ROUTE.CLIENT_ADSET_LINK_FIELDS,
                         ];
                         return await airtableFetchAllRecords(ZIP_ROUTE.CLIENT_TABLE, { fields: minimalClientFields });
@@ -2751,13 +2760,87 @@
                 if (!route.selected || !route.selected.clientRec) {
                     return null;
                 }
-                return route.selected.clientRec;
+                return await hydrateClientTcpaContactIfMissing(route.selected.clientRec);
             } catch (error) {
                 console.error('Error finding client by zip (lead routing):', error);
                 lastZipRoutingQueue = [];
                 lastLeadRoutePick = { phase: 3, tier: null, selected: null, phase1Rows: [], message: String(error.message || error) };
                 return null;
             }
+        }
+
+        function normalizeFiveDigitZip(zipCode) {
+            const zip = String(zipCode || '').trim();
+            return /^\d{5}$/.test(zip) ? zip : '';
+        }
+
+        function primeZipRoutingLookup(zipCode) {
+            const zip = normalizeFiveDigitZip(zipCode);
+            if (!zip) {
+                tlpDebug('routing', 'Prefetch skipped: zip not valid 5-digit', { zipCode });
+                zipRoutingPrefetch = { zip: '', promise: null, result: null, completed: false };
+                return null;
+            }
+            if (zipRoutingPrefetch.zip === zip && zipRoutingPrefetch.promise) {
+                tlpDebug('routing', 'Reusing cached zip prefetch promise', {
+                    zip,
+                    completed: zipRoutingPrefetch.completed
+                });
+                return zipRoutingPrefetch.promise;
+            }
+            tlpDebug('routing', 'Starting zip prefetch lookup', { zip });
+            zipRoutingPrefetch.zip = zip;
+            zipRoutingPrefetch.completed = false;
+            zipRoutingPrefetch.result = null;
+            zipRoutingPrefetch.promise = findClientByZipCode(zip)
+                .then(async (client) => {
+                    const hydrated = client ? await hydrateClientTcpaContactIfMissing(client) : null;
+                    zipRoutingPrefetch.result = hydrated || null;
+                    zipRoutingPrefetch.completed = true;
+                    matchedClientData = hydrated || null;
+                    genericLeadFlow = !matchedClientData;
+                    tlpDebug('routing', 'Zip prefetch resolved', {
+                        zip,
+                        matchedClientId: hydrated && hydrated.id ? hydrated.id : null,
+                        genericLeadFlow
+                    });
+                    try {
+                        updatePartnerNameInPrivacyPolicy();
+                    } catch (e) {
+                        tlpDebug('routing', 'updatePartnerNameInPrivacyPolicy after prefetch failed', {
+                            error: String(e && e.message ? e.message : e)
+                        });
+                    }
+                    return hydrated;
+                })
+                .catch((error) => {
+                    zipRoutingPrefetch.result = null;
+                    zipRoutingPrefetch.completed = true;
+                    matchedClientData = null;
+                    genericLeadFlow = true;
+                    tlpDebug('routing', 'Zip prefetch failed', {
+                        zip,
+                        error: String(error && error.message ? error.message : error)
+                    });
+                    try {
+                        updatePartnerNameInPrivacyPolicy();
+                    } catch (e) {
+                        tlpDebug('routing', 'updatePartnerNameInPrivacyPolicy after prefetch error failed', {
+                            error: String(e && e.message ? e.message : e)
+                        });
+                    }
+                    throw error;
+                });
+            return zipRoutingPrefetch.promise;
+        }
+
+        async function getClientForZipUsingPrefetch(zipCode) {
+            const zip = normalizeFiveDigitZip(zipCode);
+            if (!zip) return null;
+            const prefetched = primeZipRoutingLookup(zip);
+            if (!prefetched) return null;
+            tlpDebug('routing', 'Awaiting prefetched zip lookup at submit', { zip });
+            return await prefetched;
         }
 
         async function findAdByATID(adATID) {
@@ -2912,7 +2995,12 @@
         }
 
         async function updateLeadFields(leadId, fields) {
-            if (!leadId || !fields || TESTING_MODE) return;
+            if (!leadId || !fields || TESTING_MODE) {
+                if (TESTING_MODE) {
+                    tlpDebug('airtable', 'Skipped lead PATCH in testing mode', { leadId, fields });
+                }
+                return;
+            }
             const response = await fetch(`${AIRTABLE_BASE_URL}/${TABLES.B2C_LEADS}/${leadId}`, {
                 method: 'PATCH',
                 headers: {
@@ -2997,7 +3085,14 @@
         }
 
         function fireDynamicMetaLead(adsetFields, leadEventData, currentEventId) {
-            if (TESTING_MODE || typeof fbq === 'undefined') return false;
+            if (TESTING_MODE) {
+                tlpDebug('meta', 'Skipped Meta lead event in testing mode', {
+                    eventId: currentEventId || null,
+                    payload: leadEventData || null
+                });
+                return false;
+            }
+            if (typeof fbq === 'undefined') return false;
             const pixelId = normalizeMetaPixelId(adsetFields && adsetFields[ADSET_FUNNEL_FIELDS.metaPixel]);
             if (!pixelId) {
                 console.warn('Meta Lead skipped: routed adset has no Meta Pixel value');
@@ -3201,15 +3296,18 @@
             if (!fields) return '';
             const stars = fields[CLIENT_DISPLAY_FIELDS.starsOutOf5];
             const n = fields[CLIENT_DISPLAY_FIELDS.numReviews];
-            if (
-                stars == null || String(stars).trim() === '' || !Number.isFinite(Number(stars)) ||
-                n == null || String(n).trim() === '' || !Number.isFinite(Number(n))
-            ) {
-                return '';
+            const hasStars = stars != null && String(stars).trim() !== '' && Number.isFinite(Number(stars));
+            const hasReviews = n != null && String(n).trim() !== '' && Number.isFinite(Number(n));
+            if (!hasStars && !hasReviews) return '';
+            const starsText = hasStars ? escapeHtml(Number(stars).toFixed(1)) : '';
+            const reviewsText = hasReviews ? escapeHtml(String(Math.round(Number(n)))) : '';
+            if (hasStars && hasReviews) {
+                return `<div class="review-aggregate">${starsText}/5.0 rating based on ${reviewsText} real homeowner reviews</div>`;
             }
-            const starsText = escapeHtml(Number(stars).toFixed(1));
-            const reviewsText = escapeHtml(String(Math.round(Number(n))));
-            return `<div class="review-aggregate">${starsText}/5.0 rating based on ${reviewsText} real homeowner reviews</div>`;
+            if (hasStars) {
+                return `<div class="review-aggregate">${starsText}/5.0 rating</div>`;
+            }
+            return `<div class="review-aggregate">${reviewsText} real homeowner reviews</div>`;
         }
 
         /** Plain HTML for star icon row (icon 1); line break before “reviews” matches layout mockups. */
@@ -3217,15 +3315,18 @@
             if (!fields) return null;
             const stars = fields[CLIENT_DISPLAY_FIELDS.starsOutOf5];
             const n = fields[CLIENT_DISPLAY_FIELDS.numReviews];
-            if (
-                stars == null || String(stars).trim() === '' || !Number.isFinite(Number(stars)) ||
-                n == null || String(n).trim() === '' || !Number.isFinite(Number(n))
-            ) {
-                return null;
+            const hasStars = stars != null && String(stars).trim() !== '' && Number.isFinite(Number(stars));
+            const hasReviews = n != null && String(n).trim() !== '' && Number.isFinite(Number(n));
+            if (!hasStars && !hasReviews) return null;
+            const starsText = hasStars ? escapeHtml(Number(stars).toFixed(1)) : '';
+            const reviewsText = hasReviews ? escapeHtml(String(Math.round(Number(n)))) : '';
+            if (hasStars && hasReviews) {
+                return `${starsText}/5.0 rating based on ${reviewsText} real homeowner<br>reviews`;
             }
-            const starsText = escapeHtml(Number(stars).toFixed(1));
-            const reviewsText = escapeHtml(String(Math.round(Number(n))));
-            return `${starsText}/5.0 rating based on ${reviewsText} real homeowner<br>reviews`;
+            if (hasStars) {
+                return `${starsText}/5.0 rating`;
+            }
+            return `${reviewsText} real homeowner reviews`;
         }
 
         function mergeStarRatingIntoLocalPickItems(localPickItems, fields) {
@@ -3310,6 +3411,42 @@
                 return '';
             }
             return String(raw).trim();
+        }
+
+        function getTcpaContactFromClientFields(fields) {
+            if (!fields) return '';
+            const candidates = ['TCPA Contact', 'TCPA contact', 'Tcpa Contact'];
+            for (const k of candidates) {
+                if (Object.prototype.hasOwnProperty.call(fields, k)) {
+                    const v = normalizeContactFieldValue(fields[k]);
+                    if (v) return v;
+                }
+            }
+            return '';
+        }
+
+        async function hydrateClientTcpaContactIfMissing(clientRec) {
+            try {
+                if (!clientRec || !clientRec.id || !clientRec.fields) return clientRec;
+                if (getTcpaContactFromClientFields(clientRec.fields)) return clientRec;
+                const url = `${AIRTABLE_BASE_URL}/${ZIP_ROUTE.CLIENT_TABLE}/${encodeURIComponent(clientRec.id)}`;
+                const data = await fetchAirtableData(url);
+                const f = data && data.fields ? data.fields : null;
+                if (!f) return clientRec;
+                const merged = { ...clientRec.fields, ...f };
+                const next = { ...clientRec, fields: merged };
+                tlpDebug('tcpa', 'Hydrated TCPA Contact from direct client fetch', {
+                    clientId: clientRec.id,
+                    hasTcpaAfter: !!getTcpaContactFromClientFields(merged)
+                });
+                return next;
+            } catch (e) {
+                tlpDebug('tcpa', 'TCPA Contact hydration failed', {
+                    clientId: clientRec && clientRec.id ? clientRec.id : null,
+                    error: String(e && e.message ? e.message : e)
+                });
+                return clientRec;
+            }
         }
 
         /** Prefer Adset Call/Text, then client fallbacks. */
@@ -3446,11 +3583,33 @@
         // Function to update partner name in privacy policy and other branded elements
         function updatePartnerNameInPrivacyPolicy() {
             const partnerNameElement = document.getElementById('partnerBusinessName');
+            const tcpaCompanyElement = document.getElementById('tcpaCompanyName');
+            const tcpaContactElement = document.getElementById('tcpaContactValue');
             const localPickTitleEl = document.getElementById('localPickTitle');
+            const genericPartnerName = "The Local Pick and it's marketing partners";
+            const genericTcpaContact = 'contact@thelocalpick.com';
 
             if (genericLeadFlow) {
+                /** Prefetch can resolve a routed client before submit while genericLeadFlow is still true. */
+                const routedEarly = matchedClientData && matchedClientData.fields ? matchedClientData : null;
+                const routedName = routedEarly && routedEarly.fields['Name'] ? String(routedEarly.fields['Name']).trim() : '';
+                const routedTcpa = getTcpaContactFromClientFields(routedEarly && routedEarly.fields ? routedEarly.fields : null);
+                const tcpaNameForDisplay = routedName || genericPartnerName;
+                const tcpaContactForDisplay = routedTcpa || genericTcpaContact;
+                tlpDebug('tcpa', 'Generic flow TCPA labels', {
+                    hasRoutedEarly: !!routedEarly,
+                    routedClientId: routedEarly && routedEarly.id ? routedEarly.id : null,
+                    tcpaNameForDisplay,
+                    tcpaContactForDisplay
+                });
                 if (partnerNameElement) {
-                    partnerNameElement.textContent = "Peak Leads Group LLC and its marketing partners";
+                    partnerNameElement.textContent = tcpaNameForDisplay;
+                }
+                if (tcpaCompanyElement) {
+                    tcpaCompanyElement.textContent = tcpaNameForDisplay;
+                }
+                if (tcpaContactElement) {
+                    tcpaContactElement.textContent = tcpaContactForDisplay;
                 }
                 const step4AddressSubheader = document.getElementById('step4AddressSubheader');
                 if (step4AddressSubheader) {
@@ -3495,11 +3654,16 @@
             const partnerName = (activeClient && activeClient.fields && activeClient.fields['Name'])
                 ? activeClient.fields['Name']
                 : null;
+            const tcpaContact = getTcpaContactFromClientFields(activeClient && activeClient.fields ? activeClient.fields : null);
             
             if (partnerNameElement) {
-                partnerNameElement.textContent = (postFormSubmitted && partnerName)
-                    ? partnerName
-                    : "Peak Leads Group LLC and its marketing partners";
+                partnerNameElement.textContent = partnerName || genericPartnerName;
+            }
+            if (tcpaCompanyElement) {
+                tcpaCompanyElement.textContent = partnerName || genericPartnerName;
+            }
+            if (tcpaContactElement) {
+                tcpaContactElement.textContent = tcpaContact || genericTcpaContact;
             }
 
             const step4AddressSubheader = document.getElementById('step4AddressSubheader');
@@ -3747,6 +3911,8 @@
         function goFromAddressToNameStep() {
             validateAddressForm();
             if (formData.address) {
+                // Start zip routing now so this network work overlaps with name/contact steps.
+                primeZipRoutingLookup(formData.address.zip);
                 nextStep();
             }
         }
@@ -5673,6 +5839,10 @@
             setGetEstimateButtonLoading(true);
             
             try {
+                tlpDebug('submit', 'submitFinalForm started', {
+                    testingMode: TESTING_MODE,
+                    currentStep
+                });
                 eventId = generateEventId();
                 
                 if (TESTING_MODE) {
@@ -5698,6 +5868,7 @@
                 project_type: finalData.projectType,
                 main_goal: finalData.mainGoal
             };
+            tlpDebug('submit', 'Lead event payload prepared', leadEventData);
             
             adRecordId = null;
             adsetRecordId = null;
@@ -5709,6 +5880,7 @@
                 if (adATID) {
                     adRecordId = await findAdByATID(adATID);
                 }
+                tlpDebug('submit', 'Ad lookup complete', { adATID: adATID || null, adRecordId: adRecordId || null });
             } catch (error) {
                 console.log('Ad/adset lookup failed:', error.message);
             }
@@ -5782,6 +5954,12 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 zip: finalData.address.zip || '',
                 uniqueId: eventId
             };
+            tlpDebug('submit', 'Lead payload prepared', {
+                fullName: leadData.fullName,
+                zip: leadData.zip,
+                hasEmail: !!leadData.email,
+                uniqueId: leadData.uniqueId
+            });
 
             // Capture client IP at submit time for Airtable "IP" field.
             try {
@@ -5789,6 +5967,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             } catch (e) {
                 leadData.ip = '';
             }
+            tlpDebug('submit', 'IP capture completed', { ip: leadData.ip || null });
             
             // Submit to Airtable
             let submissionSuccessful = false;
@@ -5797,6 +5976,11 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 const submissionResult = await submitLeadToAirtable(leadData);
                 isDuplicateLead = !!(submissionResult && submissionResult.submissionMeta && submissionResult.submissionMeta.isDuplicate);
                 submissionSuccessful = true;
+                tlpDebug('submit', 'Lead submission stage completed', {
+                    submissionSuccessful,
+                    isDuplicateLead,
+                    leadRecordId: leadRecordId || null
+                });
                 
                 // Submission completed successfully
             } catch (error) {
@@ -5826,8 +6010,12 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                     throw new Error('Address data is missing or incomplete. Address object: ' + JSON.stringify(finalData.address));
                 }
 
-                matchedClientData = await findClientByZipCode(finalData.address.zip);
+                matchedClientData = await getClientForZipUsingPrefetch(finalData.address.zip);
                 genericLeadFlow = !matchedClientData;
+                tlpDebug('routing', 'Routing result after submit', {
+                    matchedClientId: matchedClientData && matchedClientData.id ? matchedClientData.id : null,
+                    genericLeadFlow
+                });
                 updatePartnerNameInPrivacyPolicy();
                 refreshPartnerLocalPickSection();
                 updateProjectTypeStepOptions();
