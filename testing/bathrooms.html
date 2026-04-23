@@ -1525,7 +1525,7 @@
                 <button class="nav-btn" onclick="submitFinalForm()" id="phoneSubmitBtn" disabled>Get Estimate</button>
             </div>
             <div class="privacy-policy-text" id="privacyPolicyText">
-                <p>By clicking "Get Quote", I consent to receive autodialed and/or prerecorded calls, text messages, and emails from <span id="partnerBusinessName">The Local Pick and it's marketing partners</span> to verify my contact information, provide information about my account and/or purchases, and/or advertise its products and services, at the phone number provided above, including my wireless number if provided, even if my number is currently listed on any state, federal or internal Do Not Call list. I understand that consent is not a condition of purchase. I understand that I may revoke this consent at any time by contacting <span id="tcpaCompanyName">The Local Pick and it's marketing partners</span> at <span id="tcpaContactValue">contact@thelocalpick.com</span>.</p>
+                <p>By clicking "Get Estimate", I consent to receive autodialed and/or prerecorded calls, text messages, and emails from <span id="partnerBusinessName">The Local Pick and it's marketing partners</span> to verify my contact information, provide information about my account and/or purchases, and/or advertise its products and services, at the phone number provided above, including my wireless number if provided, even if my number is currently listed on any state, federal or internal Do Not Call list. I understand that consent is not a condition of purchase. I understand that I may revoke this consent at any time by contacting <span id="tcpaCompanyName">The Local Pick and it's marketing partners</span> at <span id="tcpaContactValue">contact@thelocalpick.com</span>.</p>
                 <p>I also agree to the <a href="privacypolicy.html" class="privacy-policy-funnel-link" target="_blank" rel="noopener noreferrer">Terms & Conditions and Privacy Policy</a>.</p>
             </div>
         </div>
@@ -2799,19 +2799,38 @@
                 .then((client) => {
                     zipRoutingPrefetch.result = client || null;
                     zipRoutingPrefetch.completed = true;
+                    matchedClientData = client || null;
+                    genericLeadFlow = !matchedClientData;
                     tlpDebug('routing', 'Zip prefetch resolved', {
                         zip,
-                        matchedClientId: client && client.id ? client.id : null
+                        matchedClientId: client && client.id ? client.id : null,
+                        genericLeadFlow
                     });
+                    try {
+                        updatePartnerNameInPrivacyPolicy();
+                    } catch (e) {
+                        tlpDebug('routing', 'updatePartnerNameInPrivacyPolicy after prefetch failed', {
+                            error: String(e && e.message ? e.message : e)
+                        });
+                    }
                     return client;
                 })
                 .catch((error) => {
                     zipRoutingPrefetch.result = null;
                     zipRoutingPrefetch.completed = true;
+                    matchedClientData = null;
+                    genericLeadFlow = true;
                     tlpDebug('routing', 'Zip prefetch failed', {
                         zip,
                         error: String(error && error.message ? error.message : error)
                     });
+                    try {
+                        updatePartnerNameInPrivacyPolicy();
+                    } catch (e) {
+                        tlpDebug('routing', 'updatePartnerNameInPrivacyPolicy after prefetch error failed', {
+                            error: String(e && e.message ? e.message : e)
+                        });
+                    }
                     throw error;
                 });
             return zipRoutingPrefetch.promise;
@@ -3537,14 +3556,26 @@
             const genericTcpaContact = 'contact@thelocalpick.com';
 
             if (genericLeadFlow) {
+                /** Prefetch can resolve a routed client before submit while genericLeadFlow is still true. */
+                const routedEarly = matchedClientData && matchedClientData.fields ? matchedClientData : null;
+                const routedName = routedEarly && routedEarly.fields['Name'] ? String(routedEarly.fields['Name']).trim() : '';
+                const routedTcpa = normalizeContactFieldValue(routedEarly && routedEarly.fields ? routedEarly.fields['TCPA Contact'] : '');
+                const tcpaNameForDisplay = routedName || genericPartnerName;
+                const tcpaContactForDisplay = routedTcpa || genericTcpaContact;
+                tlpDebug('tcpa', 'Generic flow TCPA labels', {
+                    hasRoutedEarly: !!routedEarly,
+                    routedClientId: routedEarly && routedEarly.id ? routedEarly.id : null,
+                    tcpaNameForDisplay,
+                    tcpaContactForDisplay
+                });
                 if (partnerNameElement) {
-                    partnerNameElement.textContent = genericPartnerName;
+                    partnerNameElement.textContent = tcpaNameForDisplay;
                 }
                 if (tcpaCompanyElement) {
-                    tcpaCompanyElement.textContent = genericPartnerName;
+                    tcpaCompanyElement.textContent = tcpaNameForDisplay;
                 }
                 if (tcpaContactElement) {
-                    tcpaContactElement.textContent = genericTcpaContact;
+                    tcpaContactElement.textContent = tcpaContactForDisplay;
                 }
                 const step4AddressSubheader = document.getElementById('step4AddressSubheader');
                 if (step4AddressSubheader) {
