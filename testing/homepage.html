@@ -537,6 +537,167 @@
       font-size: 0.95rem;
     }
 
+    .category-search {
+      background: #fff;
+      padding: 0.5rem 0 2.2rem;
+    }
+
+    .category-search h2 {
+      font-size: clamp(1.55rem, 3vw, 2.35rem);
+      line-height: 1.2;
+      color: #0f172a;
+      margin-bottom: 1.1rem;
+      max-width: 22ch;
+    }
+
+    .category-groups {
+      display: grid;
+      gap: 1.1rem;
+    }
+
+    .category-group h3 {
+      font-size: clamp(1.2rem, 2.6vw, 1.8rem);
+      color: #0f172a;
+      margin-bottom: 0.45rem;
+    }
+
+    .category-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 0.8rem;
+      align-items: center;
+      color: #1f2937;
+    }
+
+    .category-links a {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: #111827;
+      text-decoration: none;
+    }
+
+    .category-links a:hover {
+      text-decoration: underline;
+      color: #2f849a;
+    }
+
+    .category-dot {
+      color: #111827;
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .why-local-pick {
+      background: #fff;
+      padding: 0.35rem 0 2.4rem;
+    }
+
+    .why-local-pick h2 {
+      font-size: clamp(1.7rem, 3.2vw, 2.5rem);
+      line-height: 1.2;
+      color: #0f172a;
+      margin-bottom: 0.9rem;
+    }
+
+    .why-local-pick p {
+      color: #111827;
+      font-size: clamp(1.06rem, 2vw, 1.3rem);
+      line-height: 1.55;
+      max-width: 58ch;
+      margin-bottom: 1rem;
+    }
+
+    .city-services {
+      background: #fff;
+      padding: 0.2rem 0 2.4rem;
+    }
+
+    .city-services h2 {
+      font-size: clamp(1.55rem, 3vw, 2.2rem);
+      line-height: 1.2;
+      color: #0f172a;
+      margin-bottom: 0.75rem;
+    }
+
+    .city-services-select {
+      width: min(640px, 100%);
+      border: 1px solid #d8e1e7;
+      border-radius: 12px;
+      padding: 0.8rem 0.9rem;
+      font-size: 1rem;
+      color: #111827;
+      background: #fff;
+      margin-bottom: 0.9rem;
+    }
+
+    .city-service-links {
+      list-style: none;
+      width: min(640px, 100%);
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .city-service-links li + li {
+      border-top: 1px solid #edf0f2;
+    }
+
+    .city-service-links a {
+      display: block;
+      padding: 0.78rem 0.95rem;
+      color: #111827;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .city-service-links a:hover {
+      background: #f7fbfc;
+      color: #2f849a;
+      text-decoration: none;
+    }
+
+    .floating-cta-wrap {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 14px;
+      z-index: 70;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
+
+    .floating-cta-wrap.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .floating-cta-inner {
+      width: min(1120px, 92%);
+      margin: 0 auto;
+    }
+
+    .floating-cta-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      background: #3e94ab;
+      color: #fff;
+      font-size: clamp(1.2rem, 2.2vw, 1.95rem);
+      font-weight: 700;
+      padding: 0.95rem 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .floating-cta-btn:hover {
+      background: #2f849a;
+    }
+
     .header-image {
       width: 100%;
       background: #fff;
@@ -985,6 +1146,120 @@
     </div>
   </section>
 
+  <section class="category-search" id="category-search" aria-label="Search by category">
+    <div class="container">
+      <h2>Search by category to find your local pick</h2>
+      <div class="category-groups">
+        <div class="category-group">
+          <h3>Bathroom remodel</h3>
+          <div class="category-links">
+            <a href="#">Shower remodel</a><span class="category-dot">·</span>
+            <a href="#">Tub remodel</a><span class="category-dot">·</span>
+            <a href="#">Age in place</a><span class="category-dot">·</span>
+            <a href="#">Accessibility</a><span class="category-dot">·</span>
+            <a href="#">Walk-in shower</a><span class="category-dot">·</span>
+            <a href="#">Tub-to-shower conversion</a><span class="category-dot">·</span>
+            <a href="#">Vanity replacement</a><span class="category-dot">·</span>
+            <a href="#">Tile installation</a><span class="category-dot">·</span>
+            <a href="#">Small bathroom remodel</a><span class="category-dot">·</span>
+            <a href="#">Master bathroom remodel</a><span class="category-dot">·</span>
+            <a href="#">Bathroom flooring</a><span class="category-dot">·</span>
+            <a href="#">Bathroom lighting</a>
+          </div>
+        </div>
+
+        <div class="category-group">
+          <h3>Kitchen remodel</h3>
+          <div class="category-links">
+            <a href="#">Kitchen cabinets</a><span class="category-dot">·</span>
+            <a href="#">Kitchen countertops</a><span class="category-dot">·</span>
+            <a href="#">Kitchen backsplash</a><span class="category-dot">·</span>
+            <a href="#">Kitchen flooring</a><span class="category-dot">·</span>
+            <a href="#">Kitchen island installation</a><span class="category-dot">·</span>
+            <a href="#">Open concept kitchen</a><span class="category-dot">·</span>
+            <a href="#">Galley kitchen remodel</a><span class="category-dot">·</span>
+            <a href="#">Appliance upgrade</a><span class="category-dot">·</span>
+            <a href="#">Custom cabinetry</a><span class="category-dot">·</span>
+            <a href="#">Kitchen lighting upgrade</a><span class="category-dot">·</span>
+            <a href="#">Pantry buildout</a><span class="category-dot">·</span>
+            <a href="#">Full kitchen renovation</a>
+          </div>
+        </div>
+
+        <div class="category-group">
+          <h3>Concrete coating</h3>
+          <div class="category-links">
+            <a href="#">Garage floor coating</a><span class="category-dot">·</span>
+            <a href="#">Epoxy floor coating</a><span class="category-dot">·</span>
+            <a href="#">Polyaspartic coating</a><span class="category-dot">·</span>
+            <a href="#">Patio coating</a><span class="category-dot">·</span>
+            <a href="#">Basement floor coating</a><span class="category-dot">·</span>
+            <a href="#">Pool deck coating</a><span class="category-dot">·</span>
+            <a href="#">Commercial floor coating</a><span class="category-dot">·</span>
+            <a href="#">Concrete sealing</a><span class="category-dot">·</span>
+            <a href="#">Decorative flake floors</a><span class="category-dot">·</span>
+            <a href="#">Non-slip floor coating</a><span class="category-dot">·</span>
+            <a href="#">Concrete resurfacing</a><span class="category-dot">·</span>
+            <a href="#">Driveway coating</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="why-local-pick" id="why-local-pick" aria-label="Why The Local Pick">
+    <div class="container">
+      <h2>Why The Local Pick?</h2>
+      <p>
+        Finding the right contractor can take weeks of comparing websites, reading mixed reviews, and chasing down callbacks.
+        The Local Pick is built to remove that stress. We do the heavy lifting first by researching local professionals,
+        filtering out low-quality options, and focusing on contractors with strong reputations for reliability and workmanship.
+      </p>
+      <p>
+        Instead of starting from scratch, you start with a clearer path. Whether you are planning a bathroom remodel, kitchen update,
+        or concrete coating project, our goal is to help you skip the noise and connect with the right fit faster.
+        You get confidence and momentum without wasting time on endless searching.
+      </p>
+    </div>
+  </section>
+
+  <section class="city-services" id="city-services" aria-label="Home service professionals by city">
+    <div class="container">
+      <h2>Home service professionals by city</h2>
+      <label class="sr-only" for="cityServicesSelect">Choose a city</label>
+      <select id="cityServicesSelect" class="city-services-select">
+        <option>Atlanta</option>
+        <option>Baltimore</option>
+        <option>Boston</option>
+        <option>Chicago</option>
+        <option>Dallas</option>
+        <option>Denver</option>
+        <option>Houston</option>
+        <option>Las Vegas</option>
+        <option>Los Angeles</option>
+        <option>Miami</option>
+        <option>New York City</option>
+        <option>Orlando</option>
+        <option>Philadelphia</option>
+        <option>Phoenix</option>
+        <option>San Francisco</option>
+        <option>Seattle</option>
+        <option>Tampa</option>
+      </select>
+      <ul class="city-service-links" id="cityServiceLinks">
+        <li><a href="#">Atlanta bathroom remodel</a></li>
+        <li><a href="#">Atlanta kitchen remodel</a></li>
+        <li><a href="#">Atlanta concrete coating</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="floating-cta-wrap" id="floatingCtaWrap" aria-hidden="true">
+    <div class="floating-cta-inner">
+      <button type="button" class="floating-cta-btn" id="floatingCtaBtn">Find your local pick</button>
+    </div>
+  </div>
+
   <div class="project-modal" id="projectTypeModal" aria-hidden="true">
     <div class="project-modal-backdrop" data-close-project-modal></div>
     <div class="project-modal-panel" role="dialog" aria-modal="true" aria-label="Select project type">
@@ -1135,6 +1410,49 @@
 
       initCarousel("projectCarouselViewport", "projectCardsTrack", "projectCarouselPrev", "projectCarouselNext");
       initCarousel("ideasCarouselViewport", "ideasCardsTrack", "ideasCarouselPrev", "ideasCarouselNext");
+
+      var floatingCtaWrap = document.getElementById("floatingCtaWrap");
+      var floatingCtaBtn = document.getElementById("floatingCtaBtn");
+      var projectSearchSection = document.getElementById("projectSearchTrigger");
+
+      function toggleFloatingCta() {
+        if (!floatingCtaWrap) return;
+        var show = window.scrollY > 320;
+        floatingCtaWrap.classList.toggle("is-visible", show);
+        floatingCtaWrap.setAttribute("aria-hidden", show ? "false" : "true");
+      }
+
+      if (floatingCtaWrap && floatingCtaBtn) {
+        toggleFloatingCta();
+        window.addEventListener("scroll", toggleFloatingCta, { passive: true });
+        floatingCtaBtn.addEventListener("click", function () {
+          if (projectSearchSection) {
+            projectSearchSection.scrollIntoView({ behavior: "smooth", block: "center" });
+            projectSearchSection.focus();
+          } else {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        });
+      }
+
+      var citySelect = document.getElementById("cityServicesSelect");
+      var cityServiceLinks = document.getElementById("cityServiceLinks");
+
+      function renderCityServices(city) {
+        if (!cityServiceLinks) return;
+        cityServiceLinks.innerHTML = [
+          "<li><a href='#'>" + city + " bathroom remodel</a></li>",
+          "<li><a href='#'>" + city + " kitchen remodel</a></li>",
+          "<li><a href='#'>" + city + " concrete coating</a></li>"
+        ].join("");
+      }
+
+      if (citySelect && cityServiceLinks) {
+        renderCityServices(citySelect.value);
+        citySelect.addEventListener("change", function () {
+          renderCityServices(citySelect.value);
+        });
+      }
     })();
   </script>
 </body>
