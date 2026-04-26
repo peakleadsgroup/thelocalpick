@@ -542,12 +542,44 @@
       gap: 1.1rem;
     }
 
-    .category-group h3 {
-      font-size: clamp(1.2rem, 2.6vw, 1.8rem);
-      color: #0f172a;
-      margin-bottom: 0.45rem;
+    .category-group {
+      width: min(760px, 100%);
+      margin: 0 auto;
+    }
+
+    .category-group details {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #fff;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .category-group summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.78rem 0.95rem;
+      font-size: clamp(1.1rem, 2.2vw, 1.35rem);
       font-weight: 600;
-      text-align: center;
+      color: #0f172a;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .category-group summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .category-group summary::after {
+      content: "+";
+      font-size: 1.2rem;
+      color: #6b7280;
+    }
+
+    .category-group details[open] summary::after {
+      content: "−";
     }
 
     .category-links {
@@ -557,6 +589,8 @@
       align-items: center;
       justify-content: center;
       color: #1f2937;
+      border-top: 1px solid #edf0f2;
+      padding: 0.9rem 0.95rem;
     }
 
     .category-links a {
@@ -1158,57 +1192,63 @@
       <h2>Search by category</h2>
       <div class="category-groups">
         <div class="category-group">
-          <h3>Bathroom remodel</h3>
-          <div class="category-links">
-            <a href="#">Shower remodel</a><span class="category-dot">·</span>
-            <a href="#">Tub remodel</a><span class="category-dot">·</span>
-            <a href="#">Age in place</a><span class="category-dot">·</span>
-            <a href="#">Accessibility</a><span class="category-dot">·</span>
-            <a href="#">Walk-in shower</a><span class="category-dot">·</span>
-            <a href="#">Tub-to-shower conversion</a><span class="category-dot">·</span>
-            <a href="#">Vanity replacement</a><span class="category-dot">·</span>
-            <a href="#">Tile installation</a><span class="category-dot">·</span>
-            <a href="#">Small bathroom remodel</a><span class="category-dot">·</span>
-            <a href="#">Master bathroom remodel</a><span class="category-dot">·</span>
-            <a href="#">Bathroom flooring</a><span class="category-dot">·</span>
-            <a href="#">Bathroom lighting</a>
-          </div>
+          <details>
+            <summary>Bathroom remodel</summary>
+            <div class="category-links">
+              <a href="#">Shower remodel</a><span class="category-dot">·</span>
+              <a href="#">Tub remodel</a><span class="category-dot">·</span>
+              <a href="#">Age in place</a><span class="category-dot">·</span>
+              <a href="#">Accessibility</a><span class="category-dot">·</span>
+              <a href="#">Walk-in shower</a><span class="category-dot">·</span>
+              <a href="#">Tub-to-shower conversion</a><span class="category-dot">·</span>
+              <a href="#">Vanity replacement</a><span class="category-dot">·</span>
+              <a href="#">Tile installation</a><span class="category-dot">·</span>
+              <a href="#">Small bathroom remodel</a><span class="category-dot">·</span>
+              <a href="#">Master bathroom remodel</a><span class="category-dot">·</span>
+              <a href="#">Bathroom flooring</a><span class="category-dot">·</span>
+              <a href="#">Bathroom lighting</a>
+            </div>
+          </details>
         </div>
 
         <div class="category-group">
-          <h3>Kitchen remodel</h3>
-          <div class="category-links">
-            <a href="#">Kitchen cabinets</a><span class="category-dot">·</span>
-            <a href="#">Kitchen countertops</a><span class="category-dot">·</span>
-            <a href="#">Kitchen backsplash</a><span class="category-dot">·</span>
-            <a href="#">Kitchen flooring</a><span class="category-dot">·</span>
-            <a href="#">Kitchen island installation</a><span class="category-dot">·</span>
-            <a href="#">Open concept kitchen</a><span class="category-dot">·</span>
-            <a href="#">Galley kitchen remodel</a><span class="category-dot">·</span>
-            <a href="#">Appliance upgrade</a><span class="category-dot">·</span>
-            <a href="#">Custom cabinetry</a><span class="category-dot">·</span>
-            <a href="#">Kitchen lighting upgrade</a><span class="category-dot">·</span>
-            <a href="#">Pantry buildout</a><span class="category-dot">·</span>
-            <a href="#">Full kitchen renovation</a>
-          </div>
+          <details>
+            <summary>Kitchen remodel</summary>
+            <div class="category-links">
+              <a href="#">Kitchen cabinets</a><span class="category-dot">·</span>
+              <a href="#">Kitchen countertops</a><span class="category-dot">·</span>
+              <a href="#">Kitchen backsplash</a><span class="category-dot">·</span>
+              <a href="#">Kitchen flooring</a><span class="category-dot">·</span>
+              <a href="#">Kitchen island installation</a><span class="category-dot">·</span>
+              <a href="#">Open concept kitchen</a><span class="category-dot">·</span>
+              <a href="#">Galley kitchen remodel</a><span class="category-dot">·</span>
+              <a href="#">Appliance upgrade</a><span class="category-dot">·</span>
+              <a href="#">Custom cabinetry</a><span class="category-dot">·</span>
+              <a href="#">Kitchen lighting upgrade</a><span class="category-dot">·</span>
+              <a href="#">Pantry buildout</a><span class="category-dot">·</span>
+              <a href="#">Full kitchen renovation</a>
+            </div>
+          </details>
         </div>
 
         <div class="category-group">
-          <h3>Concrete coating</h3>
-          <div class="category-links">
-            <a href="#">Garage floor coating</a><span class="category-dot">·</span>
-            <a href="#">Epoxy floor coating</a><span class="category-dot">·</span>
-            <a href="#">Polyaspartic coating</a><span class="category-dot">·</span>
-            <a href="#">Patio coating</a><span class="category-dot">·</span>
-            <a href="#">Basement floor coating</a><span class="category-dot">·</span>
-            <a href="#">Pool deck coating</a><span class="category-dot">·</span>
-            <a href="#">Commercial floor coating</a><span class="category-dot">·</span>
-            <a href="#">Concrete sealing</a><span class="category-dot">·</span>
-            <a href="#">Decorative flake floors</a><span class="category-dot">·</span>
-            <a href="#">Non-slip floor coating</a><span class="category-dot">·</span>
-            <a href="#">Concrete resurfacing</a><span class="category-dot">·</span>
-            <a href="#">Driveway coating</a>
-          </div>
+          <details>
+            <summary>Concrete coating</summary>
+            <div class="category-links">
+              <a href="#">Garage floor coating</a><span class="category-dot">·</span>
+              <a href="#">Epoxy floor coating</a><span class="category-dot">·</span>
+              <a href="#">Polyaspartic coating</a><span class="category-dot">·</span>
+              <a href="#">Patio coating</a><span class="category-dot">·</span>
+              <a href="#">Basement floor coating</a><span class="category-dot">·</span>
+              <a href="#">Pool deck coating</a><span class="category-dot">·</span>
+              <a href="#">Commercial floor coating</a><span class="category-dot">·</span>
+              <a href="#">Concrete sealing</a><span class="category-dot">·</span>
+              <a href="#">Decorative flake floors</a><span class="category-dot">·</span>
+              <a href="#">Non-slip floor coating</a><span class="category-dot">·</span>
+              <a href="#">Concrete resurfacing</a><span class="category-dot">·</span>
+              <a href="#">Driveway coating</a>
+            </div>
+          </details>
         </div>
       </div>
     </div>
@@ -1435,7 +1475,7 @@
         if (!cityAccordion) return;
         cityAccordion.innerHTML = cityNames.map(function (city, index) {
           return (
-            "<details" + (index === 0 ? " open" : "") + ">" +
+            "<details>" +
               "<summary>" + city + "</summary>" +
               "<ul class='city-service-links'>" +
                 buildCityServiceLink(city, "bathroom remodel", "bathrooms.html") +
