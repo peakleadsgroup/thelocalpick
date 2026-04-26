@@ -1363,7 +1363,7 @@
 </head>
 <body>
     <div class="logo-container">
-        <h1 class="dynamic-service-header" id="dynamicServiceHeader">Bathroom remodel</h1>
+        <h1 class="dynamic-service-header" id="dynamicServiceHeader">Find your bathroom remodel professional</h1>
         <img
             class="logo-img local-pick-brand-logo"
             src="https://thelocalpick.com/images/TheLocalPick-FlatLeftAligned.svg"
@@ -6258,8 +6258,9 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
         var params = new URLSearchParams(window.location.search);
         var service = params.get("service");
         if (service && service.trim()) {
-          headerEl.textContent = service.trim();
-          document.title = service.trim() + " | The Local Pick";
+          var normalizedService = service.trim().toLowerCase();
+          headerEl.textContent = "Find your " + normalizedService + " professional";
+          document.title = normalizedService + " | The Local Pick";
         }
       })();
     </script>

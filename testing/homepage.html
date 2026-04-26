@@ -125,31 +125,48 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 0;
+      border: 0 !important;
       border-radius: 0;
-      width: 34px;
-      height: 34px;
-      background: transparent;
+      width: 30px;
+      height: 24px;
+      padding: 0;
+      background: transparent !important;
       cursor: pointer;
-      font-size: 1.6rem;
       color: #111827;
       font-weight: 400;
       line-height: 1;
-      box-shadow: none;
-      transition: transform 160ms ease;
+      box-shadow: none !important;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: opacity 160ms ease;
     }
 
     .top-right-dropdown summary:hover {
-      transform: translateY(-1px);
+      opacity: 0.8;
     }
 
     .top-right-dropdown summary:focus-visible {
-      outline: 2px solid #9bb8f7;
-      outline-offset: 2px;
+      outline: none;
     }
 
     .top-right-dropdown summary::-webkit-details-marker {
       display: none;
+    }
+
+    .hamburger-icon {
+      width: 30px;
+      height: 20px;
+      display: inline-flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hamburger-icon span {
+      display: block;
+      width: 100%;
+      height: 3px;
+      border-radius: 2px;
+      background: #0f172a;
     }
 
     .dropdown-panel {
@@ -429,6 +446,7 @@
       scroll-snap-align: start;
       flex: 0 0 min(560px, calc(100vw - 6rem));
       max-width: calc(100vw - 6rem);
+      cursor: pointer;
     }
 
     .project-card h3 {
@@ -667,7 +685,7 @@
       cursor: pointer;
       padding: 0.78rem 0.95rem;
       font-size: 1rem;
-      font-weight: 700;
+      font-weight: 500;
       color: #111827;
       display: flex;
       align-items: center;
@@ -705,7 +723,7 @@
       color: #111827;
       text-decoration: none;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 400;
     }
 
     .city-service-links a:hover {
@@ -753,6 +771,25 @@
 
     .floating-cta-btn:hover {
       background: #4f76cc;
+    }
+
+    .site-footer {
+      background: #fff;
+      border-top: 1px solid #e5e7eb;
+      padding: 1rem 0 1.15rem;
+    }
+
+    .site-footer .container {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .footer-logo {
+      width: min(320px, 70vw);
+      height: auto;
+      object-fit: contain;
+      display: block;
     }
 
     .header-image {
@@ -1075,7 +1112,11 @@
 
       <details class="top-right-dropdown">
         <summary aria-label="Open quick links dropdown">
-          ☰
+          <span class="hamburger-icon" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
         </summary>
         <nav class="dropdown-panel" aria-label="Quick links">
           <a href="#top">Get Matched</a>
@@ -1111,33 +1152,33 @@
       <div class="project-carousel">
         <div class="project-carousel-viewport" id="projectCarouselViewport">
           <div class="project-cards" id="projectCardsTrack">
-            <article class="project-card">
+            <article class="project-card" data-route="bathrooms.html" role="link" tabindex="0">
               <div>
                 <h3>Bathroom remodel</h3>
                 <p>Upgrade your shower, vanity, tile, and layout with a bathroom remodeling specialist.</p>
-                <a href="#">Explore bathroom remodel</a>
+                <a href="bathrooms.html">Explore bathroom remodel</a>
               </div>
               <span class="project-card-icon" aria-hidden="true">
                 <img src="../images/project-bathroom-icon.png" alt="">
               </span>
             </article>
 
-            <article class="project-card">
+            <article class="project-card" data-route="kitchens.html" role="link" tabindex="0">
               <div>
                 <h3>Kitchen remodel</h3>
                 <p>Find a local kitchen contractor for cabinets, countertops, flooring, and full redesigns.</p>
-                <a href="#">Explore kitchen remodel</a>
+                <a href="kitchens.html">Explore kitchen remodel</a>
               </div>
               <span class="project-card-icon" aria-hidden="true">
                 <img src="../images/project-kitchen-icon.png" alt="">
               </span>
             </article>
 
-            <article class="project-card">
+            <article class="project-card" data-route="../floorcoating.html" role="link" tabindex="0">
               <div>
                 <h3>Concrete coating</h3>
                 <p>Connect with pros for garage, patio, and interior concrete coating with durable finishes.</p>
-                <a href="#">Explore concrete coating</a>
+                <a href="../floorcoating.html">Explore concrete coating</a>
               </div>
               <span class="project-card-icon" aria-hidden="true">
                 <img src="../images/project-concrete-icon.png" alt="">
@@ -1245,6 +1286,12 @@
     </div>
   </section>
 
+  <footer class="site-footer" aria-label="Site footer">
+    <div class="container">
+      <img class="footer-logo" src="../images/thelocalpick-superflat.png" alt="The Local Pick">
+    </div>
+  </footer>
+
   <div class="floating-cta-wrap" id="floatingCtaWrap" aria-hidden="true">
     <div class="floating-cta-inner">
       <button type="button" class="floating-cta-btn" id="floatingCtaBtn">Find your local pick</button>
@@ -1256,7 +1303,6 @@
     <div class="project-modal-panel" role="dialog" aria-modal="true" aria-label="Select project type">
       <div class="project-modal-top">
         <button type="button" class="project-modal-cancel" data-close-project-modal>Cancel</button>
-        <span class="project-modal-search">Search</span>
       </div>
       <input
         id="projectModalSearchInput"
@@ -1335,9 +1381,17 @@
       function selectProject(button) {
         var value = button.getAttribute("data-value") || "";
         var label = button.getAttribute("data-label") || "Search by project type";
+        var projectRoutes = {
+          "bathroom-remodel": "bathrooms.html",
+          "kitchen-remodel": "kitchens.html",
+          "concrete-coating": "../floorcoating.html"
+        };
         hiddenInput.value = value;
         trigger.textContent = label;
         closeModal();
+        if (projectRoutes[value]) {
+          window.location.href = projectRoutes[value];
+        }
       }
 
       trigger.addEventListener("click", openModal);
@@ -1488,6 +1542,20 @@
           event.preventDefault();
           var service = link.textContent.trim();
           window.location.href = "bathrooms.html?service=" + encodeURIComponent(service);
+        });
+      });
+
+      document.querySelectorAll(".project-card[data-route]").forEach(function (card) {
+        var route = card.getAttribute("data-route");
+        if (!route) return;
+        card.addEventListener("click", function () {
+          window.location.href = route;
+        });
+        card.addEventListener("keydown", function (event) {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            window.location.href = route;
+          }
         });
       });
     })();
