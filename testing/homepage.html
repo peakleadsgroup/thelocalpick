@@ -59,15 +59,287 @@
       text-decoration: underline;
     }
 
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .container {
       width: min(1120px, 92%);
       margin: 0 auto;
+    }
+
+    .site-header {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .site-header .container {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 0.75rem;
+      min-height: 78px;
+    }
+
+    .menu-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      cursor: pointer;
+      color: #243746;
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      justify-self: center;
+      gap: 0.7rem;
+      color: #49a8b8;
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .brand:hover {
+      text-decoration: none;
+    }
+
+    .brand-text {
+      font-size: clamp(1.15rem, 3vw, 2rem);
+      white-space: nowrap;
+    }
+
+    .logo-mark {
+      width: clamp(34px, 4vw, 44px);
+      height: clamp(34px, 4vw, 44px);
+      border: 2px solid #49a8b8;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .top-right-dropdown {
+      justify-self: end;
+      position: relative;
+    }
+
+    .top-right-dropdown summary {
+      list-style: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.5rem 0.7rem;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #243746;
+      font-weight: 700;
+    }
+
+    .top-right-dropdown summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .dropdown-panel {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 0.5rem);
+      min-width: 220px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      padding: 0.45rem;
+    }
+
+    .dropdown-panel a {
+      display: block;
+      color: #22313f;
+      padding: 0.55rem 0.6rem;
+      border-radius: 8px;
+      font-size: 0.92rem;
+    }
+
+    .dropdown-panel a:hover {
+      text-decoration: none;
+      background: #edf7f9;
     }
 
     .topbar {
       background: #0e2f33;
       color: #fff;
       font-size: 0.95rem;
+    }
+
+    .image-intro {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .image-intro .container {
+      padding: 1.25rem 0;
+      text-align: center;
+    }
+
+    .image-intro h2 {
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      line-height: 1.2;
+      margin-bottom: 0.45rem;
+      color: #17323a;
+    }
+
+    .image-intro p {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 70ch;
+      margin: 0 auto;
+    }
+
+    .project-search {
+      background: #fff;
+      padding: 1rem 0 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .project-search-box {
+      width: min(980px, 100%);
+      margin: 0 auto;
+      border: 1px solid #d7d7d7;
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+      padding: 0.45rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 0.5rem;
+      background: #fff;
+    }
+
+    .project-search-select {
+      border: 0;
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      font-weight: 600;
+      color: #1f2937;
+      padding: 0.8rem 0.85rem;
+      background: #fff;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    .project-search-btn {
+      border: 0;
+      background: #3e94ab;
+      color: #fff;
+      width: 66px;
+      height: 58px;
+      border-radius: 12px;
+      font-size: 1.7rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .project-search-btn:hover {
+      background: #307f95;
+    }
+
+    .project-select {
+      background: #fff;
+      padding: 1.8rem 0 2rem;
+    }
+
+    .project-select h2 {
+      text-align: center;
+      font-size: clamp(1.45rem, 3vw, 2.25rem);
+      margin-bottom: 1.15rem;
+      color: #101828;
+      line-height: 1.2;
+    }
+
+    .project-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .project-card {
+      background: #fff;
+      border: 1px solid #e6eaee;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+      padding: 1.25rem 1.2rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.65rem;
+      align-items: start;
+    }
+
+    .project-card h3 {
+      font-size: 1.02rem;
+      line-height: 1.35;
+      color: #0f172a;
+      margin-bottom: 0.45rem;
+    }
+
+    .project-card p {
+      color: #334155;
+      font-size: 0.95rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .project-card a {
+      color: #2f849a;
+      font-weight: 700;
+      font-size: 0.98rem;
+    }
+
+    .project-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #e8f5f8;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    .header-image {
+      width: 100%;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-image img {
+      width: 100%;
+      display: block;
+      max-height: 320px;
+      object-fit: cover;
+      object-position: center;
     }
 
     .topbar .container {
@@ -324,11 +596,19 @@
       .steps {
         grid-template-columns: 1fr;
       }
+
+      .project-cards {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 560px) {
       .row {
         grid-template-columns: 1fr;
+      }
+
+      .top-right-dropdown summary .label {
+        display: none;
       }
     }
   </style>
@@ -353,11 +633,101 @@
   </script>
 </head>
 <body>
+  <header class="site-header">
+    <div class="container">
+      <button class="menu-btn" aria-label="Open menu">☰</button>
+
+      <a class="brand" href="#" aria-label="The Local Pick home">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+            <circle cx="6" cy="7" r="2" fill="#49a8b8"></circle>
+            <circle cx="12" cy="5" r="2" fill="#49a8b8"></circle>
+            <circle cx="18" cy="7" r="2" fill="#49a8b8"></circle>
+            <path d="M6 9.5v8M12 7.5v10M18 9.5v8" stroke="#49a8b8" stroke-width="2" stroke-linecap="round"></path>
+            <path d="M4 18h16" stroke="#49a8b8" stroke-width="2" stroke-linecap="round"></path>
+          </svg>
+        </span>
+        <span class="brand-text">THE LOCAL PICK</span>
+      </a>
+
+      <details class="top-right-dropdown">
+        <summary aria-label="Open quick links dropdown">
+          <span class="label">Menu</span> ▾
+        </summary>
+        <nav class="dropdown-panel" aria-label="Quick links">
+          <a href="#top">Get Matched</a>
+          <a href="#how-it-works" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'}); return false;">How It Works</a>
+          <a href="#faq" onclick="document.getElementById('faq').scrollIntoView({behavior:'smooth'}); return false;">FAQs</a>
+        </nav>
+      </details>
+    </div>
+  </header>
+
+  <div class="header-image" aria-label="Bathroom showcase image">
+    <img src="../images/bathroomheader.png" alt="Modern bathroom remodeling design inspiration">
+  </div>
+
+  <section class="image-intro" aria-label="Contractor matching intro">
+    <div class="container">
+      <h2>Let's find your home improvement contractor</h2>
+      <p>We've looked at thousands of local professionals to find the best so you don't have to</p>
+    </div>
+  </section>
+
+  <section class="project-search" aria-label="Project type search">
+    <div class="container">
+      <form class="project-search-box" action="#" method="get">
+        <label class="sr-only" for="projectType">Search by project type</label>
+        <select id="projectType" name="projectType" class="project-search-select">
+          <option value="">Search by project type</option>
+          <option value="bathroom-remodel">Bathroom remodel</option>
+          <option value="kitchen-remodel">Kitchen remodel</option>
+          <option value="concrete-coating">Concrete coating</option>
+        </select>
+        <button type="submit" class="project-search-btn" aria-label="Search project type">⌕</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="project-select" aria-label="Select your project">
+    <div class="container">
+      <h2>Select your project</h2>
+      <div class="project-cards">
+        <article class="project-card">
+          <div>
+            <h3>Bathroom remodel</h3>
+            <p>Upgrade your shower, vanity, tile, and layout with a bathroom remodeling specialist.</p>
+            <a href="#">Explore bathroom remodel</a>
+          </div>
+          <span class="project-card-icon" aria-hidden="true">🛁</span>
+        </article>
+
+        <article class="project-card">
+          <div>
+            <h3>Kitchen remodel</h3>
+            <p>Find a local kitchen contractor for cabinets, countertops, flooring, and full redesigns.</p>
+            <a href="#">Explore kitchen remodel</a>
+          </div>
+          <span class="project-card-icon" aria-hidden="true">🍽️</span>
+        </article>
+
+        <article class="project-card">
+          <div>
+            <h3>Concrete coating</h3>
+            <p>Connect with pros for garage, patio, and interior concrete coating with durable finishes.</p>
+            <a href="#">Explore concrete coating</a>
+          </div>
+          <span class="project-card-icon" aria-hidden="true">🧱</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <div class="topbar">
     <div class="container">Trusted local bathroom remodeling matches. No spam. No pressure.</div>
   </div>
 
-  <header class="hero">
+  <header class="hero" id="top">
     <div class="container hero-grid">
       <div>
         <div class="badge">The Local Pick • Bathroom Remodeling</div>
@@ -434,7 +804,7 @@
     </div>
   </header>
 
-  <section>
+  <section id="how-it-works">
     <div class="container">
       <h2 class="section-title">Why homeowners use The Local Pick</h2>
       <p class="section-sub">We keep it simple: one category, one mission, one strong local recommendation path.</p>
@@ -455,7 +825,7 @@
     </div>
   </section>
 
-  <section>
+  <section id="faq">
     <div class="container">
       <h2 class="section-title">How it works</h2>
       <p class="section-sub">A quick three-step process to start your remodel journey.</p>
