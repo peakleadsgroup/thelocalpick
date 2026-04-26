@@ -124,6 +124,22 @@
             box-sizing: border-box;
         }
 
+        .dynamic-service-header {
+            font-size: 28px;
+            color: #111827;
+            margin: 0;
+            line-height: 1.2;
+            font-weight: 700;
+            text-align: center;
+            max-width: 560px;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+
+        body.funnel-post-submit .dynamic-service-header {
+            display: none;
+        }
+
         /* Hide quiz tagline only on post-submit / ending screens */
         body.funnel-post-submit .global-quiz-tagline {
             display: none;
@@ -1347,6 +1363,7 @@
 </head>
 <body>
     <div class="logo-container">
+        <h1 class="dynamic-service-header" id="dynamicServiceHeader">Bathroom remodel</h1>
         <img
             class="logo-img local-pick-brand-logo"
             src="https://thelocalpick.com/images/TheLocalPick-FlatLeftAligned.svg"
@@ -6232,6 +6249,19 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 validateAddressForm();
             });
         };
+    </script>
+
+    <script>
+      (function () {
+        var headerEl = document.getElementById("dynamicServiceHeader");
+        if (!headerEl) return;
+        var params = new URLSearchParams(window.location.search);
+        var service = params.get("service");
+        if (service && service.trim()) {
+          headerEl.textContent = service.trim();
+          document.title = service.trim() + " | The Local Pick";
+        }
+      })();
     </script>
 
     <script async defer
