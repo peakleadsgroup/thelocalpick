@@ -89,7 +89,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 82px;
+      min-height: 62px;
       padding: 0 10px;
     }
 
@@ -1028,7 +1028,7 @@
       }
 
       .site-header .container {
-        min-height: 72px;
+        min-height: 54px;
         padding-right: 10px;
       }
     }
@@ -1229,7 +1229,7 @@
 
   <div class="floating-cta-wrap" id="floatingCtaWrap" aria-hidden="true">
     <div class="floating-cta-inner">
-      <button type="button" class="floating-cta-btn" id="floatingCtaBtn">Find your local pick</button>
+      <button type="button" class="floating-cta-btn" id="floatingCtaBtn">Find my local pick!</button>
     </div>
   </div>
 
@@ -1407,12 +1407,11 @@
         toggleFloatingCta();
         window.addEventListener("scroll", toggleFloatingCta, { passive: true });
         floatingCtaBtn.addEventListener("click", function () {
-          if (projectSearchSection) {
-            projectSearchSection.scrollIntoView({ behavior: "smooth", block: "center" });
-            projectSearchSection.focus();
-          } else {
-            window.scrollTo({ top: 0, behavior: "smooth" });
+          if (typeof openModal === "function") {
+            openModal();
+            return;
           }
+          if (projectSearchSection) projectSearchSection.focus();
         });
       }
 
