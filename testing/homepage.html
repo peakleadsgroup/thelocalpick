@@ -29,8 +29,8 @@
       --card: #ffffff;
       --text: #1a1a1a;
       --muted: #667085;
-      --primary: #008f9e;
-      --primary-dark: #006f7b;
+      --primary: #6190f2;
+      --primary-dark: #4f76cc;
       --border: #d9dfe3;
       --success: #1f7a4f;
       --radius: 12px;
@@ -85,18 +85,17 @@
     }
 
     .site-header .container {
-      display: grid;
-      grid-template-columns: 1fr auto;
+      position: relative;
+      display: flex;
+      justify-content: center;
       align-items: center;
-      gap: 0.75rem;
-      min-height: 78px;
+      min-height: 92px;
     }
 
     .brand {
       display: inline-flex;
       align-items: center;
-      justify-self: start;
-      color: #49a8b8;
+      color: #6190f2;
       text-decoration: none;
       font-weight: 700;
       letter-spacing: 0.01em;
@@ -108,13 +107,15 @@
 
     .brand-logo {
       display: block;
-      height: clamp(34px, 5vw, 56px);
+      height: clamp(52px, 7vw, 78px);
       width: auto;
     }
 
     .top-right-dropdown {
-      justify-self: end;
-      position: relative;
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     .top-right-dropdown summary {
@@ -122,15 +123,29 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      width: 52px;
-      height: 52px;
+      border: 1px solid #d7dfe5;
+      border-radius: 14px;
+      width: 60px;
+      height: 60px;
       background: #fff;
       cursor: pointer;
-      font-size: 1.35rem;
+      font-size: 1.7rem;
       color: #243746;
-      font-weight: 700;
+      font-weight: 600;
+      line-height: 1;
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .top-right-dropdown summary:hover {
+      border-color: #b9c6d1;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .top-right-dropdown summary:focus-visible {
+      outline: 2px solid #9bb8f7;
+      outline-offset: 2px;
     }
 
     .top-right-dropdown summary::-webkit-details-marker {
@@ -159,7 +174,7 @@
 
     .dropdown-panel a:hover {
       text-decoration: none;
-      background: #edf7f9;
+      background: #eef4ff;
     }
 
     .topbar {
@@ -226,7 +241,7 @@
 
     .project-search-btn {
       border: 0;
-      background: #3e94ab;
+      background: #6190f2;
       color: #fff;
       width: 66px;
       height: 58px;
@@ -239,7 +254,7 @@
     }
 
     .project-search-btn:hover {
-      background: #307f95;
+      background: #4f76cc;
     }
 
     .project-modal {
@@ -288,7 +303,7 @@
     }
 
     .project-modal-cancel {
-      color: #2b6874;
+      color: #3555a6;
     }
 
     .project-modal-search {
@@ -430,7 +445,7 @@
     }
 
     .project-card a {
-      color: #2f849a;
+      color: #3555a6;
       font-weight: 700;
       font-size: 0.98rem;
     }
@@ -463,6 +478,7 @@
       line-height: 1.2;
       color: #101828;
       margin-bottom: 0.35rem;
+      text-align: center;
     }
 
     .ideas-tips .section-sub {
@@ -470,6 +486,9 @@
       margin-bottom: 1rem;
       max-width: 44ch;
       font-size: 1rem;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
     }
 
     .idea-card {
@@ -480,7 +499,7 @@
       border: 1px solid #e6eaee;
       border-radius: 14px;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-      padding: 1rem;
+      overflow: hidden;
       scroll-snap-align: start;
       flex: 0 0 min(420px, calc(100vw - 6rem));
       max-width: calc(100vw - 6rem);
@@ -491,22 +510,23 @@
     }
 
     .idea-thumb {
-      width: 82px;
-      height: 82px;
-      border-radius: 999px;
-      background: #e8f5f8;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      background: #eef4ff;
       overflow: hidden;
-      margin-bottom: 0.75rem;
+      display: block;
+      border-bottom: 1px solid #edf0f2;
     }
 
     .idea-thumb img {
-      width: 64px;
-      height: 64px;
-      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
+    }
+
+    .idea-content {
+      padding: 0.95rem 1rem 1rem;
     }
 
     .idea-kicker {
@@ -532,7 +552,7 @@
     }
 
     .idea-link {
-      color: #2f849a;
+      color: #3555a6;
       font-weight: 700;
       font-size: 0.95rem;
     }
@@ -577,7 +597,7 @@
 
     .category-links a:hover {
       text-decoration: underline;
-      color: #2f849a;
+      color: #3555a6;
     }
 
     .category-dot {
@@ -652,8 +672,8 @@
     }
 
     .city-service-links a:hover {
-      background: #f7fbfc;
-      color: #2f849a;
+      background: #eef4ff;
+      color: #3555a6;
       text-decoration: none;
     }
 
@@ -684,7 +704,7 @@
       width: 100%;
       border: 0;
       border-radius: 14px;
-      background: #3e94ab;
+      background: #6190f2;
       color: #fff;
       font-size: clamp(1.2rem, 2.2vw, 1.95rem);
       font-weight: 700;
@@ -695,7 +715,7 @@
     }
 
     .floating-cta-btn:hover {
-      background: #2f849a;
+      background: #4f76cc;
     }
 
     .header-image {
@@ -984,7 +1004,7 @@
       }
 
       .brand-logo {
-        height: 42px;
+        height: 60px;
       }
     }
   </style>
@@ -1056,10 +1076,6 @@
     <div class="container">
       <h2>Select your project</h2>
       <div class="project-carousel">
-        <div class="project-carousel-controls">
-          <button type="button" class="project-carousel-btn" id="projectCarouselPrev" aria-label="Previous project card">‹</button>
-          <button type="button" class="project-carousel-btn" id="projectCarouselNext" aria-label="Next project card">›</button>
-        </div>
         <div class="project-carousel-viewport" id="projectCarouselViewport">
           <div class="project-cards" id="projectCardsTrack">
             <article class="project-card">
@@ -1105,42 +1121,8 @@
       <h2>Ideas and tips</h2>
       <p class="section-sub">Get inspiration and advice from our remodeling experts</p>
       <div class="project-carousel">
-        <div class="project-carousel-controls">
-          <button type="button" class="project-carousel-btn" id="ideasCarouselPrev" aria-label="Previous article card">‹</button>
-          <button type="button" class="project-carousel-btn" id="ideasCarouselNext" aria-label="Next article card">›</button>
-        </div>
         <div class="project-carousel-viewport" id="ideasCarouselViewport">
-          <div class="project-cards" id="ideasCardsTrack">
-            <a class="idea-card" href="../articles/planning-basics.html">
-              <span class="idea-thumb">
-                <img src="../images/project-bathroom-icon.png" alt="">
-              </span>
-              <p class="idea-kicker">Planning</p>
-              <h3>Planning Basics</h3>
-              <p>A quick starter checklist for timelines, measurements, and must-have upgrades.</p>
-              <span class="idea-link">Read article</span>
-            </a>
-
-            <a class="idea-card" href="../articles/bathroom-layout-ideas.html">
-              <span class="idea-thumb">
-                <img src="../images/project-kitchen-icon.png" alt="">
-              </span>
-              <p class="idea-kicker">Design</p>
-              <h3>Bathroom Layout Ideas</h3>
-              <p>Simple layout concepts to make your bathroom feel larger and function better.</p>
-              <span class="idea-link">Read article</span>
-            </a>
-
-            <a class="idea-card" href="../articles/budget-and-materials.html">
-              <span class="idea-thumb">
-                <img src="../images/project-concrete-icon.png" alt="">
-              </span>
-              <p class="idea-kicker">Budget</p>
-              <h3>Budget and Materials</h3>
-              <p>Starter notes on where to spend, where to save, and material trade-offs.</p>
-              <span class="idea-link">Read article</span>
-            </a>
-          </div>
+          <div class="project-cards" id="ideasCardsTrack"></div>
         </div>
       </div>
     </div>
@@ -1297,6 +1279,7 @@
     </div>
   </div>
 
+  <script src="../articles/articles-data.js"></script>
   <script>
     (function () {
       var modal = document.getElementById("projectTypeModal");
@@ -1453,6 +1436,28 @@
           renderCityServices(citySelect.value);
         });
       }
+
+      var ideasCardsTrack = document.getElementById("ideasCardsTrack");
+      var articleItems = Array.isArray(window.TLP_ARTICLES) ? window.TLP_ARTICLES : [];
+
+      function renderIdeaCards() {
+        if (!ideasCardsTrack || !articleItems.length) return;
+        ideasCardsTrack.innerHTML = articleItems.map(function (item) {
+          return (
+            "<a class='idea-card' href='" + item.url + "'>" +
+              "<span class='idea-thumb'><img src='" + item.image + "' alt='Article image for " + item.title + "'></span>" +
+              "<div class='idea-content'>" +
+                "<p class='idea-kicker'>" + item.category + "</p>" +
+                "<h3>" + item.title + "</h3>" +
+                "<p>" + item.excerpt + "</p>" +
+                "<span class='idea-link'>Read article</span>" +
+              "</div>" +
+            "</a>"
+          );
+        }).join("");
+      }
+
+      renderIdeaCards();
     })();
   </script>
 </body>
