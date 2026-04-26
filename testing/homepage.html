@@ -86,32 +86,16 @@
 
     .site-header .container {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: 1fr auto;
       align-items: center;
       gap: 0.75rem;
       min-height: 78px;
     }
 
-    .menu-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 42px;
-      height: 42px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: #fff;
-      cursor: pointer;
-      color: #243746;
-      font-size: 1.35rem;
-      line-height: 1;
-    }
-
     .brand {
       display: inline-flex;
       align-items: center;
-      justify-self: center;
-      gap: 0.7rem;
+      justify-self: start;
       color: #49a8b8;
       text-decoration: none;
       font-weight: 700;
@@ -122,19 +106,10 @@
       text-decoration: none;
     }
 
-    .brand-text {
-      font-size: clamp(1.15rem, 3vw, 2rem);
-      white-space: nowrap;
-    }
-
-    .logo-mark {
-      width: clamp(34px, 4vw, 44px);
-      height: clamp(34px, 4vw, 44px);
-      border: 2px solid #49a8b8;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .brand-logo {
+      display: block;
+      height: clamp(34px, 5vw, 56px);
+      width: auto;
     }
 
     .top-right-dropdown {
@@ -146,13 +121,14 @@
       list-style: none;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      justify-content: center;
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 0.5rem 0.7rem;
+      width: 52px;
+      height: 52px;
       background: #fff;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 1.35rem;
       color: #243746;
       font-weight: 700;
     }
@@ -244,9 +220,8 @@
       padding: 0.8rem 0.85rem;
       background: #fff;
       outline: none;
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
+      text-align: left;
+      cursor: pointer;
     }
 
     .project-search-btn {
@@ -267,6 +242,104 @@
       background: #307f95;
     }
 
+    .project-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+    }
+
+    .project-modal.is-open {
+      display: block;
+    }
+
+    .project-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    .project-modal-panel {
+      position: relative;
+      width: min(520px, 94vw);
+      max-height: 86vh;
+      margin: 4vh auto 0;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+      overflow: auto;
+      padding: 0.9rem 1rem 1rem;
+    }
+
+    .project-modal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.85rem;
+    }
+
+    .project-modal-cancel,
+    .project-modal-search {
+      border: 0;
+      background: transparent;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .project-modal-cancel {
+      color: #2b6874;
+    }
+
+    .project-modal-search {
+      color: #b2b8be;
+      cursor: default;
+    }
+
+    .project-modal-searchbar {
+      width: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 11px;
+      padding: 0.85rem 0.9rem;
+      font-size: 1rem;
+      margin-bottom: 0.8rem;
+      color: #111827;
+      background: #fff;
+    }
+
+    .project-modal-options {
+      list-style: none;
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .project-modal-option {
+      width: 100%;
+      border: 0;
+      background: #fff;
+      padding: 0.55rem 0.4rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      text-align: left;
+      cursor: pointer;
+      color: #111827;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .project-modal-option:hover {
+      background: #f3f7fa;
+    }
+
+    .project-modal-option img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+      flex: 0 0 30px;
+    }
+
     .project-select {
       background: #fff;
       padding: 1.8rem 0 2rem;
@@ -280,10 +353,52 @@
       line-height: 1.2;
     }
 
+    .project-carousel {
+      position: relative;
+    }
+
+    .project-carousel-controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.45rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .project-carousel-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #d8e1e7;
+      border-radius: 999px;
+      background: #fff;
+      color: #0f172a;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .project-carousel-btn[disabled] {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .project-carousel-viewport {
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .project-carousel-viewport::-webkit-scrollbar {
+      display: none;
+    }
+
     .project-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: flex;
       gap: 1rem;
+      padding: 0.2rem;
+      width: max-content;
     }
 
     .project-card {
@@ -296,6 +411,9 @@
       grid-template-columns: 1fr auto;
       gap: 0.65rem;
       align-items: start;
+      scroll-snap-align: start;
+      flex: 0 0 min(560px, calc(100vw - 6rem));
+      max-width: calc(100vw - 6rem);
     }
 
     .project-card h3 {
@@ -320,12 +438,103 @@
     .project-card-icon {
       width: 44px;
       height: 44px;
-      border-radius: 10px;
+      border-radius: 8px;
+      background: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .project-card-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .ideas-tips {
+      background: #fff;
+      padding: 0.75rem 0 2rem;
+    }
+
+    .ideas-tips h2 {
+      font-size: clamp(1.45rem, 3vw, 2.1rem);
+      line-height: 1.2;
+      color: #101828;
+      margin-bottom: 0.35rem;
+    }
+
+    .ideas-tips .section-sub {
+      color: #4b5563;
+      margin-bottom: 1rem;
+      max-width: 44ch;
+      font-size: 1rem;
+    }
+
+    .idea-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: #fff;
+      border: 1px solid #e6eaee;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+      padding: 1rem;
+      scroll-snap-align: start;
+      flex: 0 0 min(420px, calc(100vw - 6rem));
+      max-width: calc(100vw - 6rem);
+    }
+
+    .idea-card:hover {
+      text-decoration: none;
+    }
+
+    .idea-thumb {
+      width: 82px;
+      height: 82px;
+      border-radius: 999px;
       background: #e8f5f8;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+    }
+
+    .idea-thumb img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .idea-kicker {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+      font-size: 0.74rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .idea-card h3 {
+      font-size: 1.2rem;
+      line-height: 1.25;
+      margin-bottom: 0.45rem;
+      color: #111827;
+    }
+
+    .idea-card p {
+      color: #374151;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .idea-link {
+      color: #2f849a;
+      font-weight: 700;
+      font-size: 0.95rem;
     }
 
     .header-image {
@@ -597,8 +806,14 @@
         grid-template-columns: 1fr;
       }
 
-      .project-cards {
-        grid-template-columns: 1fr;
+      .project-card {
+        flex-basis: calc(100vw - 4.5rem);
+        max-width: calc(100vw - 4.5rem);
+      }
+
+      .idea-card {
+        flex-basis: calc(100vw - 4.5rem);
+        max-width: calc(100vw - 4.5rem);
       }
     }
 
@@ -607,8 +822,8 @@
         grid-template-columns: 1fr;
       }
 
-      .top-right-dropdown summary .label {
-        display: none;
+      .brand-logo {
+        height: 42px;
       }
     }
   </style>
@@ -633,31 +848,20 @@
   </script>
 </head>
 <body>
-  <header class="site-header">
+  <header class="site-header" id="top">
     <div class="container">
-      <button class="menu-btn" aria-label="Open menu">☰</button>
-
       <a class="brand" href="#" aria-label="The Local Pick home">
-        <span class="logo-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
-            <circle cx="6" cy="7" r="2" fill="#49a8b8"></circle>
-            <circle cx="12" cy="5" r="2" fill="#49a8b8"></circle>
-            <circle cx="18" cy="7" r="2" fill="#49a8b8"></circle>
-            <path d="M6 9.5v8M12 7.5v10M18 9.5v8" stroke="#49a8b8" stroke-width="2" stroke-linecap="round"></path>
-            <path d="M4 18h16" stroke="#49a8b8" stroke-width="2" stroke-linecap="round"></path>
-          </svg>
-        </span>
-        <span class="brand-text">THE LOCAL PICK</span>
+        <img class="brand-logo" src="../images/TheLocalPick-FlatLeftAligned.svg" alt="The Local Pick">
       </a>
 
       <details class="top-right-dropdown">
         <summary aria-label="Open quick links dropdown">
-          <span class="label">Menu</span> ▾
+          ☰
         </summary>
         <nav class="dropdown-panel" aria-label="Quick links">
           <a href="#top">Get Matched</a>
-          <a href="#how-it-works" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'}); return false;">How It Works</a>
-          <a href="#faq" onclick="document.getElementById('faq').scrollIntoView({behavior:'smooth'}); return false;">FAQs</a>
+          <a href="#project-select" onclick="document.getElementById('project-select').scrollIntoView({behavior:'smooth'}); return false;">Select Project</a>
+          <a href="#ideas-tips" onclick="document.getElementById('ideas-tips').scrollIntoView({behavior:'smooth'}); return false;">Ideas and Tips</a>
         </nav>
       </details>
     </div>
@@ -669,7 +873,7 @@
 
   <section class="image-intro" aria-label="Contractor matching intro">
     <div class="container">
-      <h2>Let's find your home improvement contractor</h2>
+      <h2>Let's find your home improvement professional</h2>
       <p>We've looked at thousands of local professionals to find the best so you don't have to</p>
     </div>
   </section>
@@ -677,217 +881,261 @@
   <section class="project-search" aria-label="Project type search">
     <div class="container">
       <form class="project-search-box" action="#" method="get">
-        <label class="sr-only" for="projectType">Search by project type</label>
-        <select id="projectType" name="projectType" class="project-search-select">
-          <option value="">Search by project type</option>
-          <option value="bathroom-remodel">Bathroom remodel</option>
-          <option value="kitchen-remodel">Kitchen remodel</option>
-          <option value="concrete-coating">Concrete coating</option>
-        </select>
-        <button type="submit" class="project-search-btn" aria-label="Search project type">⌕</button>
+        <label class="sr-only" for="projectSearchTrigger">Search by project type</label>
+        <input type="hidden" id="projectType" name="projectType" value="">
+        <button id="projectSearchTrigger" type="button" class="project-search-select" aria-haspopup="dialog" aria-controls="projectTypeModal">
+          Search by project type
+        </button>
+        <button id="projectSearchIconBtn" type="button" class="project-search-btn" aria-label="Search project type">⌕</button>
       </form>
     </div>
   </section>
 
-  <section class="project-select" aria-label="Select your project">
+  <section class="project-select" id="project-select" aria-label="Select your project">
     <div class="container">
       <h2>Select your project</h2>
-      <div class="project-cards">
-        <article class="project-card">
-          <div>
-            <h3>Bathroom remodel</h3>
-            <p>Upgrade your shower, vanity, tile, and layout with a bathroom remodeling specialist.</p>
-            <a href="#">Explore bathroom remodel</a>
-          </div>
-          <span class="project-card-icon" aria-hidden="true">🛁</span>
-        </article>
+      <div class="project-carousel">
+        <div class="project-carousel-controls">
+          <button type="button" class="project-carousel-btn" id="projectCarouselPrev" aria-label="Previous project card">‹</button>
+          <button type="button" class="project-carousel-btn" id="projectCarouselNext" aria-label="Next project card">›</button>
+        </div>
+        <div class="project-carousel-viewport" id="projectCarouselViewport">
+          <div class="project-cards" id="projectCardsTrack">
+            <article class="project-card">
+              <div>
+                <h3>Bathroom remodel</h3>
+                <p>Upgrade your shower, vanity, tile, and layout with a bathroom remodeling specialist.</p>
+                <a href="#">Explore bathroom remodel</a>
+              </div>
+              <span class="project-card-icon" aria-hidden="true">
+                <img src="../images/project-bathroom-icon.png" alt="">
+              </span>
+            </article>
 
-        <article class="project-card">
-          <div>
-            <h3>Kitchen remodel</h3>
-            <p>Find a local kitchen contractor for cabinets, countertops, flooring, and full redesigns.</p>
-            <a href="#">Explore kitchen remodel</a>
-          </div>
-          <span class="project-card-icon" aria-hidden="true">🍽️</span>
-        </article>
+            <article class="project-card">
+              <div>
+                <h3>Kitchen remodel</h3>
+                <p>Find a local kitchen contractor for cabinets, countertops, flooring, and full redesigns.</p>
+                <a href="#">Explore kitchen remodel</a>
+              </div>
+              <span class="project-card-icon" aria-hidden="true">
+                <img src="../images/project-kitchen-icon.png" alt="">
+              </span>
+            </article>
 
-        <article class="project-card">
-          <div>
-            <h3>Concrete coating</h3>
-            <p>Connect with pros for garage, patio, and interior concrete coating with durable finishes.</p>
-            <a href="#">Explore concrete coating</a>
+            <article class="project-card">
+              <div>
+                <h3>Concrete coating</h3>
+                <p>Connect with pros for garage, patio, and interior concrete coating with durable finishes.</p>
+                <a href="#">Explore concrete coating</a>
+              </div>
+              <span class="project-card-icon" aria-hidden="true">
+                <img src="../images/project-concrete-icon.png" alt="">
+              </span>
+            </article>
           </div>
-          <span class="project-card-icon" aria-hidden="true">🧱</span>
-        </article>
+        </div>
       </div>
     </div>
   </section>
 
-  <div class="topbar">
-    <div class="container">Trusted local bathroom remodeling matches. No spam. No pressure.</div>
+  <section class="ideas-tips" id="ideas-tips" aria-label="Ideas and tips">
+    <div class="container">
+      <h2>Ideas and tips</h2>
+      <p class="section-sub">Get inspiration and advice from our remodeling experts</p>
+      <div class="project-carousel">
+        <div class="project-carousel-controls">
+          <button type="button" class="project-carousel-btn" id="ideasCarouselPrev" aria-label="Previous article card">‹</button>
+          <button type="button" class="project-carousel-btn" id="ideasCarouselNext" aria-label="Next article card">›</button>
+        </div>
+        <div class="project-carousel-viewport" id="ideasCarouselViewport">
+          <div class="project-cards" id="ideasCardsTrack">
+            <a class="idea-card" href="../articles/planning-basics.html">
+              <span class="idea-thumb">
+                <img src="../images/project-bathroom-icon.png" alt="">
+              </span>
+              <p class="idea-kicker">Planning</p>
+              <h3>Planning Basics</h3>
+              <p>A quick starter checklist for timelines, measurements, and must-have upgrades.</p>
+              <span class="idea-link">Read article</span>
+            </a>
+
+            <a class="idea-card" href="../articles/bathroom-layout-ideas.html">
+              <span class="idea-thumb">
+                <img src="../images/project-kitchen-icon.png" alt="">
+              </span>
+              <p class="idea-kicker">Design</p>
+              <h3>Bathroom Layout Ideas</h3>
+              <p>Simple layout concepts to make your bathroom feel larger and function better.</p>
+              <span class="idea-link">Read article</span>
+            </a>
+
+            <a class="idea-card" href="../articles/budget-and-materials.html">
+              <span class="idea-thumb">
+                <img src="../images/project-concrete-icon.png" alt="">
+              </span>
+              <p class="idea-kicker">Budget</p>
+              <h3>Budget and Materials</h3>
+              <p>Starter notes on where to spend, where to save, and material trade-offs.</p>
+              <span class="idea-link">Read article</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="project-modal" id="projectTypeModal" aria-hidden="true">
+    <div class="project-modal-backdrop" data-close-project-modal></div>
+    <div class="project-modal-panel" role="dialog" aria-modal="true" aria-label="Select project type">
+      <div class="project-modal-top">
+        <button type="button" class="project-modal-cancel" data-close-project-modal>Cancel</button>
+        <span class="project-modal-search">Search</span>
+      </div>
+      <input
+        id="projectModalSearchInput"
+        type="text"
+        class="project-modal-searchbar"
+        placeholder="Search by project type"
+        autocomplete="off"
+      >
+      <ul class="project-modal-options" id="projectModalOptions">
+        <li>
+          <button type="button" class="project-modal-option" data-value="bathroom-remodel" data-label="Bathroom remodel">
+            <img src="../images/project-bathroom-icon.png" alt="">
+            Bathroom remodel
+          </button>
+        </li>
+        <li>
+          <button type="button" class="project-modal-option" data-value="kitchen-remodel" data-label="Kitchen remodel">
+            <img src="../images/project-kitchen-icon.png" alt="">
+            Kitchen remodel
+          </button>
+        </li>
+        <li>
+          <button type="button" class="project-modal-option" data-value="concrete-coating" data-label="Concrete coating">
+            <img src="../images/project-concrete-icon.png" alt="">
+            Concrete coating
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
 
-  <header class="hero" id="top">
-    <div class="container hero-grid">
-      <div>
-        <div class="badge">The Local Pick • Bathroom Remodeling</div>
-        <h1>We already found the best bathroom remodeler in your area so you do not have to.</h1>
-        <p class="sub">
-          Skip the endless searching. We pre-screen local pros so you can compare one trusted option built around your style, timeline, and budget.
-        </p>
-        <ul class="highlights">
-          <li>Local, licensed remodeling specialists</li>
-          <li>Fast response and transparent next steps</li>
-          <li>Designed for homeowners ready to start</li>
-        </ul>
-        <div class="social-proof" aria-label="Trust indicators">
-          <span>Homeowner-first matching</span>
-          <span>Built for speed and clarity</span>
-          <span>Focused on bathroom remodels only</span>
-        </div>
-      </div>
+  <script>
+    (function () {
+      var modal = document.getElementById("projectTypeModal");
+      var trigger = document.getElementById("projectSearchTrigger");
+      var iconTrigger = document.getElementById("projectSearchIconBtn");
+      var hiddenInput = document.getElementById("projectType");
+      var searchInput = document.getElementById("projectModalSearchInput");
+      var optionButtons = Array.from(document.querySelectorAll(".project-modal-option"));
+      var closeTargets = Array.from(document.querySelectorAll("[data-close-project-modal]"));
+      var lastFocusedElement = null;
 
-      <aside class="form-card" aria-label="Lead form">
-        <h2>Get matched with your local pick</h2>
-        <p>Tell us about your project and we will connect you quickly.</p>
-        <form action="#" method="post">
-          <div class="row">
-            <div>
-              <label for="firstName">First name</label>
-              <input id="firstName" name="firstName" type="text" autocomplete="given-name" required>
-            </div>
-            <div>
-              <label for="lastName">Last name</label>
-              <input id="lastName" name="lastName" type="text" autocomplete="family-name" required>
-            </div>
-          </div>
+      function openModal() {
+        if (!modal) return;
+        lastFocusedElement = document.activeElement;
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        searchInput.value = "";
+        filterOptions("");
+        window.setTimeout(function () {
+          searchInput.focus();
+        }, 0);
+      }
 
-          <div class="row">
-            <div>
-              <label for="email">Email</label>
-              <input id="email" name="email" type="email" autocomplete="email" required>
-            </div>
-            <div>
-              <label for="phone">Phone</label>
-              <input id="phone" name="phone" type="tel" autocomplete="tel" required>
-            </div>
-          </div>
+      function closeModal() {
+        if (!modal) return;
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+          lastFocusedElement.focus();
+        }
+      }
 
-          <div class="row">
-            <div>
-              <label for="zip">Project ZIP code</label>
-              <input id="zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" required>
-            </div>
-            <div>
-              <label for="timeline">When are you looking to start?</label>
-              <select id="timeline" name="timeline" required>
-                <option value="">Select one</option>
-                <option>ASAP</option>
-                <option>Within 30 days</option>
-                <option>1-3 months</option>
-                <option>Just researching</option>
-              </select>
-            </div>
-          </div>
+      function filterOptions(term) {
+        var normalized = term.trim().toLowerCase();
+        optionButtons.forEach(function (button) {
+          var label = button.getAttribute("data-label") || "";
+          var visible = label.toLowerCase().indexOf(normalized) !== -1;
+          button.parentElement.style.display = visible ? "" : "none";
+        });
+      }
 
-          <div>
-            <label for="details">Project details</label>
-            <textarea id="details" name="details" placeholder="Tell us about your bathroom remodel goals, style, and budget range."></textarea>
-          </div>
+      function selectProject(button) {
+        var value = button.getAttribute("data-value") || "";
+        var label = button.getAttribute("data-label") || "Search by project type";
+        hiddenInput.value = value;
+        trigger.textContent = label;
+        closeModal();
+      }
 
-          <p class="consent">
-            By submitting, you agree to be contacted by phone, SMS, or email about your remodeling request.
-          </p>
-          <button class="btn" type="submit">Get My Bathroom Remodel Match</button>
-        </form>
-      </aside>
-    </div>
-  </header>
+      trigger.addEventListener("click", openModal);
+      iconTrigger.addEventListener("click", openModal);
+      closeTargets.forEach(function (el) {
+        el.addEventListener("click", closeModal);
+      });
+      optionButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          selectProject(button);
+        });
+      });
+      searchInput.addEventListener("input", function (event) {
+        filterOptions(event.target.value);
+      });
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && modal.classList.contains("is-open")) {
+          closeModal();
+        }
+      });
 
-  <section id="how-it-works">
-    <div class="container">
-      <h2 class="section-title">Why homeowners use The Local Pick</h2>
-      <p class="section-sub">We keep it simple: one category, one mission, one strong local recommendation path.</p>
-      <div class="cards">
-        <article class="card">
-          <h3>Bathroom-only focus</h3>
-          <p>This page is built for one need: bathroom remodeling. That means more relevant matches and less noise.</p>
-        </article>
-        <article class="card">
-          <h3>Pre-screened local pros</h3>
-          <p>We focus on quality-first local contractors so you can move forward with confidence.</p>
-        </article>
-        <article class="card">
-          <h3>Lead-first experience</h3>
-          <p>Everything here is designed to help you share project details quickly and get contacted fast.</p>
-        </article>
-      </div>
-    </div>
-  </section>
+      function getScrollStep(track) {
+        var firstCard = track ? track.firstElementChild : null;
+        if (!firstCard) return 0;
+        var styles = window.getComputedStyle(track);
+        var gap = parseFloat(styles.columnGap || styles.gap || "16") || 16;
+        return firstCard.getBoundingClientRect().width + gap;
+      }
 
-  <section id="faq">
-    <div class="container">
-      <h2 class="section-title">How it works</h2>
-      <p class="section-sub">A quick three-step process to start your remodel journey.</p>
-      <div class="steps">
-        <article class="card">
-          <p class="step-num">Step 1</p>
-          <h3>Share your project</h3>
-          <p>Complete the form with your location, timeline, and goals.</p>
-        </article>
-        <article class="card">
-          <p class="step-num">Step 2</p>
-          <h3>We review your request</h3>
-          <p>We align your details with a local bathroom remodeling pro.</p>
-        </article>
-        <article class="card">
-          <p class="step-num">Step 3</p>
-          <h3>Connect and compare</h3>
-          <p>Get contacted, review fit, and decide your next move.</p>
-        </article>
-      </div>
-    </div>
-  </section>
+      function initCarousel(viewportId, trackId, prevId, nextId) {
+        var carouselViewport = document.getElementById(viewportId);
+        var carouselTrack = document.getElementById(trackId);
+        var prevButton = document.getElementById(prevId);
+        var nextButton = document.getElementById(nextId);
+        if (!prevButton || !nextButton || !carouselViewport || !carouselTrack) return;
 
-  <section>
-    <div class="container">
-      <div class="cta-band">
-        <div>
-          <h2 class="section-title">Ready to start your bathroom remodel?</h2>
-          <p>Tell us where you are and what you need. We will route your request to the right local team.</p>
-        </div>
-        <div>
-          <a class="btn" href="#top" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">Start My Request</a>
-        </div>
-      </div>
-    </div>
-  </section>
+        function updateCarouselButtons() {
+          var maxScrollLeft = carouselViewport.scrollWidth - carouselViewport.clientWidth;
+          prevButton.disabled = carouselViewport.scrollLeft <= 2;
+          nextButton.disabled = carouselViewport.scrollLeft >= maxScrollLeft - 2;
+        }
 
-  <section>
-    <div class="container">
-      <h2 class="section-title">Bathroom remodeling FAQs</h2>
-      <div class="faq">
-        <details>
-          <summary>How quickly will someone contact me?</summary>
-          <p>Most requests receive a response quickly after submission, depending on your local market and project details.</p>
-        </details>
-        <details>
-          <summary>Do I have to commit right away?</summary>
-          <p>No. Your submission helps start the conversation so you can evaluate fit, pricing, and timeline before deciding.</p>
-        </details>
-        <details>
-          <summary>Can I submit even if I am still planning?</summary>
-          <p>Yes. If you are in the research phase, share that in the timeline field and project notes so expectations are clear.</p>
-        </details>
-      </div>
-    </div>
-  </section>
+        function scrollCarousel(direction) {
+          var step = getScrollStep(carouselTrack);
+          if (!step) return;
+          carouselViewport.scrollBy({
+            left: direction * step,
+            behavior: "smooth"
+          });
+        }
 
-  <footer>
-    <div class="container">
-      <p><strong>The Local Pick</strong> • Bathroom Remodeling Match Service</p>
-      <p>Helping homeowners connect with trusted local remodelers.</p>
-    </div>
-  </footer>
+        prevButton.addEventListener("click", function () {
+          scrollCarousel(-1);
+        });
+        nextButton.addEventListener("click", function () {
+          scrollCarousel(1);
+        });
+        carouselViewport.addEventListener("scroll", updateCarouselButtons);
+        window.addEventListener("resize", updateCarouselButtons);
+        updateCarouselButtons();
+      }
+
+      initCarousel("projectCarouselViewport", "projectCardsTrack", "projectCarouselPrev", "projectCarouselNext");
+      initCarousel("ideasCarouselViewport", "ideasCardsTrack", "ideasCarouselPrev", "ideasCarouselNext");
+    })();
+  </script>
 </body>
 </html>
