@@ -622,33 +622,36 @@
     }
 
     .category-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem 0.8rem;
-      align-items: center;
-      justify-content: flex-start;
+      display: block;
       text-align: left;
       color: #1f2937;
       border-top: 1px solid #edf0f2;
-      padding: 0.9rem 0.95rem;
+      padding: 0;
     }
 
     .category-links a {
-      font-size: clamp(1rem, 2vw, 1.3rem);
+      display: block;
+      padding: 0.78rem 0.95rem;
+      font-size: 1rem;
       color: #111827;
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 400;
+      line-height: 1.4;
+      border-top: 1px solid #edf0f2;
+    }
+
+    .category-links a:first-child {
+      border-top: 0;
     }
 
     .category-links a:hover {
-      text-decoration: underline;
+      text-decoration: none;
+      background: #eef4ff;
       color: #3555a6;
     }
 
     .category-dot {
-      color: #111827;
-      font-size: 1.2rem;
-      line-height: 1;
+      display: none;
     }
 
     .why-local-pick {
@@ -1213,18 +1216,6 @@
     </div>
   </section>
 
-  <section class="certified-section" aria-label="Local Pick Certified">
-    <div class="container">
-      <div class="certified-box">
-        <div class="certified-copy">
-          <h2>Local Pick Certified</h2>
-          <p>Don't settle for less than the best</p>
-        </div>
-        <img class="certified-badge" src="../images/localpickbadge.png" alt="Local Pick certified badge">
-      </div>
-    </div>
-  </section>
-
   <section class="ideas-tips" id="ideas-tips" aria-label="Ideas and tips">
     <div class="container">
       <h2>Ideas and tips</h2>
@@ -1233,6 +1224,18 @@
         <div class="project-carousel-viewport" id="ideasCarouselViewport">
           <div class="project-cards" id="ideasCardsTrack"></div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="certified-section" aria-label="Local Pick Certified">
+    <div class="container">
+      <div class="certified-box">
+        <div class="certified-copy">
+          <h2>Local Pick Certified</h2>
+          <p>Don't settle for less than the best</p>
+        </div>
+        <img class="certified-badge" src="../images/localpickbadge.png" alt="Local Pick certified badge">
       </div>
     </div>
   </section>
@@ -1322,7 +1325,7 @@
 
   <section class="city-services" id="city-services" aria-label="Home service professionals by city">
     <div class="container">
-      <h2>Home service professionals by city</h2>
+      <h2>Search by city</h2>
       <div class="city-accordion" id="cityAccordion"></div>
     </div>
   </section>
