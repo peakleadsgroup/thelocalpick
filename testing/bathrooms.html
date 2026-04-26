@@ -136,6 +136,12 @@
             box-sizing: border-box;
         }
 
+        .dynamic-service-term {
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+            text-underline-offset: 4px;
+        }
+
         body.funnel-post-submit .dynamic-service-header {
             display: none;
         }
@@ -159,6 +165,15 @@
             border-radius: 4px;
             box-decoration-break: clone;
             -webkit-box-decoration-break: clone;
+        }
+
+        .header-section-divider {
+            width: 100%;
+            max-width: 560px;
+            height: 8px;
+            background: #f2f4f7;
+            border-radius: 999px;
+            margin: 8px auto 18px;
         }
 
         .step-subheader {
@@ -1363,7 +1378,7 @@
 </head>
 <body>
     <div class="logo-container">
-        <h1 class="dynamic-service-header" id="dynamicServiceHeader">Find your bathroom remodel professional</h1>
+        <h1 class="dynamic-service-header" id="dynamicServiceHeader">Find your <span class="dynamic-service-term">Bathroom Remodel</span> professional</h1>
         <img
             class="logo-img local-pick-brand-logo"
             src="https://thelocalpick.com/images/TheLocalPick-FlatLeftAligned.svg"
@@ -1373,6 +1388,7 @@
         >
         <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
     </div>
+    <div class="header-section-divider" aria-hidden="true"></div>
 
     <div class="main-funnel-local-pick-wrap" id="mainFunnelLocalPickWrap" style="display: none;">
         <div class="local-pick-group local-pick-block-partner" id="localPickOuter" style="display: none;">
@@ -6257,10 +6273,20 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
         if (!headerEl) return;
         var params = new URLSearchParams(window.location.search);
         var service = params.get("service");
+        function toTitleCase(value) {
+          return value
+            .toLowerCase()
+            .split(/\s+/)
+            .filter(Boolean)
+            .map(function (word) {
+              return word.charAt(0).toUpperCase() + word.slice(1);
+            })
+            .join(" ");
+        }
         if (service && service.trim()) {
-          var normalizedService = service.trim().toLowerCase();
-          headerEl.textContent = "Find your " + normalizedService + " professional";
-          document.title = normalizedService + " | The Local Pick";
+          var titleCaseService = toTitleCase(service.trim());
+          headerEl.innerHTML = "Find your <span class=\"dynamic-service-term\">" + titleCaseService + "</span> professional";
+          document.title = titleCaseService + " | The Local Pick";
         }
       })();
     </script>

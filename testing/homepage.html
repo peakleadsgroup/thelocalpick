@@ -89,7 +89,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 62px;
+      min-height: 82px;
+      padding: 0 96px 0 10px;
     }
 
     .brand {
@@ -108,14 +109,14 @@
     .brand-logo {
       display: block;
       height: auto;
-      width: min(560px, calc(100vw - 120px));
-      max-height: 38px;
+      width: min(560px, calc(100vw - 180px));
+      max-height: 46px;
       object-fit: contain;
     }
 
     .top-right-dropdown {
       position: absolute;
-      right: 0;
+      right: 10px;
       top: 50%;
       transform: translateY(-50%);
     }
@@ -125,12 +126,12 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 0 !important;
-      border-radius: 0;
-      width: 30px;
-      height: 24px;
+      border: 1.5px solid #dbe5f2 !important;
+      border-radius: 16px;
+      width: 78px;
+      height: 78px;
       padding: 0;
-      background: transparent !important;
+      background: #fff !important;
       cursor: pointer;
       color: #111827;
       font-weight: 400;
@@ -138,11 +139,12 @@
       box-shadow: none !important;
       appearance: none;
       -webkit-appearance: none;
-      transition: opacity 160ms ease;
+      transition: border-color 160ms ease, opacity 160ms ease;
     }
 
     .top-right-dropdown summary:hover {
-      opacity: 0.8;
+      border-color: #c9d7ec !important;
+      opacity: 0.95;
     }
 
     .top-right-dropdown summary:focus-visible {
@@ -154,8 +156,8 @@
     }
 
     .hamburger-icon {
-      width: 30px;
-      height: 20px;
+      width: 34px;
+      height: 24px;
       display: inline-flex;
       flex-direction: column;
       justify-content: space-between;
@@ -1078,8 +1080,24 @@
       }
 
       .brand-logo {
-        width: min(420px, calc(100vw - 92px));
-        max-height: 32px;
+        width: min(420px, calc(100vw - 152px));
+        max-height: 34px;
+      }
+
+      .site-header .container {
+        min-height: 72px;
+        padding-right: 82px;
+      }
+
+      .top-right-dropdown summary {
+        width: 62px;
+        height: 62px;
+        border-radius: 14px;
+      }
+
+      .hamburger-icon {
+        width: 30px;
+        height: 20px;
       }
     }
   </style>
