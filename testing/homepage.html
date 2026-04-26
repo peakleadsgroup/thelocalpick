@@ -1154,7 +1154,13 @@
   </header>
 
   <div class="header-image" aria-label="Bathroom showcase image">
-    <img src="/images/bathroomheader.png" alt="Modern bathroom remodeling design inspiration" loading="eager" decoding="async">
+    <img
+      src="/images/bathroomheader.png"
+      alt="Modern bathroom remodeling design inspiration"
+      loading="eager"
+      decoding="async"
+      onerror="if(this.dataset.fallbackApplied)return;this.dataset.fallbackApplied='1';this.src='../images/bathroomheader.png';"
+    >
   </div>
 
   <section class="image-intro" aria-label="Contractor matching intro">
@@ -1381,6 +1387,12 @@
   <script src="../articles/articles-data.js"></script>
   <script>
     (function () {
+      // Guard against stale/duplicated markup from mixed cache/CDN variants.
+      var introSections = Array.from(document.querySelectorAll(".image-intro"));
+      if (introSections.length > 1) {
+        introSections.slice(0, -1).forEach(function (section) { section.remove(); });
+      }
+
       var modal = document.getElementById("projectTypeModal");
       var trigger = document.getElementById("projectSearchTrigger");
       var iconTrigger = document.getElementById("projectSearchIconBtn");
