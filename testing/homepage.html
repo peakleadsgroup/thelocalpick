@@ -90,7 +90,7 @@
       justify-content: center;
       align-items: center;
       min-height: 82px;
-      padding: 0 96px 0 10px;
+      padding: 0 10px;
     }
 
     .brand {
@@ -112,63 +112,6 @@
       width: min(560px, calc(100vw - 180px));
       max-height: 46px;
       object-fit: contain;
-    }
-
-    .top-right-dropdown {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .top-right-dropdown summary {
-      list-style: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1.5px solid #dbe5f2 !important;
-      border-radius: 16px;
-      width: 78px;
-      height: 78px;
-      padding: 0;
-      background: #fff !important;
-      cursor: pointer;
-      color: #111827;
-      font-weight: 400;
-      line-height: 1;
-      box-shadow: none !important;
-      appearance: none;
-      -webkit-appearance: none;
-      transition: border-color 160ms ease, opacity 160ms ease;
-    }
-
-    .top-right-dropdown summary:hover {
-      border-color: #c9d7ec !important;
-      opacity: 0.95;
-    }
-
-    .top-right-dropdown summary:focus-visible {
-      outline: none;
-    }
-
-    .top-right-dropdown summary::-webkit-details-marker {
-      display: none;
-    }
-
-    .hamburger-icon {
-      width: 34px;
-      height: 24px;
-      display: inline-flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .hamburger-icon span {
-      display: block;
-      width: 100%;
-      height: 3px;
-      border-radius: 2px;
-      background: #0f172a;
     }
 
     .dropdown-panel {
@@ -1080,24 +1023,13 @@
       }
 
       .brand-logo {
-        width: min(420px, calc(100vw - 152px));
+        width: min(420px, calc(100vw - 24px));
         max-height: 34px;
       }
 
       .site-header .container {
         min-height: 72px;
-        padding-right: 82px;
-      }
-
-      .top-right-dropdown summary {
-        width: 62px;
-        height: 62px;
-        border-radius: 14px;
-      }
-
-      .hamburger-icon {
-        width: 30px;
-        height: 20px;
+        padding-right: 10px;
       }
     }
   </style>
@@ -1127,21 +1059,6 @@
       <a class="brand" href="#" aria-label="The Local Pick home">
         <img class="brand-logo" src="../images/thelocalpick-superflat.png" alt="The Local Pick">
       </a>
-
-      <details class="top-right-dropdown">
-        <summary aria-label="Open quick links dropdown">
-          <span class="hamburger-icon" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-        </summary>
-        <nav class="dropdown-panel" aria-label="Quick links">
-          <a href="#top">Get Matched</a>
-          <a href="#project-select" onclick="document.getElementById('project-select').scrollIntoView({behavior:'smooth'}); return false;">Select Project</a>
-          <a href="#ideas-tips" onclick="document.getElementById('ideas-tips').scrollIntoView({behavior:'smooth'}); return false;">Ideas and Tips</a>
-        </nav>
-      </details>
     </div>
   </header>
 
@@ -1238,7 +1155,7 @@
 
   <section class="category-search" id="category-search" aria-label="Search by category">
     <div class="container">
-      <h2>Search by category to find your local pick</h2>
+      <h2>Search by category</h2>
       <div class="category-groups">
         <div class="category-group">
           <h3>Bathroom remodel</h3>
@@ -1506,10 +1423,10 @@
         "Orlando", "Philadelphia", "Phoenix", "San Francisco", "Seattle", "Tampa"
       ];
 
-      function buildCityServiceLink(city, projectType) {
+      function buildCityServiceLink(city, projectType, targetPage) {
         var service = city + " " + projectType;
         return (
-          "<li><a href='bathrooms.html?service=" + encodeURIComponent(service) + "'>" +
+          "<li><a href='" + targetPage + "?service=" + encodeURIComponent(service) + "'>" +
             service +
           "</a></li>"
         );
@@ -1522,9 +1439,9 @@
             "<details" + (index === 0 ? " open" : "") + ">" +
               "<summary>" + city + "</summary>" +
               "<ul class='city-service-links'>" +
-                buildCityServiceLink(city, "bathroom remodel") +
-                buildCityServiceLink(city, "kitchen remodel") +
-                buildCityServiceLink(city, "concrete coating") +
+                buildCityServiceLink(city, "bathroom remodel", "bathrooms.html") +
+                buildCityServiceLink(city, "kitchen remodel", "kitchens.html") +
+                buildCityServiceLink(city, "concrete coating", "../floorcoating.html") +
               "</ul>" +
             "</details>"
           );
@@ -1559,7 +1476,12 @@
         link.addEventListener("click", function (event) {
           event.preventDefault();
           var service = link.textContent.trim();
-          window.location.href = "bathrooms.html?service=" + encodeURIComponent(service);
+          var categoryGroup = link.closest(".category-group");
+          var categoryTitle = categoryGroup ? (categoryGroup.querySelector("h3") || {}).textContent || "" : "";
+          var targetPage = "bathrooms.html";
+          if (/kitchen/i.test(categoryTitle)) targetPage = "kitchens.html";
+          if (/concrete/i.test(categoryTitle)) targetPage = "../floorcoating.html";
+          window.location.href = targetPage + "?service=" + encodeURIComponent(service);
         });
       });
 

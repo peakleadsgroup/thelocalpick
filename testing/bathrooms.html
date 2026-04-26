@@ -1378,7 +1378,8 @@
 </head>
 <body>
     <div class="logo-container">
-        <h1 class="dynamic-service-header" id="dynamicServiceHeader">Find your <span class="dynamic-service-term">Bathroom Remodel</span> professional</h1>
+        <h1 class="dynamic-service-header" id="dynamicServiceHeader">Find Your <span class="dynamic-service-term">Bathroom Remodel</span> Professional</h1>
+        <div class="header-section-divider" aria-hidden="true"></div>
         <img
             class="logo-img local-pick-brand-logo"
             src="https://thelocalpick.com/images/TheLocalPick-FlatLeftAligned.svg"
@@ -1388,7 +1389,6 @@
         >
         <p class="global-quiz-tagline">Take our 30 second quiz for a <span class="step-header-highlight">fast and free quote</span></p>
     </div>
-    <div class="header-section-divider" aria-hidden="true"></div>
 
     <div class="main-funnel-local-pick-wrap" id="mainFunnelLocalPickWrap" style="display: none;">
         <div class="local-pick-group local-pick-block-partner" id="localPickOuter" style="display: none;">
@@ -6285,7 +6285,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
         }
         if (service && service.trim()) {
           var titleCaseService = toTitleCase(service.trim());
-          headerEl.innerHTML = "Find your <span class=\"dynamic-service-term\">" + titleCaseService + "</span> professional";
+          headerEl.innerHTML = "Find Your <span class=\"dynamic-service-term\">" + titleCaseService + "</span> Professional";
           document.title = titleCaseService + " | The Local Pick";
         }
       })();
