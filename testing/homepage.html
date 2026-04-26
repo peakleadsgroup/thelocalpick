@@ -828,6 +828,10 @@
       object-position: center;
     }
 
+    .header-image img.image-failed {
+      display: none;
+    }
+
     .topbar .container {
       padding: 0.6rem 0;
       display: flex;
@@ -1155,11 +1159,11 @@
 
   <div class="header-image" aria-label="Bathroom showcase image">
     <img
-      src="/images/bathroomheader.png"
+      src="bathroomheader.png"
       alt="Modern bathroom remodeling design inspiration"
       loading="eager"
       decoding="async"
-      onerror="if(this.dataset.fallbackApplied)return;this.dataset.fallbackApplied='1';this.src='../images/bathroomheader.png';"
+      onerror="if(this.dataset.try1!=='1'){this.dataset.try1='1';this.src='/images/bathroomheader.png';return;}if(this.dataset.try2!=='1'){this.dataset.try2='1';this.src='../images/bathroomheader.png';return;}this.classList.add('image-failed');"
     >
   </div>
 
@@ -1392,6 +1396,14 @@
       if (introSections.length > 1) {
         introSections.slice(0, -1).forEach(function (section) { section.remove(); });
       }
+
+      // Safety cleanup for stale cached variants that still include older header copy.
+      Array.from(document.querySelectorAll("h1, h2, h3, p, div, section")).forEach(function (el) {
+        if (el.textContent && el.textContent.trim() === "Let's find your home improvement contractor") {
+          var wrapper = el.closest("section") || el;
+          wrapper.remove();
+        }
+      });
 
       var modal = document.getElementById("projectTypeModal");
       var trigger = document.getElementById("projectSearchTrigger");
