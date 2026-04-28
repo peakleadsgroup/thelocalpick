@@ -1949,6 +1949,16 @@
         let funnelResumeRestored = false;
         let phoneValidationListenersAttached = false;
 
+        function tlpLogoDebug(message, details) {
+            try {
+                if (details === undefined) {
+                    console.log(`[TLP][logo-debug] ${message}`);
+                } else {
+                    console.log(`[TLP][logo-debug] ${message}`, details);
+                }
+            } catch (e) {}
+        }
+
         function funnelUrlTrackingMatches(savedSearch, currentSearch) {
             const sig = (q) => {
                 const p = new URLSearchParams(String(q || '').replace(/^\?/, ''));
@@ -2781,14 +2791,34 @@
             try {
                 const id = String(areaId || '').trim();
                 if (!id) return null;
+                tlpLogoDebug('findClientByAreaId start', { areaId: id });
                 await zipRouteEnsureInfrastructure();
                 const adsetRec = await fetchAirtableData(
                     `${AIRTABLE_BASE_URL}/${ZIP_ROUTE.ADSET_TABLE}/${encodeURIComponent(id)}`
                 );
-                if (!adsetRec || !adsetRec.id) return null;
+                if (!adsetRec || !adsetRec.id) {
+                    tlpLogoDebug('findClientByAreaId adset not found', { areaId: id });
+                    return null;
+                }
+                tlpLogoDebug('findClientByAreaId adset resolved', {
+                    adsetRecordId: adsetRec.id,
+                    adsetFieldKeys: Object.keys(adsetRec.fields || {})
+                });
                 const clientRec = zipRouteFindClientRecordForAdset(adsetRec.id);
-                if (!clientRec) return null;
+                if (!clientRec) {
+                    tlpLogoDebug('findClientByAreaId no linked client in cache', { adsetRecordId: adsetRec.id });
+                    return null;
+                }
+                tlpLogoDebug('findClientByAreaId client cache hit', {
+                    clientRecordId: clientRec.id,
+                    clientFieldKeys: Object.keys(clientRec.fields || {})
+                });
                 const hydratedClient = await hydrateClientTcpaContactIfMissing(clientRec);
+                tlpLogoDebug('findClientByAreaId hydrated client', {
+                    clientRecordId: hydratedClient && hydratedClient.id ? hydratedClient.id : null,
+                    hasLogoAfterHydrate: !!resolveClientLogoUrl(hydratedClient && hydratedClient.fields ? hydratedClient.fields : null),
+                    clientFieldKeysAfterHydrate: hydratedClient && hydratedClient.fields ? Object.keys(hydratedClient.fields) : []
+                });
                 const selected = {
                     tier: 1,
                     adsetId: adsetRec.id,
@@ -2808,6 +2838,10 @@
                 return hydratedClient;
             } catch (error) {
                 console.error('Error finding client by areaID:', error);
+                tlpLogoDebug('findClientByAreaId exception', {
+                    areaId: areaId || null,
+                    error: String(error && error.message ? error.message : error)
+                });
                 lastZipRoutingQueue = [];
                 lastLeadRoutePick = { phase: 3, tier: null, selected: null, phase1Rows: [], message: String(error.message || error) };
                 return null;
@@ -3305,10 +3339,21 @@
             const fromLogo = resolveLogoLinkField(fields[CLIENT_DISPLAY_FIELDS.logo]);
             if (fromLogo) {
                 tlpDebug('logo', 'Resolved logo from Client.Logo', { logo: fromLogo });
+                tlpLogoDebug('resolveClientLogoUrl resolved from Logo field', {
+                    logoUrl: fromLogo,
+                    logoRawType: typeof fields[CLIENT_DISPLAY_FIELDS.logo]
+                });
                 return fromLogo;
             }
             const fallback = resolveLogoLinkField(fields['Logo Link']);
             tlpDebug('logo', 'Resolved logo fallback from Logo Link', { logo: fallback || null });
+            tlpLogoDebug('resolveClientLogoUrl fallback result', {
+                fallbackLogoUrl: fallback || null,
+                hasLogoField: Object.prototype.hasOwnProperty.call(fields, CLIENT_DISPLAY_FIELDS.logo),
+                hasLogoLinkField: Object.prototype.hasOwnProperty.call(fields, 'Logo Link'),
+                logoFieldRaw: fields[CLIENT_DISPLAY_FIELDS.logo] ?? null,
+                logoLinkRaw: fields['Logo Link'] ?? null
+            });
             return fallback;
         }
 
@@ -3510,6 +3555,11 @@
                 const hasTcpa = !!getTcpaContactFromClientFields(clientRec.fields);
                 const hasLogo = !!resolveClientLogoUrl(clientRec.fields);
                 if (hasTcpa && hasLogo) return clientRec;
+                tlpLogoDebug('hydrateClientTcpaContactIfMissing fetching full client', {
+                    clientId: clientRec.id,
+                    hasTcpa,
+                    hasLogo
+                });
                 const url = `${AIRTABLE_BASE_URL}/${ZIP_ROUTE.CLIENT_TABLE}/${encodeURIComponent(clientRec.id)}`;
                 const data = await fetchAirtableData(url);
                 const f = data && data.fields ? data.fields : null;
@@ -3525,6 +3575,10 @@
                 return next;
             } catch (e) {
                 tlpDebug('tcpa', 'TCPA Contact hydration failed', {
+                    clientId: clientRec && clientRec.id ? clientRec.id : null,
+                    error: String(e && e.message ? e.message : e)
+                });
+                tlpLogoDebug('hydrateClientTcpaContactIfMissing exception', {
                     clientId: clientRec && clientRec.id ? clientRec.id : null,
                     error: String(e && e.message ? e.message : e)
                 });
@@ -3628,11 +3682,25 @@
             const logoImg = getMainQuizLogoImg();
             if (!logoImg) return;
             const nextSrc = (typeof logoUrl === 'string' && logoUrl.trim()) ? logoUrl.trim() : DEFAULT_LOGO_SRC;
+            tlpLogoDebug('setMainQuizHeaderLogo apply', {
+                requestedLogoUrl: logoUrl || null,
+                appliedSrc: nextSrc,
+                usedDefault: nextSrc === DEFAULT_LOGO_SRC
+            });
             preloadLogo(nextSrc);
             logoImg.dataset.fallbackApplied = '';
+            logoImg.onload = function() {
+                tlpLogoDebug('setMainQuizHeaderLogo image loaded', {
+                    currentSrc: logoImg.currentSrc || logoImg.src || null
+                });
+            };
             logoImg.onerror = function() {
                 if (logoImg.dataset.fallbackApplied === '1') return;
                 logoImg.dataset.fallbackApplied = '1';
+                tlpLogoDebug('setMainQuizHeaderLogo image failed; falling back', {
+                    failedSrc: logoImg.currentSrc || logoImg.src || null,
+                    fallbackSrc: DEFAULT_LOGO_SRC
+                });
                 logoImg.src = DEFAULT_LOGO_SRC;
                 logoImg.style.display = 'block';
             };
@@ -3802,6 +3870,13 @@
             }
 
             const headerLogoUrl = activeClient && activeClient.fields ? resolveClientLogoUrl(activeClient.fields) : null;
+            tlpLogoDebug('updatePartnerNameInPrivacyPolicy logo resolution', {
+                genericLeadFlow,
+                activeClientId: activeClient && activeClient.id ? activeClient.id : null,
+                headerLogoUrl: headerLogoUrl || null,
+                currentStep,
+                postFormSubmitted
+            });
             setMainQuizHeaderLogo(headerLogoUrl);
             setPartnerLogoForWhySection(headerLogoUrl, 'both');
         }
