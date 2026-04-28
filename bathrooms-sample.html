@@ -3507,7 +3507,9 @@
         async function hydrateClientTcpaContactIfMissing(clientRec) {
             try {
                 if (!clientRec || !clientRec.id || !clientRec.fields) return clientRec;
-                if (getTcpaContactFromClientFields(clientRec.fields)) return clientRec;
+                const hasTcpa = !!getTcpaContactFromClientFields(clientRec.fields);
+                const hasLogo = !!resolveClientLogoUrl(clientRec.fields);
+                if (hasTcpa && hasLogo) return clientRec;
                 const url = `${AIRTABLE_BASE_URL}/${ZIP_ROUTE.CLIENT_TABLE}/${encodeURIComponent(clientRec.id)}`;
                 const data = await fetchAirtableData(url);
                 const f = data && data.fields ? data.fields : null;
@@ -3516,7 +3518,9 @@
                 const next = { ...clientRec, fields: merged };
                 tlpDebug('tcpa', 'Hydrated TCPA Contact from direct client fetch', {
                     clientId: clientRec.id,
-                    hasTcpaAfter: !!getTcpaContactFromClientFields(merged)
+                    hasTcpaAfter: !!getTcpaContactFromClientFields(merged),
+                    hasLogoAfter: !!resolveClientLogoUrl(merged),
+                    hydrateReason: !hasTcpa ? 'missing-tcpa' : (!hasLogo ? 'missing-logo' : 'unknown')
                 });
                 return next;
             } catch (e) {
