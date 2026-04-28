@@ -3312,6 +3312,7 @@
         /** Adset (tblee61crNCoSfurx) — post-submit path + calendar (from routed ad set) */
         const ADSET_FUNNEL_FIELDS = {
             submitScreen: 'Submit Screen',
+            adsetName: 'Adset Name',
             availabilityApiUrl: 'Availability API URL',
             minCalendarHours: 'Minimum Calendar Hours',
             maxCalendarDays: 'Maximum Calendar Days',
@@ -3496,6 +3497,27 @@
             const sel = lastLeadRoutePick && lastLeadRoutePick.selected;
             if (!sel || !sel.adsetRec || !sel.adsetRec.fields) return null;
             return sel.adsetRec.fields;
+        }
+
+        function getAdsetDisplayName() {
+            const adsetFields = getRoutedAdsetFields();
+            if (!adsetFields) return '';
+            const raw = adsetFields[ADSET_FUNNEL_FIELDS.adsetName];
+            if (raw == null) return '';
+            if (Array.isArray(raw)) {
+                for (const item of raw) {
+                    const s = String(item || '').trim();
+                    if (s) return s;
+                }
+                return '';
+            }
+            return String(raw).trim();
+        }
+
+        function getPartnerDisplayName(fallback = '') {
+            const fromAdset = getAdsetDisplayName();
+            if (fromAdset) return fromAdset;
+            return fallback;
         }
 
         function adsetOverlayValuePresent(v) {
@@ -3762,7 +3784,7 @@
             if (genericLeadFlow) {
                 /** Prefetch can resolve a routed client before submit while genericLeadFlow is still true. */
                 const routedEarly = matchedClientData && matchedClientData.fields ? matchedClientData : null;
-                const routedName = routedEarly && routedEarly.fields['Name'] ? String(routedEarly.fields['Name']).trim() : '';
+                const routedName = getAdsetDisplayName();
                 const routedTcpa = getTcpaContactFromClientFields(routedEarly && routedEarly.fields ? routedEarly.fields : null);
                 const tcpaNameForDisplay = routedName || genericPartnerName;
                 const tcpaContactForDisplay = routedTcpa || genericTcpaContact;
@@ -3821,9 +3843,7 @@
             }
 
             const activeClient = getActiveClient();
-            const partnerName = (activeClient && activeClient.fields && activeClient.fields['Name'])
-                ? activeClient.fields['Name']
-                : null;
+            const partnerName = getPartnerDisplayName('');
             const tcpaContact = getTcpaContactFromClientFields(activeClient && activeClient.fields ? activeClient.fields : null);
             
             if (partnerNameElement) {
@@ -3872,14 +3892,16 @@
             }
 
             const headerLogoUrl = activeClient && activeClient.fields ? resolveClientLogoUrl(activeClient.fields) : null;
+            const topHeaderLogoUrl = postFormSubmitted ? null : headerLogoUrl;
             tlpLogoDebug('updatePartnerNameInPrivacyPolicy logo resolution', {
                 genericLeadFlow,
                 activeClientId: activeClient && activeClient.id ? activeClient.id : null,
                 headerLogoUrl: headerLogoUrl || null,
+                topHeaderLogoUrl: topHeaderLogoUrl || null,
                 currentStep,
                 postFormSubmitted
             });
-            setMainQuizHeaderLogo(headerLogoUrl);
+            setMainQuizHeaderLogo(topHeaderLogoUrl);
             setPartnerLogoForWhySection(headerLogoUrl, 'both');
         }
         
@@ -3928,7 +3950,7 @@
                 // Initial update
                 setTimeout(updateBackgroundHeight, 100);
                 
-                if (currentStep === 0) {
+                if (currentStep === 0 && !AREA_ID_ROUTE_ENABLED) {
                     applyDefaultLocalPickLogo();
                 }
                 
@@ -3948,7 +3970,7 @@
             updateBackgroundHeight();
             tryShowReviewsOnLoad();
             updateProjectTypeStepOptions();
-            if (currentStep === 0) {
+            if (currentStep === 0 && !AREA_ID_ROUTE_ENABLED) {
                 applyDefaultLocalPickLogo();
             }
 
@@ -5266,9 +5288,7 @@
             // Set "Ready to get started now?" subtitle based on screen type
             const contactReadySubtitle = document.getElementById('contactReadySubtitle');
             if (contactReadySubtitle) {
-                const companyName = (getActiveClient() && getActiveClient().fields && getActiveClient().fields['Name'])
-                    ? String(getActiveClient().fields['Name']).trim()
-                    : 'COMPANY';
+                const companyName = getPartnerDisplayName('COMPANY');
                 const subtitles = {
                     'Phone': `Can't wait to hear from ${companyName}? Click the button below to call them now.`,
                     'Text': `Can't wait to hear from ${companyName}? Text them below to schedule your free estimate.`,
@@ -5378,10 +5398,7 @@
             if (confirmationAppointmentBlock) confirmationAppointmentBlock.style.display = 'none';
             const confirmationReadySubtitle = document.getElementById('confirmationReadySubtitle');
             if (confirmationReadySubtitle && !genericLeadFlow) {
-                const activeClient = getActiveClient();
-                const companyName = (activeClient && activeClient.fields && activeClient.fields['Name'])
-                    ? String(activeClient.fields['Name']).trim()
-                    : 'COMPANY';
+                const companyName = getPartnerDisplayName('COMPANY');
                 confirmationReadySubtitle.textContent = `${companyName} will call you soon to schedule your free estimate!`;
             }
             deactivateSubmitSourceSteps();
@@ -5491,7 +5508,7 @@
 
             mergeStarRatingIntoLocalPickItems(localPickItems, fields);
 
-            const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
+            const partnerName = getPartnerDisplayName('Peak Leads Group');
             buildLocalPickBlock(localPickItems, partnerName);
 
             if (reviewsContainer) reviewsContainer.innerHTML = '';
@@ -5536,7 +5553,7 @@
 
             mergeStarRatingIntoLocalPickItems(localPickItems, fields);
 
-            const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
+            const partnerName = getPartnerDisplayName('Peak Leads Group');
             if (postFormSubmitted) {
                 if (localPickItems.length > 0) {
                     // Keep card + “what happens now” steps in #mainFunnelLocalPickWrap (under logo, above post-submit CTA).
