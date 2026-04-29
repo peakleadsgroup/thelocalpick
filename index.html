@@ -1389,7 +1389,7 @@
     </div>
   </div>
 
-  <script src="../articles/articles-data.js"></script>
+  <script src="../articles/articles-data.js?v=20260428-article-images"></script>
   <script>
     (function () {
       // Guard against stale/duplicated markup from mixed cache/CDN variants.
@@ -1586,12 +1586,26 @@
       var ideasCardsTrack = document.getElementById("ideasCardsTrack");
       var articleItems = Array.isArray(window.TLP_ARTICLES) ? window.TLP_ARTICLES : [];
 
+      var articleImageBySlug = {
+        "planning-basics": "../images/article-bathroom-shower-modern.png",
+        "bathroom-layout-ideas": "../images/article-bathroom-green-double-vanity.png",
+        "budget-and-materials": "../images/article-bathroom-blue-tile-spa.png"
+      };
+
+      function resolveArticleImage(item) {
+        if (!item || !item.slug) return "../images/article-bathroom-shower-modern.png";
+        if (!item.image || item.image.indexOf("article-placeholder.png") !== -1) {
+          return articleImageBySlug[item.slug] || "../images/article-bathroom-shower-modern.png";
+        }
+        return item.image;
+      }
+
       function renderIdeaCards() {
         if (!ideasCardsTrack || !articleItems.length) return;
         ideasCardsTrack.innerHTML = articleItems.map(function (item) {
           return (
             "<a class='idea-card' href='" + item.url + "'>" +
-              "<span class='idea-thumb'><img src='" + item.image + "' alt='Article image for " + item.title + "'></span>" +
+              "<span class='idea-thumb'><img src='" + resolveArticleImage(item) + "' alt='Article image for " + item.title + "'></span>" +
               "<div class='idea-content'>" +
                 "<p class='idea-kicker'>" + item.category + "</p>" +
                 "<h3>" + item.title + "</h3>" +
