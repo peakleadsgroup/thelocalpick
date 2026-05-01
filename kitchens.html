@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="icons/favicon-local-pick-48.png?v=4">
-    <title>Find Your Local Pick - Bathroom Remodel</title>
+    <title>Find Your Local Pick - Kitchen Remodel</title>
     <base href="./">
     
     <!-- Meta Pixel -->
@@ -1011,7 +1011,7 @@
             margin: 0;
         }
 
-        /* Post-zip (partner): icons left, like bathrooms.html */
+        /* Post-zip (partner): icons left, like kitchens.html */
         .local-pick-group .local-pick-item {
             display: flex;
             align-items: flex-start;
@@ -1375,7 +1375,7 @@
                         <span class="post-submit-step-num">2</span>
                         <h3 class="post-submit-step-title">In-Home Estimate</h3>
                     </div>
-                    <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
+                    <p class="post-submit-step-desc">A design specialist will help design your new kitchen and provide a straightforward, no-obligation estimate with no sales pressure.</p>
                 </div>
                 <div class="post-submit-step">
                     <div class="post-submit-step-header">
@@ -1415,12 +1415,12 @@
             </div>
         </div>
 
-        <!-- STEP 1: Bathroom last updated -->
+        <!-- STEP 1: Kitchen last updated -->
         <div class="form-step" id="step1">
-            <div class="step-header">When was your bathroom last updated?</div>
+            <div class="step-header">When was your kitchen last updated?</div>
             <div class="options">
-                <div class="option" data-quiz-field="bathroomLastUpdated" data-quiz-value="less_than_10" onclick="selectOptionAndAdvance(this, 'bathroomLastUpdated', 'less_than_10')">Less than 10 years ago</div>
-                <div class="option" data-quiz-field="bathroomLastUpdated" data-quiz-value="more_than_10" onclick="selectOptionAndAdvance(this, 'bathroomLastUpdated', 'more_than_10')">More than 10 years ago</div>
+                <div class="option" data-quiz-field="kitchenLastUpdated" data-quiz-value="less_than_10" onclick="selectOptionAndAdvance(this, 'kitchenLastUpdated', 'less_than_10')">Less than 10 years ago</div>
+                <div class="option" data-quiz-field="kitchenLastUpdated" data-quiz-value="more_than_10" onclick="selectOptionAndAdvance(this, 'kitchenLastUpdated', 'more_than_10')">More than 10 years ago</div>
             </div>
         </div>
 
@@ -1447,7 +1447,7 @@
                     </svg>
                 </div>
                 <div class="repair-damage-content">
-                    <div class="homeowner-no-text" id="repairDamageCopy">Our contractors don't offer small repairs.  They specialize exclusively in full replacements and conversions</div>
+                    <div class="homeowner-no-text" id="repairDamageCopy">Our contractors don't offer small repairs. They specialize exclusively in full kitchen remodels and major renovations</div>
                 </div>
             </div>
         </div>
@@ -1660,7 +1660,7 @@
                                 <span class="post-submit-step-num">2</span>
                                 <h3 class="post-submit-step-title">In-Home Estimate</h3>
                             </div>
-                            <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
+                            <p class="post-submit-step-desc">A design specialist will help design your new kitchen and provide a straightforward, no-obligation estimate with no sales pressure.</p>
                         </div>
                         <div class="post-submit-step">
                             <div class="post-submit-step-header">
@@ -1879,7 +1879,7 @@
         };
 
         /** Adset table {Niche} must match this value (single- or multi-select) for routing on this page */
-        const FUNNEL_ADSET_NICHE = 'Bathrooms';
+        const FUNNEL_ADSET_NICHE = 'Kitchens';
 
         const initializedMetaPixels = new Set();
         
@@ -1943,7 +1943,7 @@
         const DEFAULT_LOGO_SRC = 'images/TheLocalPick-FlatLeftAligned.svg';
 
         const FUNNEL_RESUME_STORAGE_KEY = 'localpick_funnel_resume_v1';
-        const FUNNEL_PAGE_FILE = 'bathrooms.html';
+        const FUNNEL_PAGE_FILE = 'kitchens.html';
         const DISABLE_FUNNEL_PROGRESS_PERSIST = true; // Off for now (no save/resume). Set false to turn progress persistence back on.
         let funnelResumeRestored = false;
         let phoneValidationListenersAttached = false;
@@ -2523,7 +2523,7 @@
             return v ? 'yes' : 'no';
         }
 
-        /** Exact-zip junction only: pick tier-qualified Bathrooms ad set, else no partner. */
+        /** Exact-zip junction only: pick tier-qualified Kitchens ad set, else no partner. */
         async function computeLeadRoute(zipInput) {
             const zipFive = zipRouteNormalizeZipFive(zipInput);
             const empty = { phase: 3, tier: null, selected: null, phase1Rows: [], message: 'No match' };
@@ -3206,12 +3206,12 @@
         };
 
         const SHOWER_IMAGE_URLS = [
-            'https://thelocalpick.com/images/shower1.png',
-            'https://thelocalpick.com/images/shower2.png',
-            'https://thelocalpick.com/images/shower3.png',
-            'https://thelocalpick.com/images/shower4.png',
-            'https://thelocalpick.com/images/shower6.png',
-            'https://thelocalpick.com/images/shower5.png',
+            'https://thelocalpick.com/images/modern-white-kitchen-remodel-waterfall-island-black-hardware.png',
+            'https://thelocalpick.com/images/modern-white-kitchen-gold-hardware-marble-waterfall-island.png',
+            'https://thelocalpick.com/images/modern-dark-wood-kitchen-concrete-floor-industrial.png',
+            'https://thelocalpick.com/images/modern-matte-black-kitchen-dark-stone-island-minimalist.png',
+            'https://thelocalpick.com/images/modern-white-kitchen-remodel-waterfall-island-black-hardware.png',
+            'https://thelocalpick.com/images/modern-white-kitchen-gold-hardware-marble-waterfall-island.png',
         ];
         const DEFAULT_LOCAL_PICK_ITEMS = [
             'Top-rated service backed by real homeowner reviews',
@@ -3346,7 +3346,7 @@
                 (src) =>
                     `<div class="shower-carousel-slide"><img src="${escapeHtml(src)}" alt="" loading="lazy"></div>`
             ).join('');
-            return `<div class="shower-carousel-wrap"><div class="shower-carousel" role="region" aria-label="Project photos">${slides}</div></div>`;
+            return `<div class="shower-carousel-wrap"><div class="shower-carousel" role="region" aria-label="Kitchen project photos">${slides}</div></div>`;
         }
 
         function getActiveClient() {
@@ -3491,8 +3491,9 @@
         /** Maps Airtable Client "Project Type" multi-select to form values; options must match B2C lead field options. */
         function getProjectTypeChoicesForClient(activeClient) {
             const ORDER = [
-                { match: (t) => /^shower\s*replacement$/i.test(t), value: 'shower_replacement', label: 'Shower replacement' },
-                { match: (t) => /^tub\s*replacement$/i.test(t), value: 'tub_replacement', label: 'Tub replacement' }
+                { match: (t) => /full\s*kitchen|^kitchen\s*remodel$/i.test(t), value: 'full_kitchen_remodel', label: 'Full kitchen remodel' },
+                { match: (t) => /cabinet/i.test(t) && /reface/i.test(t), value: 'cabinet_refacing', label: 'Cabinet refacing' },
+                { match: (t) => /countertop/i.test(t), value: 'countertop_replacement', label: 'Countertop replacement' }
             ];
             const f = activeClient && activeClient.fields;
             const raw = (f && (f['Project Type'] != null ? f['Project Type'] : f['Project Types'])) != null
@@ -5815,7 +5816,7 @@
             const options = { 'yes': 'Yes', 'no': 'No' };
             return options[value] || value;
         }
-        function getBathroomLastUpdatedDisplay(value) {
+        function getKitchenLastUpdatedDisplay(value) {
             const options = {
                 'less_than_10': 'Less than 10 years ago',
                 'more_than_10': 'More than 10 years ago'
@@ -5824,11 +5825,14 @@
         }
         function getProjectTypeDisplay(value) {
             const options = {
+                'full_kitchen_remodel': 'Full kitchen remodel',
+                'cabinet_refacing': 'Cabinet refacing',
+                'countertop_replacement': 'Countertop replacement',
+                'full_remodel': 'Full remodel',
                 'tub_to_shower': 'Tub to shower conversion',
                 'shower_to_tub': 'Shower to tub conversion',
                 'shower_replacement': 'Shower replacement',
-                'tub_replacement': 'Tub replacement',
-                'full_remodel': 'Full remodel'
+                'tub_replacement': 'Tub replacement'
             };
             return options[value] || value;
         }
@@ -5890,11 +5894,11 @@
             
             const leadEventData = {
                 content_category: 'home_improvement',
-                content_name: 'bathroom_remodel_quote',
+                content_name: 'kitchen_remodel_quote',
                 value: 1.00,
                 currency: 'USD',
                 homeowner_status: finalData.homeowner,
-                bathroom_last_updated: finalData.bathroomLastUpdated,
+                kitchen_last_updated: finalData.kitchenLastUpdated,
                 project_type: finalData.projectType,
                 main_goal: finalData.mainGoal
             };
@@ -5917,12 +5921,12 @@
             
             // Build full summary
             const emailLine = finalData.email ? `Email: ${finalData.email}\n` : '';
-            const fullSummary = `Bathroom Remodel Lead Information:
+            const fullSummary = `Kitchen Remodel Lead Information:
 
 Name: ${finalData.firstName} ${finalData.lastName}
 Phone: ${formatPhoneForDisplay(finalData.phone)}
 ${emailLine}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}
-Bathroom last updated: ${getBathroomLastUpdatedDisplay(finalData.bathroomLastUpdated)}
+Kitchen last updated: ${getKitchenLastUpdatedDisplay(finalData.kitchenLastUpdated)}
 Project Type: ${getProjectTypeDisplay(finalData.projectType)}
 Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}
 
@@ -5946,7 +5950,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             
             // Build HTML version of full summary
             const emailLineHTML = finalData.email ? `Email: ${finalData.email}<BR>` : '';
-            const fullSummaryHTML = `Bathroom Remodel Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Bathroom last updated: ${getBathroomLastUpdatedDisplay(finalData.bathroomLastUpdated)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
+            const fullSummaryHTML = `Kitchen Remodel Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Kitchen last updated: ${getKitchenLastUpdatedDisplay(finalData.kitchenLastUpdated)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
