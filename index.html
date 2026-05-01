@@ -1216,7 +1216,7 @@
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "The Local Pick Bathroom Remodeling",
-    "url": "https://www.thelocalpick.com/testing/homepage.html",
+    "url": "https://www.thelocalpick.com/",
     "description": "We connect homeowners with top-rated local bathroom remodelers.",
     "areaServed": {
       "@type": "Country",
@@ -1226,6 +1226,30 @@
     "sameAs": [
       "https://www.facebook.com/",
       "https://www.instagram.com/"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.thelocalpick.com/#organization",
+        "name": "The Local Pick",
+        "url": "https://www.thelocalpick.com/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.thelocalpick.com/images/thelocalpick-superflat.png"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.thelocalpick.com/#website",
+        "url": "https://www.thelocalpick.com/",
+        "name": "The Local Pick",
+        "publisher": { "@id": "https://www.thelocalpick.com/#organization" }
+      }
     ]
   }
   </script>
@@ -1752,7 +1776,24 @@
       var articleImageBySlug = {
         "planning-basics": "../images/article-bathroom-shower-modern.png",
         "bathroom-layout-ideas": "../images/article-bathroom-green-double-vanity.png",
-        "budget-and-materials": "../images/article-bathroom-blue-tile-spa.png"
+        "budget-and-materials": "../images/article-bathroom-blue-tile-spa.png",
+        "solid-surface-acrylic-showers": "../images/solid-surface-acrylic-shower-bathroom-remodel.png",
+        "modern-walk-in-shower-ideas-seamless-panels": "../images/modern-minimalist-bathroom-remodel-walk-in-shower.png",
+        "floating-vanity-bathroom-design-pros-and-cons": "../images/modern-minimalist-bathroom-floating-vanity-walk-in-shower.png",
+        "curbless-walk-in-shower-design-guide": "../images/curbless-walk-in-shower-floating-vanity-spa-bathroom.png",
+        "modern-walk-in-shower-remodel-tub-and-shower-layouts": "../images/modern-minimalist-bathroom-remodel-walk-in-shower-freestanding-tub.png",
+        "luxury-master-bathroom-remodel-ideas-natural-light": "../images/luxury-master-bathroom-remodel-freestanding-tub-natural-light.png",
+        "modern-glass-walk-in-shower-remodel-ideas": "../images/modern-minimalist-bathroom-remodel-walk-in-glass-shower.png",
+        "garage-epoxy-flake-floor-coating-guide": "../images/modern-garage-grey-flake-epoxy-floor-coating.png",
+        "high-gloss-garage-floor-coating-benefits-drawbacks": "../images/high-gloss-gray-epoxy-flake-garage-floor-coating.png",
+        "concrete-floor-sealer-vs-garage-coating-system": "../images/modern-workshop-sealed-concrete-floor-coating.png",
+        "garage-workshop-floor-coating-checklist": "../images/garage-workshop-gray-epoxy-floor-coating-organized-space.png",
+        "epoxy-vs-polyaspartic-garage-floor-coating": "../images/high-gloss-gray-flake-garage-floor-white-cabinets.png",
+        "garage-storage-ideas-with-floor-coating-upgrade": "../images/modern-garage-renovation-grey-flake-epoxy-floor-slatwall-storage.png",
+        "matte-black-kitchen-design-ideas-minimalist-remodel": "../images/modern-matte-black-kitchen-dark-stone-island-minimalist.png",
+        "modern-white-kitchen-waterfall-island-remodel-guide": "../images/modern-white-kitchen-remodel-waterfall-island-black-hardware.png",
+        "dark-wood-kitchen-concrete-floor-remodel-ideas": "../images/modern-dark-wood-kitchen-concrete-floor-industrial.png",
+        "white-kitchen-gold-hardware-waterfall-island-ideas": "../images/modern-white-kitchen-gold-hardware-marble-waterfall-island.png"
       };
 
       function resolveArticleImage(item) {

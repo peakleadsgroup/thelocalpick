@@ -1,0 +1,361 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: #f8fbfc;
+  color: #111827;
+}
+
+main {
+  width: min(860px, 92%);
+  margin: 2rem auto;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.2rem;
+}
+
+.breadcrumbs {
+  font-size: 0.9rem;
+  color: #475467;
+  margin-bottom: 0.75rem;
+}
+
+.breadcrumbs a {
+  color: #3555a6;
+  text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbs-sep {
+  margin: 0 0.35rem;
+  color: #94a3b8;
+}
+
+.category {
+  display: inline-block;
+  margin-bottom: 0.7rem;
+  color: #3555a6;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+img {
+  width: 100%;
+  max-height: 340px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 0.9rem;
+}
+
+h1 {
+  margin: 0 0 0.6rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+h2 {
+  margin: 1.35rem 0 0.55rem;
+  line-height: 1.3;
+}
+
+ul {
+  margin: 0 0 1rem 1.1rem;
+  line-height: 1.6;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 0.45rem;
+}
+
+p {
+  line-height: 1.6;
+  margin: 0 0 0.9rem;
+}
+
+/* Inline links in article body (not TOC): contextual CTAs to vertical landers */
+main p a {
+  color: #3555a6;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+main p a:hover {
+  color: #4f76cc;
+}
+
+main h2 ~ ul li a {
+  color: #3555a6;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+main h2 ~ ul li a:hover {
+  color: #4f76cc;
+}
+
+.meta {
+  color: #475467;
+  font-size: 0.92rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.article-intro {
+  text-align: center;
+  max-width: 60ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.toc {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  margin: 0 0 1.25rem;
+  background: #f8fafc;
+}
+
+.toc-title {
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.toc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc li {
+  margin: 0 0 0.35rem;
+}
+
+.toc a {
+  color: #3555a6;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+.faq-item {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.related {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+}
+
+.related a {
+  color: #3555a6;
+  text-decoration: none;
+}
+
+.related a:hover {
+  text-decoration: underline;
+}
+
+/* Site chrome (matches homepage header/footer) */
+:root {
+  --tlp-primary: #6190f2;
+  --tlp-primary-dark: #4f76cc;
+  --tlp-border: #d9dfe3;
+  --tlp-text: #1a1a1a;
+  --tlp-muted: #667085;
+  --tlp-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.tlp-site-header {
+  background: #fff;
+  border-bottom: 1px solid var(--tlp-border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.tlp-site-header .tlp-container {
+  width: min(1120px, 92%);
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 62px;
+  padding: 0 10px;
+}
+
+.tlp-brand {
+  display: inline-flex;
+  align-items: center;
+  color: var(--tlp-primary);
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.tlp-brand:hover {
+  text-decoration: none;
+}
+
+.tlp-brand-logo {
+  display: block;
+  height: auto;
+  width: min(560px, calc(100vw - 180px));
+  max-height: 46px;
+  object-fit: contain;
+}
+
+.tlp-site-footer {
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem 0 1.15rem;
+  margin-top: 0;
+}
+
+.tlp-site-footer .tlp-container {
+  width: min(1120px, 92%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.tlp-footer-logo {
+  width: min(320px, 70vw);
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.tlp-footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  color: #475467;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.tlp-footer-meta a {
+  color: #3555a6;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.tlp-footer-meta a:hover {
+  text-decoration: underline;
+}
+
+.tlp-article-cta {
+  background: linear-gradient(180deg, #eaf6f8 0%, #f0f7fa 100%);
+  border-bottom: 1px solid var(--tlp-border);
+}
+
+.tlp-article-cta--after-main {
+  border-bottom: none;
+  border-top: 1px solid var(--tlp-border);
+  margin-top: 0;
+}
+
+.tlp-article-cta .tlp-container {
+  width: min(1120px, 92%);
+  margin: 0 auto;
+  padding: 1rem 0;
+}
+
+.tlp-article-cta-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem 1.25rem;
+  text-align: center;
+}
+
+.tlp-article-cta-text {
+  margin: 0;
+  color: #17323a;
+  font-size: clamp(0.98rem, 2vw, 1.08rem);
+  font-weight: 600;
+  max-width: 42ch;
+  line-height: 1.4;
+}
+
+.tlp-article-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+}
+
+.tlp-article-cta-primary,
+.tlp-article-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.72rem 1.25rem;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.tlp-article-cta-primary {
+  background: var(--tlp-primary);
+  color: #fff;
+  border: 2px solid var(--tlp-primary);
+  box-shadow: 0 4px 14px rgba(97, 144, 242, 0.35);
+}
+
+.tlp-article-cta-primary:hover {
+  background: var(--tlp-primary-dark);
+  border-color: var(--tlp-primary-dark);
+  color: #fff;
+  text-decoration: none;
+}
+
+.tlp-article-cta-secondary {
+  background: #fff;
+  color: var(--tlp-primary-dark);
+  border: 2px solid var(--tlp-border);
+}
+
+.tlp-article-cta-secondary:hover {
+  background: #eef4ff;
+  border-color: #c5d4f5;
+  text-decoration: none;
+}
+
+@media (max-width: 560px) {
+  .tlp-brand-logo {
+    width: min(420px, calc(100vw - 24px));
+    max-height: 34px;
+  }
+
+  .tlp-site-header .tlp-container {
+    min-height: 54px;
+  }
+
+  .tlp-article-cta-inner {
+    flex-direction: column;
+  }
+}
