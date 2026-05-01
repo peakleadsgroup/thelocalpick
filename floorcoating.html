@@ -119,28 +119,6 @@
             box-sizing: border-box;
         }
 
-        .dynamic-service-header {
-            font-size: 28px;
-            color: #6190f2;
-            margin: 0;
-            line-height: 1.2;
-            font-weight: 700;
-            text-align: center;
-            max-width: 560px;
-            padding: 0 16px;
-            box-sizing: border-box;
-        }
-
-        .dynamic-service-term {
-            text-decoration: underline;
-            text-decoration-thickness: 2px;
-            text-underline-offset: 4px;
-        }
-
-        body.funnel-post-submit .dynamic-service-header {
-            display: none;
-        }
-
         /* Hide quiz tagline only on post-submit / ending screens */
         body.funnel-post-submit .global-quiz-tagline {
             display: none;
@@ -1364,7 +1342,6 @@
 </head>
 <body>
     <div class="logo-container">
-        <h1 class="dynamic-service-header" id="dynamicServiceHeader">Find Your <span class="dynamic-service-term">Floor Coating</span> Professional</h1>
         <img
             class="logo-img local-pick-brand-logo"
             src="https://thelocalpick.com/images/TheLocalPick-FlatLeftAligned.svg"
@@ -5996,30 +5973,6 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 validateAddressForm();
             });
         };
-    </script>
-
-    <script>
-      (function () {
-        var headerEl = document.getElementById("dynamicServiceHeader");
-        if (!headerEl) return;
-        var params = new URLSearchParams(window.location.search);
-        var service = params.get("service");
-        function toTitleCase(value) {
-          return value
-            .toLowerCase()
-            .split(/\s+/)
-            .filter(Boolean)
-            .map(function (word) {
-              return word.charAt(0).toUpperCase() + word.slice(1);
-            })
-            .join(" ");
-        }
-        if (service && service.trim()) {
-          var titleCaseService = toTitleCase(service.trim());
-          headerEl.innerHTML = "Find Your <span class=\"dynamic-service-term\">" + titleCaseService + "</span> Professional";
-          document.title = titleCaseService + " | The Local Pick";
-        }
-      })();
     </script>
 
     <script async defer

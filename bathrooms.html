@@ -3626,11 +3626,12 @@
                 if (localPickTitleEl) {
                     localPickTitleEl.innerHTML = 'How we choose every <span class="local-pick-highlight">Local Pick</span>';
                 }
+                const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
+                if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
+                const localPickOuter = document.getElementById('localPickOuter');
+                if (localPickOuter) localPickOuter.style.display = 'none';
                 const reviewsLPMount = document.getElementById('reviewsLocalPickMount');
                 if (reviewsLPMount) reviewsLPMount.style.display = 'none';
-                if (!postFormSubmitted && typeof refreshPartnerLocalPickSection === 'function') {
-                    refreshPartnerLocalPickSection();
-                }
                 if (postFormSubmitted) {
                     applyGenericNoMatchPostSubmitCopy();
                 }
@@ -5237,28 +5238,6 @@
             }, 100);
         }
 
-        function showGenericMainFunnelLocalPickWhy() {
-            const titleEl = document.getElementById('localPickTitle');
-            if (titleEl) {
-                titleEl.innerHTML = 'How we choose every <span class="local-pick-highlight">Local Pick</span>';
-            }
-            const items = DEFAULT_LOCAL_PICK_ITEMS.map((text, idx) => ({ text, iconIndex: idx + 1 }));
-            buildLocalPickBlock(items, 'The Local Pick');
-        }
-
-        function clearMainFunnelReviewsOnlyUi() {
-            const reviewsSection = document.getElementById('reviewsSection');
-            const reviewsContainer = document.getElementById('reviewsContainer');
-            if (reviewsSection) {
-                reviewsSection.classList.remove('active');
-                reviewsSection.classList.remove('main-funnel-local-pick-only');
-            }
-            if (reviewsContainer) reviewsContainer.innerHTML = '';
-            setTimeout(() => {
-                if (typeof updateBackgroundHeight === 'function') updateBackgroundHeight();
-            }, 100);
-        }
-
         /** Partner “why they’re our Local Pick” from Airtable (Local Pick 1–5) below the form during the quiz; not post-submit. */
         async function refreshPartnerLocalPickSection() {
             if (postFormSubmitted) return;
@@ -5268,31 +5247,22 @@
                 return;
             }
 
-            const hasZip = (formData.address && formData.address.zip) || formData.initialZip;
-
-            if (currentStep === 0) {
-                if (!hasZip) {
-                    showGenericMainFunnelLocalPickWhy();
-                    clearMainFunnelReviewsOnlyUi();
-                    return;
-                }
-                let step0Client = getActiveClient();
-                if (step0Client && step0Client.fields) {
-                    step0Client = await hydrateClientReviewsByIdIfNeeded(step0Client);
-                }
-                if (!step0Client || !step0Client.fields) {
-                    showGenericMainFunnelLocalPickWhy();
-                    clearMainFunnelReviewsOnlyUi();
-                    return;
-                }
-            }
-
-            if (!hasZip) {
+            // Partner bullets after address zip (or legacy initialZip from saved progress)
+            if (!(formData.address && formData.address.zip) && !formData.initialZip) {
                 const mainFunnelWrap = document.getElementById('mainFunnelLocalPickWrap');
                 if (mainFunnelWrap) mainFunnelWrap.style.display = 'none';
                 const topOuter = document.getElementById('localPickOuter');
                 if (topOuter) topOuter.style.display = 'none';
-                clearMainFunnelReviewsOnlyUi();
+                const reviewsSection = document.getElementById('reviewsSection');
+                const reviewsContainer = document.getElementById('reviewsContainer');
+                if (reviewsSection) {
+                    reviewsSection.classList.remove('active');
+                    reviewsSection.classList.remove('main-funnel-local-pick-only');
+                }
+                if (reviewsContainer) reviewsContainer.innerHTML = '';
+                setTimeout(() => {
+                    if (typeof updateBackgroundHeight === 'function') updateBackgroundHeight();
+                }, 100);
                 return;
             }
 
