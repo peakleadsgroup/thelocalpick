@@ -1738,7 +1738,16 @@
       renderCityAccordion();
 
       var ideasCardsTrack = document.getElementById("ideasCardsTrack");
-      var articleItems = Array.isArray(window.TLP_ARTICLES) ? window.TLP_ARTICLES : [];
+      var articleItems = Array.isArray(window.TLP_ARTICLES) ? window.TLP_ARTICLES.slice() : [];
+
+      articleItems.sort(function (a, b) {
+        var aTime = a && a.publishedAt ? Date.parse(a.publishedAt) : NaN;
+        var bTime = b && b.publishedAt ? Date.parse(b.publishedAt) : NaN;
+        if (!Number.isNaN(aTime) && !Number.isNaN(bTime)) return bTime - aTime;
+        if (!Number.isNaN(aTime)) return -1;
+        if (!Number.isNaN(bTime)) return 1;
+        return 0;
+      });
 
       var articleImageBySlug = {
         "planning-basics": "../images/article-bathroom-shower-modern.png",
