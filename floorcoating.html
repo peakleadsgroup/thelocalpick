@@ -1141,11 +1141,11 @@
             line-height: 1.4;
         }
 
-        .shower-carousel-wrap {
+        .floor-carousel-wrap {
             margin: 0 0 24px;
         }
 
-        .shower-carousel {
+        .floor-carousel {
             display: flex;
             gap: 12px;
             overflow-x: auto;
@@ -1154,13 +1154,13 @@
             padding-bottom: 10px;
         }
 
-        .shower-carousel-slide {
+        .floor-carousel-slide {
             flex: 0 0 86%;
             max-width: 400px;
             scroll-snap-align: center;
         }
 
-        .shower-carousel-slide img {
+        .floor-carousel-slide img {
             width: 100%;
             height: auto;
             border-radius: 10px;
@@ -1375,7 +1375,7 @@
                         <span class="post-submit-step-num">2</span>
                         <h3 class="post-submit-step-title">In-Home Estimate</h3>
                     </div>
-                    <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
+                    <p class="post-submit-step-desc">A design specialist will review your space, explain coating options, and provide a straightforward, no-obligation estimate with no sales pressure.</p>
                 </div>
                 <div class="post-submit-step">
                     <div class="post-submit-step-header">
@@ -1651,7 +1651,7 @@
                                 <span class="post-submit-step-num">2</span>
                                 <h3 class="post-submit-step-title">In-Home Estimate</h3>
                             </div>
-                            <p class="post-submit-step-desc">A design specialist will help design your new shower and provide a straightforward, no-obligation estimate with no sales pressure.</p>
+                            <p class="post-submit-step-desc">A design specialist will review your space, explain coating options, and provide a straightforward, no-obligation estimate with no sales pressure.</p>
                         </div>
                         <div class="post-submit-step">
                             <div class="post-submit-step-header">
@@ -3086,13 +3086,12 @@
             metaPixel: 'Meta Pixel',
         };
 
-        const SHOWER_IMAGE_URLS = [
-            'https://thelocalpick.com/images/shower1.png',
-            'https://thelocalpick.com/images/shower2.png',
-            'https://thelocalpick.com/images/shower3.png',
-            'https://thelocalpick.com/images/shower4.png',
-            'https://thelocalpick.com/images/shower6.png',
-            'https://thelocalpick.com/images/shower5.png',
+        const FLOOR_COATING_IMAGE_URLS = [
+            'https://thelocalpick.com/images/floorcoating-hero-garage-consultation.png',
+            'https://thelocalpick.com/images/floorcoating-before-after-garage.png',
+            'https://thelocalpick.com/images/floorcoating-before-after-basement.png',
+            'https://thelocalpick.com/images/floorcoating-garage-classic-car.png',
+            'https://thelocalpick.com/images/floorcoating-epoxy-garage-closeup.png',
         ];
         const DEFAULT_LOCAL_PICK_ITEMS = [
             'Top-rated service backed by real homeowner reviews',
@@ -3216,12 +3215,12 @@
             }
         }
 
-        function buildShowerCarouselHtml() {
-            const slides = SHOWER_IMAGE_URLS.map(
+        function buildFloorCoatingCarouselHtml() {
+            const slides = FLOOR_COATING_IMAGE_URLS.map(
                 (src) =>
-                    `<div class="shower-carousel-slide"><img src="${escapeHtml(src)}" alt="" loading="lazy"></div>`
+                    `<div class="floor-carousel-slide"><img src="${escapeHtml(src)}" alt="Floor coating project photo" loading="lazy"></div>`
             ).join('');
-            return `<div class="shower-carousel-wrap"><div class="shower-carousel" role="region" aria-label="Project photos">${slides}</div></div>`;
+            return `<div class="floor-carousel-wrap"><div class="floor-carousel" role="region" aria-label="Floor coating project photos">${slides}</div></div>`;
         }
 
         function getActiveClient() {
@@ -5305,7 +5304,7 @@
             const active = getActiveClient();
             const cf = active && active.fields ? active.fields : null;
             if (!genericLeadFlow) {
-                container.insertAdjacentHTML('beforeend', buildShowerCarouselHtml());
+                container.insertAdjacentHTML('beforeend', buildFloorCoatingCarouselHtml());
             }
 
             reviews.forEach((review) => {
