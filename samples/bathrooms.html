@@ -384,6 +384,29 @@
             width: 100%;
         }
 
+        .client-showcase-back-wrap {
+            display: none;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        body.client-showcase-demo-end-screen .client-showcase-back-wrap {
+            display: flex;
+        }
+
+        .client-showcase-back-btn {
+            max-width: 280px;
+            width: 100%;
+            background: #fff;
+            color: #333;
+            border: 2px solid #ccc;
+        }
+
+        .client-showcase-back-btn:hover {
+            border-color: #6190f2;
+            color: #6190f2;
+        }
+
         .progress-bar {
             width: 100%;
             height: 6px;
@@ -1563,6 +1586,9 @@
         <!-- PHONE/TEXT CONTACT SCREEN -->
         <div class="form-step" id="contactStep">
             <div>
+                <div class="client-showcase-back-wrap" aria-hidden="true">
+                    <button type="button" class="nav-btn client-showcase-back-btn" onclick="returnToClientShowcasePicker()">← Back to demo options</button>
+                </div>
                 <div class="post-submit-intro">
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
@@ -1590,6 +1616,9 @@
         <!-- ADD CONTACT SCREEN (Contact submit type from Airtable) -->
         <div class="form-step" id="contactStepAddContact">
             <div>
+                <div class="client-showcase-back-wrap" aria-hidden="true">
+                    <button type="button" class="nav-btn client-showcase-back-btn" onclick="returnToClientShowcasePicker()">← Back to demo options</button>
+                </div>
                 <div class="post-submit-intro">
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
@@ -1602,6 +1631,9 @@
         <!-- CALENDAR BOOKING SCREEN -->
         <div class="form-step" id="calendarStep">
             <div style="padding: 0 20px 20px;">
+            <div class="client-showcase-back-wrap" aria-hidden="true">
+                <button type="button" class="nav-btn client-showcase-back-btn" onclick="returnToClientShowcasePicker()">← Back to demo options</button>
+            </div>
             <div class="post-submit-intro">
                 <div class="post-submit-cta-block">
                     <h3 class="post-submit-cta-title">Ready to get started now?</h3>
@@ -1646,6 +1678,9 @@
         <!-- CONFIRMATION/THANK YOU SCREEN -->
         <div class="form-step" id="confirmationStep">
             <div style="padding: 40px 20px;">
+                <div class="client-showcase-back-wrap" aria-hidden="true">
+                    <button type="button" class="nav-btn client-showcase-back-btn" onclick="returnToClientShowcasePicker()">← Back to demo options</button>
+                </div>
                 <div class="post-submit-intro">
                     <div class="post-submit-cta-block" id="confirmationCtaBlock">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
@@ -1841,15 +1876,17 @@
             URL_PARAMETERS: 'tbl5JDBRhTzuxzsc4',
         };
 
-        /** Site-root icons: `/icons/` breaks when this file is under `/testing/`. */
+        /** Partner Local Pick list icons: `icons/1.svg` … `icons/5.svg` at site root (e.g. repo `thelocalpick/icons/1.svg`). */
         function getIconsBaseUrl() {
             try {
-                const base = typeof location !== 'undefined' ? location.href : '';
-                const u = new URL(base || 'https://thelocalpick.com/');
+                const base = (typeof document !== 'undefined' && document.baseURI)
+                    ? document.baseURI
+                    : (typeof location !== 'undefined' ? location.href : 'https://thelocalpick.com/');
+                const u = new URL(base);
                 const path = u.pathname || '';
-                if (path.includes('/testing/')) {
+                if (path.includes('/testing/') || path.includes('/samples/')) {
                     const out = new URL('../icons/', u).href;
-                    tlpDebug('icons', 'Using testing-relative icons base', { path, out });
+                    tlpDebug('icons', 'Using parent-relative icons base', { path, out });
                     return out;
                 }
                 const out = new URL('icons/', u).href;
@@ -5221,7 +5258,77 @@
             const picker = document.getElementById('clientShowcasePickerStep');
             if (picker) picker.classList.add('active');
             clientShowcaseDemoUiActive = true;
+            document.body.classList.remove('client-showcase-demo-end-screen');
             syncGlobalQuizTaglineVisibility();
+        }
+
+        function returnToClientShowcasePicker() {
+            if (!CLIENT_SHOWCASE_DEMO_MODE) return;
+
+            document.body.classList.remove('client-showcase-demo-end-screen');
+
+            ['contactStep', 'contactStepAddContact', 'calendarStep', 'confirmationStep'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active');
+            });
+
+            const ctaSection = document.getElementById('ctaSection');
+            if (ctaSection) ctaSection.classList.remove('active');
+            ['contactStepBelow', 'contactStepAddContactBelow', 'calendarStepBelow', 'confirmationStepBelow'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+
+            const reviewsSection = document.getElementById('reviewsSection');
+            const reviewsContainer = document.getElementById('reviewsContainer');
+            if (reviewsSection) {
+                reviewsSection.classList.remove('active');
+                reviewsSection.classList.remove('main-funnel-local-pick-only');
+            }
+            if (reviewsContainer) reviewsContainer.innerHTML = '';
+
+            const reviewsMount = document.getElementById('reviewsLocalPickMount');
+            if (reviewsMount) reviewsMount.style.display = 'none';
+
+            const mainWrap = document.getElementById('mainFunnelLocalPickWrap');
+            const topOuter = document.getElementById('localPickOuter');
+            if (mainWrap) mainWrap.style.display = 'none';
+            if (topOuter) topOuter.style.display = 'none';
+
+            appointmentTimeSelected = false;
+
+            const confirmationCtaBlock = document.getElementById('confirmationCtaBlock');
+            const confirmationAppointmentBlock = document.getElementById('confirmationAppointmentBlock');
+            if (confirmationCtaBlock) confirmationCtaBlock.style.display = '';
+            if (confirmationAppointmentBlock) confirmationAppointmentBlock.style.display = 'none';
+
+            const timeSection = document.getElementById('timeSection');
+            if (timeSection) timeSection.style.display = 'none';
+
+            const callBtn = document.getElementById('callButtonLink');
+            const textBtn = document.getElementById('textButtonLink');
+            const phoneDisp = document.getElementById('phoneNumberDisplay');
+            if (callBtn) callBtn.style.display = 'none';
+            if (textBtn) textBtn.style.display = 'none';
+            if (phoneDisp) phoneDisp.textContent = '';
+
+            const callBelow = document.getElementById('callButtonLinkBelow');
+            const textBelow = document.getElementById('textButtonLinkBelow');
+            const phoneBelow = document.getElementById('phoneNumberDisplayBelow');
+            if (callBelow) callBelow.style.display = 'none';
+            if (textBelow) textBelow.style.display = 'none';
+            if (phoneBelow) phoneBelow.textContent = '';
+
+            const picker = document.getElementById('clientShowcasePickerStep');
+            if (picker) picker.classList.add('active');
+
+            syncGlobalQuizTaglineVisibility();
+            if (typeof updateBackgroundHeight === 'function') {
+                setTimeout(() => updateBackgroundHeight(), 100);
+            }
+
+            const pickerEl = document.getElementById('clientShowcasePickerStep');
+            if (pickerEl) pickerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function handleClientShowcasePick(mode) {
@@ -5243,6 +5350,9 @@
             } else {
                 currentSubmitScreenType = null;
                 showConfirmationScreen();
+            }
+            if (CLIENT_SHOWCASE_DEMO_MODE) {
+                document.body.classList.add('client-showcase-demo-end-screen');
             }
         }
 
