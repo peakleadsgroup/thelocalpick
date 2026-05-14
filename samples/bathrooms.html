@@ -372,6 +372,18 @@
             display: block;
         }
 
+        .client-showcase-picker-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 340px;
+            margin: 0 auto;
+        }
+
+        .client-showcase-picker-btn {
+            width: 100%;
+        }
+
         .progress-bar {
             width: 100%;
             height: 6px;
@@ -1346,7 +1358,7 @@
         <img
             id="logoImg"
             class="logo-img local-pick-brand-logo"
-            src="../images/thelocalpick-superflat.png"
+            src="../images/TheLocalPick-FlatLeftAligned.svg"
             alt="The Local Pick logo"
             decoding="async"
             onerror="if(this.dataset.fallbackApplied)return;this.dataset.fallbackApplied='1';this.src='icons/favicon-local-pick-48.png?v=4';"
@@ -1531,6 +1543,20 @@
             <div class="finding-local-pick-wrap">
                 <div class="finding-local-pick-spinner" aria-hidden="true"></div>
                 <div class="finding-local-pick-title">Finding your local pick!</div>
+            </div>
+        </div>
+
+        <div class="form-step" id="clientShowcasePickerStep">
+            <div class="post-submit-intro" style="text-align: center; padding: 0 16px;">
+                <div class="step-header" style="margin-bottom: 12px;">Choose post-submit experience (demo)</div>
+                <p class="post-submit-cta-subtitle" style="margin-bottom: 24px;">Preview the end screen for each CTA type. Sample company: Peak Leads Group LLC.</p>
+                <div class="client-showcase-picker-grid">
+                    <button type="button" class="nav-btn client-showcase-picker-btn" onclick="handleClientShowcasePick('calendar')">Calendar</button>
+                    <button type="button" class="nav-btn client-showcase-picker-btn" onclick="handleClientShowcasePick('phone')">Call</button>
+                    <button type="button" class="nav-btn client-showcase-picker-btn" onclick="handleClientShowcasePick('text')">Text</button>
+                    <button type="button" class="nav-btn client-showcase-picker-btn" onclick="handleClientShowcasePick('calltext')">Call / Text</button>
+                    <button type="button" class="nav-btn client-showcase-picker-btn" onclick="handleClientShowcasePick('none')">None</button>
+                </div>
             </div>
         </div>
 
@@ -1780,6 +1806,12 @@
         // ============================================
         const TESTING_MODE = false; // Production: Airtable writes + Meta enabled
         if (TESTING_MODE) console.log('[TESTING_MODE] Page loaded - Airtable writes and Meta Pixel disabled for testing');
+
+        /** Samples test page: after submit, choose post-submit CTA with filler Peak Leads data (ignores URL/adset submit screen). */
+        const CLIENT_SHOWCASE_DEMO_MODE = true;
+        let clientShowcaseDemoUiActive = false;
+        const CLIENT_SHOWCASE_DEMO_CLIENT_ID = 'recClientShowcaseDemoLocal';
+        const CLIENT_SHOWCASE_DEMO_LOGO = 'https://peakleadsgroup.com/Images/Peak%20Leads%20Flattened%20Logo.png';
         const TLP_DEBUG_VERBOSE = window.TLP_DEBUG_VERBOSE === true;
         function tlpDebug(scope, message, details) {
             if (!TLP_DEBUG_VERBOSE) return;
@@ -1942,7 +1974,7 @@
             result: null,
             completed: false,
         };
-        const DEFAULT_LOGO_SRC = '../images/thelocalpick-superflat.png';
+        const DEFAULT_LOGO_SRC = '../images/TheLocalPick-FlatLeftAligned.svg';
 
         const FUNNEL_RESUME_STORAGE_KEY = 'localpick_funnel_resume_v1';
         const FUNNEL_PAGE_FILE = 'bathrooms.html';
@@ -3391,6 +3423,7 @@
 
         async function hydrateClientReviewsByIdIfNeeded(activeClient) {
             if (!activeClient || !activeClient.id || !activeClient.fields) return activeClient;
+            if (activeClient.id === CLIENT_SHOWCASE_DEMO_CLIENT_ID) return activeClient;
             const currentFields = activeClient.fields;
             const alreadyHasReviewKeys = fieldsContainAnyReviewKeys(currentFields);
             const alreadyHasReviews = collectReviewsFromClientFields(currentFields).length > 0;
@@ -3515,6 +3548,9 @@
         }
 
         function getPartnerDisplayName(fallback = '') {
+            if (CLIENT_SHOWCASE_DEMO_MODE && clientShowcaseDemoUiActive) {
+                return 'Peak Leads Group LLC';
+            }
             const fromAdset = getAdsetDisplayName();
             if (fromAdset) return fromAdset;
             return fallback;
@@ -3575,6 +3611,7 @@
         async function hydrateClientTcpaContactIfMissing(clientRec) {
             try {
                 if (!clientRec || !clientRec.id || !clientRec.fields) return clientRec;
+                if (clientRec.id === CLIENT_SHOWCASE_DEMO_CLIENT_ID) return clientRec;
                 const hasTcpa = !!getTcpaContactFromClientFields(clientRec.fields);
                 const hasLogo = !!resolveClientLogoUrl(clientRec.fields);
                 if (hasTcpa && hasLogo) return clientRec;
@@ -5138,6 +5175,77 @@
             }, 500); // Small delay to let the confirmation screen appear first
         }
         
+        function buildClientShowcaseDemoRecord() {
+            const slotTemplates = ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'];
+            const fields = {
+                'Logo': CLIENT_SHOWCASE_DEMO_LOGO,
+                'Name': 'Peak Leads Group LLC',
+                'Call': '+18015551234',
+                'Text': '+18015551234',
+                'Phone': '+18015551234',
+                'TCPA Contact': 'hello@peakleadsgroup.com',
+                'Stars/5.0': 4.9,
+                '# of Reviews': 127,
+                'Review 1': 'Outstanding team from start to finish. They explained every option clearly and the remodel came in on time.',
+                'Reviewer 1': 'Sarah M.',
+                'Review 2': 'We interviewed three contractors and Peak Leads Group stood out for communication and craftsmanship.',
+                'Reviewer 2': 'James R.',
+                'Review 3': 'Five-star experience. Our bathroom looks magazine-ready and the crew respected our home every day.',
+                'Reviewer 3': 'The Chen family',
+                'Local Pick 1': '4.9 average from 127 verified homeowner reviews across the metro area',
+                'Local Pick 2': 'Licensed and insured crews with manufacturer-backed product warranties',
+                'Local Pick 3': 'Dedicated project manager from first visit through final walkthrough',
+                'Local Pick 4': 'Transparent quotes with flexible financing options for qualified homeowners',
+                'Local Pick 5': 'Local footprint with fast response times in your neighborhood',
+                'Submit Screen': 'Calendar',
+                'Timezone': 'America/Denver',
+                'Minimum Calendar Hours': 24,
+                'Maximum Calendar Days': 21,
+            };
+            for (let d = 1; d <= 5; d++) {
+                fields[CALENDAR_WEEKDAY_FIELDS[d]] = slotTemplates.slice();
+            }
+            return { id: CLIENT_SHOWCASE_DEMO_CLIENT_ID, fields };
+        }
+
+        function applyClientShowcaseDemoClient() {
+            lastLeadRoutePick = null;
+            matchedClientData = buildClientShowcaseDemoRecord();
+            genericLeadFlow = false;
+            updatePartnerNameInPrivacyPolicy();
+        }
+
+        function showClientShowcasePicker() {
+            const findingStep = document.getElementById('findingLocalPickStep');
+            if (findingStep) findingStep.classList.remove('active');
+            const picker = document.getElementById('clientShowcasePickerStep');
+            if (picker) picker.classList.add('active');
+            clientShowcaseDemoUiActive = true;
+            syncGlobalQuizTaglineVisibility();
+        }
+
+        function handleClientShowcasePick(mode) {
+            const picker = document.getElementById('clientShowcasePickerStep');
+            if (picker) picker.classList.remove('active');
+            applyClientShowcaseDemoClient();
+            if (mode === 'calendar') {
+                currentSubmitScreenType = 'calendar';
+                void showCalendarScreen();
+            } else if (mode === 'phone') {
+                currentSubmitScreenType = 'Phone';
+                showContactScreen('Phone');
+            } else if (mode === 'text') {
+                currentSubmitScreenType = 'Text';
+                showContactScreen('Text');
+            } else if (mode === 'calltext') {
+                currentSubmitScreenType = 'Phone/Text';
+                showContactScreen('Phone/Text');
+            } else {
+                currentSubmitScreenType = null;
+                showConfirmationScreen();
+            }
+        }
+
         async function showCalendarScreen() {
             postFormSubmitted = true;
             syncGlobalQuizTaglineVisibility();
@@ -5370,8 +5478,10 @@
         function deactivateSubmitSourceSteps() {
             const phoneStep = document.getElementById('step6');
             const findingStep = document.getElementById('findingLocalPickStep');
+            const showcasePicker = document.getElementById('clientShowcasePickerStep');
             if (phoneStep) phoneStep.classList.remove('active');
             if (findingStep) findingStep.classList.remove('active');
+            if (showcasePicker) showcasePicker.classList.remove('active');
         }
         function showFindingLocalPickScreen() {
             postFormSubmitted = true;
@@ -6322,7 +6432,12 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                 const routedAdsetForPixel = getRoutedAdsetFields();
                 fireDynamicMetaLead(routedAdsetForPixel, leadEventData, eventId);
             }
-            
+
+            if (CLIENT_SHOWCASE_DEMO_MODE) {
+                isSubmitting = false;
+                setGetEstimateButtonLoading(false);
+                showClientShowcasePicker();
+            } else {
             let activeClient = getActiveClient();
             let submitScreenType = 'None';
 
@@ -6377,6 +6492,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
 
             isSubmitting = false;
             setGetEstimateButtonLoading(false);
+            }
             } catch (error) {
                 console.error('Unexpected error in submitFinalForm:', error);
                 showConfirmationScreen();
