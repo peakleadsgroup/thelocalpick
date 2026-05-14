@@ -1346,7 +1346,7 @@
         <img
             id="logoImg"
             class="logo-img local-pick-brand-logo"
-            src="https://thelocalpick.com/images/TheLocalPick-FlatLeftAligned.svg"
+            src="../images/thelocalpick-superflat.png"
             alt="The Local Pick logo"
             decoding="async"
             onerror="if(this.dataset.fallbackApplied)return;this.dataset.fallbackApplied='1';this.src='icons/favicon-local-pick-48.png?v=4';"
@@ -1942,7 +1942,7 @@
             result: null,
             completed: false,
         };
-        const DEFAULT_LOGO_SRC = 'images/TheLocalPick-FlatLeftAligned.svg';
+        const DEFAULT_LOGO_SRC = '../images/thelocalpick-superflat.png';
 
         const FUNNEL_RESUME_STORAGE_KEY = 'localpick_funnel_resume_v1';
         const FUNNEL_PAGE_FILE = 'bathrooms.html';
@@ -3892,7 +3892,7 @@
             }
 
             const headerLogoUrl = activeClient && activeClient.fields ? resolveClientLogoUrl(activeClient.fields) : null;
-            const topHeaderLogoUrl = postFormSubmitted ? null : headerLogoUrl;
+            const topHeaderLogoUrl = null;
             tlpLogoDebug('updatePartnerNameInPrivacyPolicy logo resolution', {
                 genericLeadFlow,
                 activeClientId: activeClient && activeClient.id ? activeClient.id : null,
