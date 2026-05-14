@@ -394,6 +394,10 @@
             display: flex;
         }
 
+        #mainFunnelLocalPickWrap > .client-showcase-back-wrap {
+            margin-bottom: 12px;
+        }
+
         .client-showcase-back-btn {
             max-width: 280px;
             width: 100%;
@@ -1390,6 +1394,9 @@
     </div>
 
     <div class="main-funnel-local-pick-wrap" id="mainFunnelLocalPickWrap" style="display: none;">
+        <div class="client-showcase-back-wrap" aria-hidden="true">
+            <button type="button" class="nav-btn client-showcase-back-btn" onclick="returnToClientShowcasePicker()">← Back to demo options</button>
+        </div>
         <div class="local-pick-group local-pick-block-partner" id="localPickOuter" style="display: none;">
             <div class="local-pick-block" id="localPickBlock">
                 <div class="local-pick-title" id="localPickTitle">Here's why <span id="localPickCompanyName">Company</span> is our <span class="local-pick-highlight">Local Pick</span> in <span id="localPickZipCode" class="local-pick-highlight">ZIP CODE ENTERED</span></div>
@@ -1586,9 +1593,6 @@
         <!-- PHONE/TEXT CONTACT SCREEN -->
         <div class="form-step" id="contactStep">
             <div>
-                <div class="client-showcase-back-wrap" aria-hidden="true">
-                    <button type="button" class="nav-btn client-showcase-back-btn" onclick="returnToClientShowcasePicker()">← Back to demo options</button>
-                </div>
                 <div class="post-submit-intro">
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
@@ -1616,9 +1620,6 @@
         <!-- ADD CONTACT SCREEN (Contact submit type from Airtable) -->
         <div class="form-step" id="contactStepAddContact">
             <div>
-                <div class="client-showcase-back-wrap" aria-hidden="true">
-                    <button type="button" class="nav-btn client-showcase-back-btn" onclick="returnToClientShowcasePicker()">← Back to demo options</button>
-                </div>
                 <div class="post-submit-intro">
                     <div class="post-submit-cta-block" style="text-align: center;">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
@@ -1631,9 +1632,6 @@
         <!-- CALENDAR BOOKING SCREEN -->
         <div class="form-step" id="calendarStep">
             <div style="padding: 0 20px 20px;">
-            <div class="client-showcase-back-wrap" aria-hidden="true">
-                <button type="button" class="nav-btn client-showcase-back-btn" onclick="returnToClientShowcasePicker()">← Back to demo options</button>
-            </div>
             <div class="post-submit-intro">
                 <div class="post-submit-cta-block">
                     <h3 class="post-submit-cta-title">Ready to get started now?</h3>
@@ -1678,9 +1676,6 @@
         <!-- CONFIRMATION/THANK YOU SCREEN -->
         <div class="form-step" id="confirmationStep">
             <div style="padding: 40px 20px;">
-                <div class="client-showcase-back-wrap" aria-hidden="true">
-                    <button type="button" class="nav-btn client-showcase-back-btn" onclick="returnToClientShowcasePicker()">← Back to demo options</button>
-                </div>
                 <div class="post-submit-intro">
                     <div class="post-submit-cta-block" id="confirmationCtaBlock">
                         <h3 class="post-submit-cta-title">Ready to get started now?</h3>
