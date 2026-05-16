@@ -1424,31 +1424,36 @@
             </div>
         </div>
 
-        <!-- STEP 2: Project Type (from Airtable Client "Project Type") -->
+        <!-- STEP 2: Window count -->
         <div class="form-step" id="step2">
-            <div class="step-header">Which best describes this project?</div>
-            <div class="options" id="projectTypeOptions"></div>
-        </div>
-
-        <!-- STEP 3: Main Goal -->
-        <div class="form-step" id="step3">
-            <div class="step-header">What do you want most from this project?</div>
+            <div class="step-header">How many windows will you be replacing?</div>
             <div class="options">
-                <div class="option" data-quiz-field="mainGoal" data-quiz-value="accessibility_safety" onclick="selectOptionAndAdvance(this, 'mainGoal', 'accessibility_safety')">Improve accessibility/safety</div>
-                <div class="option" data-quiz-field="mainGoal" data-quiz-value="look_function" onclick="selectOptionAndAdvance(this, 'mainGoal', 'look_function')">Improve look/function</div>
-                <div class="option" data-quiz-field="mainGoal" data-quiz-value="home_value" onclick="selectOptionAndAdvance(this, 'mainGoal', 'home_value')">Increase home value</div>
-                <div class="option" data-quiz-field="mainGoal" data-quiz-value="repair_damage" onclick="selectOptionAndAdvance(this, 'mainGoal', 'repair_damage')">Repair damage</div>
+                <div class="option" data-quiz-field="windowsReplaceCount" data-quiz-value="1_3" onclick="selectOptionAndAdvance(this, 'windowsReplaceCount', '1_3')">1-3</div>
+                <div class="option" data-quiz-field="windowsReplaceCount" data-quiz-value="3_6" onclick="selectOptionAndAdvance(this, 'windowsReplaceCount', '3_6')">3-6</div>
+                <div class="option" data-quiz-field="windowsReplaceCount" data-quiz-value="6_10" onclick="selectOptionAndAdvance(this, 'windowsReplaceCount', '6_10')">6-10</div>
+                <div class="option" data-quiz-field="windowsReplaceCount" data-quiz-value="10_plus" onclick="selectOptionAndAdvance(this, 'windowsReplaceCount', '10_plus')">10+</div>
             </div>
-            <div class="repair-damage-message" id="repairDamageMessage" style="display: none;">
+            <div class="homeowner-no-message" id="windowsTooFewMessage" style="display: none;">
                 <div class="homeowner-no-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
                     </svg>
                 </div>
-                <div class="repair-damage-content">
-                    <div class="homeowner-no-text" id="repairDamageCopy">Our contractors don't offer small repairs. They specialize exclusively in full window replacement and larger installation projects</div>
+                <div class="homeowner-no-content">
+                    <div class="homeowner-no-text">We can only work on projects with 3+ windows</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: Main Goal -->
+        <div class="form-step" id="step3">
+            <div class="step-header">What do you want most from this project?</div>
+            <div class="options">
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="security" onclick="selectOptionAndAdvance(this, 'mainGoal', 'security')">Security</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="energy_efficiency" onclick="selectOptionAndAdvance(this, 'mainGoal', 'energy_efficiency')">Energy efficiency</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="update_look" onclick="selectOptionAndAdvance(this, 'mainGoal', 'update_look')">Update look</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="home_value" onclick="selectOptionAndAdvance(this, 'mainGoal', 'home_value')">Increase home value</div>
             </div>
         </div>
 
@@ -2018,9 +2023,9 @@
             if (homeownerNoMsg) {
                 homeownerNoMsg.style.display = (currentStep === 0 && formData.homeowner === 'no') ? 'flex' : 'none';
             }
-            const repairDamageMsg = document.getElementById('repairDamageMessage');
-            if (repairDamageMsg) {
-                repairDamageMsg.style.display = (currentStep === 3 && formData.mainGoal === 'repair_damage') ? 'flex' : 'none';
+            const windowsTooFewMsg = document.getElementById('windowsTooFewMessage');
+            if (windowsTooFewMsg) {
+                windowsTooFewMsg.style.display = (currentStep === 2 && formData.windowsReplaceCount === '1_3') ? 'flex' : 'none';
             }
         }
 
@@ -3495,70 +3500,8 @@
             });
         }
 
-        function normalizeAirtableMultiSelectField(raw) {
-            if (raw == null) return [];
-            if (Array.isArray(raw)) return raw.map(s => String(s).trim()).filter(Boolean);
-            const s = String(raw).trim();
-            if (!s) return [];
-            return s.split(/[,;]+/).map(p => p.trim()).filter(Boolean);
-        }
-
-        /** Maps Airtable Client "Project Type" multi-select to form values; options must match B2C lead field options. */
-        function getProjectTypeChoicesForClient(activeClient) {
-            const ORDER = [
-                { match: (t) => /full|whole|entire|all[\s-]*(?:house|home)/i.test(t) && /window/i.test(t), value: 'full_home_windows', label: 'Full home window replacement' },
-                { match: (t) => /new\s*construction/i.test(t) && /window/i.test(t), value: 'new_construction_windows', label: 'New construction windows' },
-                { match: (t) => /bay|bow|garden|picture|specialty/i.test(t), value: 'specialty_windows', label: 'Bay / bow / specialty windows' },
-                { match: (t) => /partial|selected|some/i.test(t) && /window/i.test(t), value: 'partial_windows', label: 'Partial / selected windows' },
-                {
-                    match: (t) =>
-                        (/replac/i.test(t) && /window/i.test(t)) || /^windows?$/i.test(String(t).trim()),
-                    value: 'window_replacement',
-                    label: 'Window replacement',
-                },
-            ];
-            const f = activeClient && activeClient.fields;
-            const raw = (f && (f['Project Type'] != null ? f['Project Type'] : f['Project Types'])) != null
-                ? (f['Project Type'] != null ? f['Project Type'] : f['Project Types'])
-                : null;
-            const labels = normalizeAirtableMultiSelectField(raw);
-            if (!labels.length) {
-                return ORDER.map((d) => ({ value: d.value, label: d.label }));
-            }
-            const matched = new Set();
-            for (const lbl of labels) {
-                const t = lbl.trim();
-                for (const def of ORDER) {
-                    if (def.match(t)) {
-                        matched.add(def.value);
-                        break;
-                    }
-                }
-            }
-            if (matched.size === 0) {
-                return ORDER.map((d) => ({ value: d.value, label: d.label }));
-            }
-            return ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
-        }
-
-        function updateProjectTypeStepOptions() {
-            const container = document.getElementById('projectTypeOptions');
-            if (!container) return;
-            const choices = getProjectTypeChoicesForClient(getActiveClient());
-            container.replaceChildren();
-            choices.forEach((c) => {
-                const div = document.createElement('div');
-                div.className = 'option';
-                div.setAttribute('data-quiz-field', 'projectType');
-                div.setAttribute('data-quiz-value', c.value);
-                div.textContent = c.label;
-                const value = c.value;
-                div.addEventListener('click', function () {
-                    selectOptionAndAdvance(div, 'projectType', value);
-                });
-                container.appendChild(div);
-            });
-        }
+        /** No-op: window count step uses static HTML options (not Airtable-driven project types). */
+        function updateProjectTypeStepOptions() {}
 
         function applyDefaultLocalPickLogo() {
             const logoImg = document.getElementById('logoImg');
@@ -3833,16 +3776,15 @@
                     if (homeownerNoMsg) homeownerNoMsg.style.display = 'none';
                 }
             }
-            
-            // Main goal step: show red message when "Repair damage" selected, don't advance
-            if (field === 'mainGoal') {
-                const repairDamageMsg = document.getElementById('repairDamageMessage');
-                if (value === 'repair_damage') {
-                    if (repairDamageMsg) repairDamageMsg.style.display = 'flex';
+
+            // Window count: 1-3 is below minimum; don't advance
+            if (field === 'windowsReplaceCount') {
+                const windowsTooFewMsg = document.getElementById('windowsTooFewMessage');
+                if (value === '1_3') {
+                    if (windowsTooFewMsg) windowsTooFewMsg.style.display = 'flex';
                     return;
-                } else {
-                    if (repairDamageMsg) repairDamageMsg.style.display = 'none';
                 }
+                if (windowsTooFewMsg) windowsTooFewMsg.style.display = 'none';
             }
             
             setTimeout(() => {
@@ -3927,6 +3869,7 @@
                     mainFunnelLocalPickSuppressed = true;
                     hideMainFunnelPartnerWhySection();
                 }
+                syncAuxiliaryStepMessages();
             }
             persistFunnelProgress();
         }
@@ -5728,21 +5671,20 @@
             };
             return options[value] || value;
         }
-        function getProjectTypeDisplay(value) {
+        function getWindowsReplaceCountDisplay(value) {
             const options = {
-                'window_replacement': 'Window replacement',
-                'full_home_windows': 'Full home window replacement',
-                'new_construction_windows': 'New construction windows',
-                'specialty_windows': 'Bay / bow / specialty windows',
-                'partial_windows': 'Partial / selected windows'
+                '1_3': '1-3',
+                '3_6': '3-6',
+                '6_10': '6-10',
+                '10_plus': '10+'
             };
             return options[value] || value;
         }
         function getMainGoalDisplay(value) {
             const options = {
-                'accessibility_safety': 'Improve accessibility/safety',
-                'look_function': 'Improve look/function',
-                'repair_damage': 'Repair damage',
+                'security': 'Security',
+                'energy_efficiency': 'Energy efficiency',
+                'update_look': 'Update look',
                 'home_value': 'Increase home value'
             };
             return options[value] || value;
@@ -5801,7 +5743,7 @@
                 currency: 'USD',
                 homeowner_status: finalData.homeowner,
                 windows_last_updated: finalData.windowsLastUpdated,
-                project_type: finalData.projectType,
+                windows_replace_count: finalData.windowsReplaceCount,
                 main_goal: finalData.mainGoal
             };
             tlpDebug('submit', 'Lead event payload prepared', leadEventData);
@@ -5829,7 +5771,7 @@ Name: ${finalData.firstName} ${finalData.lastName}
 Phone: ${formatPhoneForDisplay(finalData.phone)}
 ${emailLine}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}
 Windows last updated: ${getWindowsLastUpdatedDisplay(finalData.windowsLastUpdated)}
-Project Type: ${getProjectTypeDisplay(finalData.projectType)}
+Windows replacing: ${getWindowsReplaceCountDisplay(finalData.windowsReplaceCount)}
 Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}
 
 Address:
@@ -5852,7 +5794,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             
             // Build HTML version of full summary
             const emailLineHTML = finalData.email ? `Email: ${finalData.email}<BR>` : '';
-            const fullSummaryHTML = `Window Replacement Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Windows last updated: ${getWindowsLastUpdatedDisplay(finalData.windowsLastUpdated)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
+            const fullSummaryHTML = `Window Replacement Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Windows last updated: ${getWindowsLastUpdatedDisplay(finalData.windowsLastUpdated)}<BR>Windows replacing: ${getWindowsReplaceCountDisplay(finalData.windowsReplaceCount)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
