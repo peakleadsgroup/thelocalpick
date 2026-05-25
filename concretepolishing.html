@@ -3863,6 +3863,10 @@
                 return { valid: false, error: 'Phone number must be 10 digits.' };
             }
 
+            if (digits.charAt(0) === '1') {
+                return { valid: false, error: "Phone number shouldn't start with a 1." };
+            }
+
             return { valid: true, error: '' };
         }
 
@@ -5663,6 +5667,13 @@
         async function submitFinalForm() {
             // Prevent duplicate submissions
             if (isSubmitting) {
+                return;
+            }
+
+            const phoneDigitsForSubmit = document.getElementById('phone_digits')?.value || '';
+            const phoneSubmitValidation = isValidPhoneNumber(phoneDigitsForSubmit);
+            if (!phoneSubmitValidation.valid) {
+                if (typeof validatePhones === 'function') validatePhones();
                 return;
             }
             

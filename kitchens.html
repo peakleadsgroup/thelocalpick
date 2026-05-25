@@ -5837,6 +5837,13 @@
             if (isSubmitting) {
                 return;
             }
+
+            const phoneDigitsForSubmit = document.getElementById('phone_digits')?.value || '';
+            const phoneSubmitValidation = isValidPhoneNumber(phoneDigitsForSubmit);
+            if (!phoneSubmitValidation.valid) {
+                if (typeof validatePhones === 'function') validatePhones();
+                return;
+            }
             
             // Set submission flag and disable button immediately
             isSubmitting = true;
