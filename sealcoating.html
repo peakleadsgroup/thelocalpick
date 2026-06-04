@@ -3501,8 +3501,9 @@
             const res = document.getElementById('asphaltLocationResidential');
             const com = document.getElementById('asphaltLocationCommercial');
             const isResidential = formData.propertyType === 'residential';
-            if (res) res.style.display = isResidential ? 'block' : 'none';
-            if (com) com.style.display = isResidential ? 'none' : 'block';
+            // Must use flex (not block) so .options gap spacing applies between buttons
+            if (res) res.style.display = isResidential ? 'flex' : 'none';
+            if (com) com.style.display = isResidential ? 'none' : 'flex';
         }
 
         function applyDefaultLocalPickLogo() {
