@@ -3332,7 +3332,6 @@
                 { match: (t) => /^garage$/i.test(t), value: 'garage', label: 'Garage' },
                 { match: (t) => /^basement$/i.test(t), value: 'basement', label: 'Basement' },
                 { match: (t) => /^patio$/i.test(t), value: 'patio', label: 'Patio' },
-                { match: (t) => /^pool\s*deck$/i.test(t), value: 'pool_deck', label: 'Pool Deck' },
                 { match: (t) => /^driveway$/i.test(t), value: 'driveway', label: 'Driveway' }
             ];
             const f = activeClient && activeClient.fields;
@@ -3366,7 +3365,6 @@
                 { value: 'garage', label: 'Garage' },
                 { value: 'basement', label: 'Basement' },
                 { value: 'patio', label: 'Patio' },
-                { value: 'pool_deck', label: 'Pool Deck' },
                 { value: 'driveway', label: 'Driveway' }
             ];
             container.replaceChildren();
@@ -5534,7 +5532,6 @@
                 'garage': 'Garage',
                 'basement': 'Basement',
                 'patio': 'Patio',
-                'pool_deck': 'Pool Deck',
                 'driveway': 'Driveway'
             };
             return options[value] || value;
