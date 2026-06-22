@@ -1916,7 +1916,7 @@
             totalLeadsLeft: 'Total Leads Left',
         };
 
-        /** Adset table {Niche} must match this value (single- or multi-select) for routing on this page */
+        /** Adset table {Adset Niche} must match this value (single- or multi-select) for routing on this page */
         const FUNNEL_ADSET_NICHE = 'Bathrooms';
 
         const initializedMetaPixels = new Set();
@@ -2465,7 +2465,7 @@
 
         function routingAdsetNicheMatchesFunnel(adsetFields) {
             if (!adsetFields) return false;
-            const n = adsetFields['Niche'];
+            const n = adsetFields['Adset Niche'];
             if (n == null || n === '') return false;
             const target = FUNNEL_ADSET_NICHE.trim().toLowerCase();
             if (Array.isArray(n)) {
