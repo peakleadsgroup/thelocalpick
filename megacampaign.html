@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mega Campaign — Bathrooms Zip Targeting | The Local Pick</title>
+  <meta name="robots" content="noindex,nofollow">
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #667085;
+      --primary: #6190f2;
+      --primary-dark: #4f76cc;
+      --border: #d9dfe3;
+      --success: #1f7a4f;
+      --warning: #b54708;
+      --radius: 10px;
+      --shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+
+    .container {
+      width: min(1200px, 94%);
+      margin: 0 auto;
+      padding: 24px 0 48px;
+    }
+
+    header {
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      color: var(--muted);
+      max-width: 72ch;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    button, .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    button:hover, .btn:hover {
+      border-color: var(--primary);
+    }
+
+    button.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    button.primary:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .stat .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: #fafbfc;
+    }
+
+    .card-header h2 {
+      font-size: 1.05rem;
+    }
+
+    .card-header .meta {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    .progress {
+      margin-bottom: 16px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .progress strong {
+      color: var(--text);
+    }
+
+    .error {
+      background: #fef3f2;
+      border: 1px solid #fecdca;
+      color: #b42318;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      white-space: pre-wrap;
+    }
+
+    textarea.output {
+      width: 100%;
+      min-height: 140px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      resize: vertical;
+      background: #fcfcfd;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      background: #fafbfc;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge.ok { background: #ecfdf3; color: var(--success); }
+    .badge.warn { background: #fffaeb; color: var(--warning); }
+
+    .state-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .state-chip {
+      background: #eef2ff;
+      color: #3730a3;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Mega Campaign — Bathrooms</h1>
+      <p>
+        Aggregates all zip codes from <strong>active</strong> ad sets with niche
+        <strong>Bathrooms</strong>, then computes Meta targeting exclusions:
+        states with no coverage, and individual zips missing from partially-covered states.
+      </p>
+    </header>
+
+    <div class="toolbar">
+      <button class="primary" id="btnLoad" type="button">Load / Refresh</button>
+      <button id="btnCopyIncluded" type="button" disabled>Copy included zips</button>
+      <button id="btnCopyExcludedStates" type="button" disabled>Copy excluded states</button>
+      <button id="btnCopyExcludedZips" type="button" disabled>Copy excluded zips</button>
+    </div>
+
+    <div id="progress" class="progress" hidden></div>
+    <div id="error" class="error" hidden></div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label">Active ad sets</div>
+        <div class="value" id="statAdsets">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">Included zips</div>
+        <div class="value" id="statIncludedZips">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">States covered</div>
+        <div class="value" id="statCoveredStates">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">Excluded states</div>
+        <div class="value" id="statExcludedStates">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">Excluded zips (partial states)</div>
+        <div class="value" id="statExcludedZips">—</div>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Active Bathrooms ad sets</h2>
+        <span class="meta" id="adsetTableMeta">—</span>
+      </div>
+      <div class="card-body" style="padding: 0; overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Ad set</th>
+              <th>Status</th>
+              <th>Linked zips</th>
+            </tr>
+          </thead>
+          <tbody id="adsetTableBody">
+            <tr><td colspan="3" style="color: var(--muted);">Click Load to fetch data.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Included zip codes</h2>
+        <span class="meta">Comma-separated — use for Meta zip targeting</span>
+      </div>
+      <div class="card-body">
+        <textarea class="output" id="outIncluded" readonly placeholder="Included zips will appear here…"></textarea>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Excluded states</h2>
+        <span class="meta">US states + DC with zero active Bathrooms zips</span>
+      </div>
+      <div class="card-body">
+        <div class="state-grid" id="excludedStatesChips"></div>
+        <textarea class="output" id="outExcludedStates" readonly style="margin-top: 12px;" placeholder="Excluded state abbreviations…"></textarea>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Excluded zips within partially-covered states</h2>
+        <span class="meta" id="partialStatesMeta">—</span>
+      </div>
+      <div class="card-body">
+        <textarea class="output" id="outExcludedZips" readonly placeholder="Zips to exclude in states where you have partial coverage…"></textarea>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const AIRTABLE_BASE_ID = 'appmBb0lzqRK9dI8v';
+    const AIRTABLE_BASE_URL = `/api/airtable/v0/${AIRTABLE_BASE_ID}`;
+    const ADSET_TABLE = 'tblee61crNCoSfurx';
+    const ADSET_ZIPS_TABLE = 'tbl87JqHAdJwgq1GL';
+    const US_ZIPS_TABLE = 'tblieaHIf6rDfFZFl';
+    const TARGET_NICHE = 'Bathrooms';
+    const RECORD_ID_CHUNK = 30;
+
+    const ALL_US_STATES = [
+      'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL',
+      'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME',
+      'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH',
+      'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI',
+      'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+    ];
+
+    let lastResults = null;
+
+    function $(id) { return document.getElementById(id); }
+
+    function setProgress(msg) {
+      const el = $('progress');
+      if (!msg) {
+        el.hidden = true;
+        el.textContent = '';
+        return;
+      }
+      el.hidden = false;
+      el.innerHTML = msg;
+    }
+
+    function setError(msg) {
+      const el = $('error');
+      if (!msg) {
+        el.hidden = true;
+        el.textContent = '';
+        return;
+      }
+      el.hidden = false;
+      el.textContent = msg;
+    }
+
+    function normalizeZip(value) {
+      const digits = String(value == null ? '' : value).replace(/\D/g, '');
+      if (digits.length < 5) return null;
+      return digits.slice(0, 5);
+    }
+
+    function airtableEscape(s) {
+      return String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    }
+
+    async function fetchAirtable(url) {
+      const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Airtable ${res.status}: ${text.slice(0, 300)}`);
+      }
+      return res.json();
+    }
+
+    function buildListUrl(tableId, opts = {}, offset = null) {
+      const u = new URL(`${AIRTABLE_BASE_URL}/${tableId}`, window.location.origin);
+      if (opts.formula) u.searchParams.set('filterByFormula', opts.formula);
+      if (offset) u.searchParams.set('offset', offset);
+      if (opts.fields) {
+        for (const f of opts.fields) u.searchParams.append('fields[]', f);
+      }
+      if (opts.maxRecords) u.searchParams.set('maxRecords', String(opts.maxRecords));
+      return u.toString();
+    }
+
+    async function fetchAllRecords(tableId, opts = {}, onPage) {
+      const all = [];
+      let url = buildListUrl(tableId, opts, null);
+      let pageNum = 0;
+      while (url) {
+        pageNum += 1;
+        const page = await fetchAirtable(url);
+        if (page.records?.length) all.push(...page.records);
+        if (onPage) onPage(pageNum, all.length);
+        url = page.offset ? buildListUrl(tableId, opts, page.offset) : null;
+      }
+      return all;
+    }
+
+    function buildRecordIdFormula(ids) {
+      const parts = ids.map((id) => `RECORD_ID()="${airtableEscape(id)}"`);
+      return `OR(${parts.join(',')})`;
+    }
+
+    async function fetchRecordsByIds(tableId, recordIds, fields, label, onProgress) {
+      const unique = [...new Set(recordIds.filter(Boolean))];
+      const out = [];
+      const chunks = [];
+      for (let i = 0; i < unique.length; i += RECORD_ID_CHUNK) {
+        chunks.push(unique.slice(i, i + RECORD_ID_CHUNK));
+      }
+      for (let i = 0; i < chunks.length; i += 1) {
+        if (onProgress) onProgress(label, i + 1, chunks.length, out.length);
+        const formula = buildRecordIdFormula(chunks[i]);
+        const records = await fetchAllRecords(tableId, { formula, fields });
+        out.push(...records);
+      }
+      return out;
+    }
+
+    function nicheMatches(fields) {
+      const n = fields?.['Adset Niche'];
+      if (n == null || n === '') return false;
+      const target = TARGET_NICHE.toLowerCase();
+      if (Array.isArray(n)) return n.some((x) => String(x).trim().toLowerCase() === target);
+      return String(n).trim().toLowerCase() === target;
+    }
+
+    function isActiveStatus(val) {
+      if (val == null || val === '') return false;
+      const s = Array.isArray(val) ? val.map(String).join(' ') : String(val);
+      return s.trim().toLowerCase() === 'active';
+    }
+
+    async function fetchActiveBathroomsAdsets() {
+      const formula = `AND(LOWER({Adset Status})="active",{Adset Niche}="${airtableEscape(TARGET_NICHE)}")`;
+      const records = await fetchAllRecords(ADSET_TABLE, {
+        formula,
+        fields: ['Adset Name', 'Adset Status', 'Adset Niche', 'Adset Zip Tracking', 'Linked Zips'],
+      });
+      return records.filter((rec) => nicheMatches(rec.fields) && isActiveStatus(rec.fields['Adset Status']));
+    }
+
+    function collectJunctionIds(adsets) {
+      const ids = new Set();
+      for (const rec of adsets) {
+        const links = rec.fields?.['Adset Zip Tracking'];
+        if (!Array.isArray(links)) continue;
+        for (const id of links) {
+          if (typeof id === 'string' && id.startsWith('rec')) ids.add(id);
+        }
+      }
+      return [...ids];
+    }
+
+    async function resolveIncludedZips(junctionIds, onProgress) {
+      const junctionRecords = await fetchRecordsByIds(
+        ADSET_ZIPS_TABLE,
+        junctionIds,
+        ['US Zips'],
+        'junction rows',
+        onProgress,
+      );
+
+      const usZipRecordIds = new Set();
+      for (const rec of junctionRecords) {
+        const link = rec.fields?.['US Zips'];
+        const id = Array.isArray(link) ? link[0] : link;
+        if (typeof id === 'string' && id.startsWith('rec')) usZipRecordIds.add(id);
+      }
+
+      const usZipRecords = await fetchRecordsByIds(
+        US_ZIPS_TABLE,
+        [...usZipRecordIds],
+        ['Zip', 'State'],
+        'US zip rows',
+        onProgress,
+      );
+
+      const includedByZip = new Map();
+      for (const rec of usZipRecords) {
+        const zip = normalizeZip(rec.fields?.Zip);
+        const state = String(rec.fields?.State || '').trim().toUpperCase();
+        if (!zip || !state) continue;
+        if (!includedByZip.has(zip)) includedByZip.set(zip, { zip, state, recordId: rec.id });
+      }
+
+      return {
+        includedZips: [...includedByZip.values()].sort((a, b) => a.zip.localeCompare(b.zip)),
+        junctionCount: junctionRecords.length,
+        usZipRecordCount: usZipRecords.length,
+      };
+    }
+
+    async function fetchAllZipsForState(state, onProgress) {
+      const formula = `{State}="${airtableEscape(state)}"`;
+      const records = await fetchAllRecords(US_ZIPS_TABLE, {
+        formula,
+        fields: ['Zip', 'State'],
+      }, (pageNum, total) => {
+        if (onProgress) onProgress(state, pageNum, total);
+      });
+      const zips = [];
+      for (const rec of records) {
+        const zip = normalizeZip(rec.fields?.Zip);
+        if (zip) zips.push(zip);
+      }
+      return zips;
+    }
+
+    async function computeExclusions(includedZips, onProgress) {
+      const includedSet = new Set(includedZips.map((z) => z.zip));
+      const byState = new Map();
+      for (const row of includedZips) {
+        if (!byState.has(row.state)) byState.set(row.state, new Set());
+        byState.get(row.state).add(row.zip);
+      }
+
+      const coveredStates = [...byState.keys()].sort();
+      const excludedStates = ALL_US_STATES.filter((st) => !byState.has(st));
+
+      const partialStates = [];
+      const excludedZips = new Set();
+      let stateIndex = 0;
+
+      for (const state of coveredStates) {
+        stateIndex += 1;
+        if (onProgress) {
+          onProgress(stateIndex, coveredStates.length, state);
+        }
+        const allInState = await fetchAllZipsForState(state);
+        const includedInState = byState.get(state);
+        const missing = allInState.filter((zip) => !includedInState.has(zip));
+        if (missing.length > 0) {
+          partialStates.push({
+            state,
+            total: allInState.length,
+            included: includedInState.size,
+            excluded: missing.length,
+          });
+          for (const zip of missing) excludedZips.add(zip);
+        }
+      }
+
+      return {
+        coveredStates,
+        excludedStates,
+        partialStates,
+        excludedZips: [...excludedZips].sort(),
+      };
+    }
+
+    function renderAdsetTable(adsets) {
+      const tbody = $('adsetTableBody');
+      if (!adsets.length) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color: var(--muted);">No active Bathrooms ad sets found.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = adsets
+        .map((rec) => {
+          const f = rec.fields || {};
+          const name = f['Adset Name'] || rec.id;
+          const status = f['Adset Status'] || '—';
+          const linked = Array.isArray(f['Adset Zip Tracking'])
+            ? f['Adset Zip Tracking'].length
+            : (f['Linked Zips'] ?? '—');
+          return `<tr><td>${escapeHtml(name)}</td><td>${escapeHtml(String(status))}</td><td>${escapeHtml(String(linked))}</td></tr>`;
+        })
+        .join('');
+      $('adsetTableMeta').textContent = `${adsets.length} ad set${adsets.length === 1 ? '' : 's'}`;
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderResults(results) {
+      const includedCsv = results.includedZips.map((z) => z.zip).join(',');
+      const excludedStatesCsv = results.excludedStates.join(',');
+      const excludedZipsCsv = results.excludedZips.join(',');
+
+      $('statAdsets').textContent = String(results.adsets.length);
+      $('statIncludedZips').textContent = String(results.includedZips.length);
+      $('statCoveredStates').textContent = String(results.coveredStates.length);
+      $('statExcludedStates').textContent = String(results.excludedStates.length);
+      $('statExcludedZips').textContent = String(results.excludedZips.length);
+
+      $('outIncluded').value = includedCsv;
+      $('outExcludedStates').value = excludedStatesCsv;
+      $('outExcludedZips').value = excludedZipsCsv;
+
+      const chips = $('excludedStatesChips');
+      chips.innerHTML = results.excludedStates
+        .map((st) => `<span class="state-chip">${escapeHtml(st)}</span>`)
+        .join('');
+
+      const partialMeta = results.partialStates.length
+        ? results.partialStates
+            .map((p) => `${p.state}: ${p.included}/${p.total} included (${p.excluded} excluded)`)
+            .join(' · ')
+        : 'All covered states are fully included (no partial-state zip gaps).';
+      $('partialStatesMeta').textContent = partialMeta;
+
+      $('btnCopyIncluded').disabled = !includedCsv;
+      $('btnCopyExcludedStates').disabled = !excludedStatesCsv;
+      $('btnCopyExcludedZips').disabled = !excludedZipsCsv;
+    }
+
+    async function copyText(text, button) {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        const prev = button.textContent;
+        button.textContent = 'Copied!';
+        setTimeout(() => { button.textContent = prev; }, 1200);
+      } catch {
+        window.prompt('Copy this text:', text);
+      }
+    }
+
+    async function loadData() {
+      const btn = $('btnLoad');
+      btn.disabled = true;
+      setError('');
+      setProgress('<strong>Starting…</strong>');
+
+      try {
+        setProgress('<strong>Step 1/4:</strong> Fetching active Bathrooms ad sets…');
+        const adsets = await fetchActiveBathroomsAdsets();
+        renderAdsetTable(adsets);
+
+        const junctionIds = collectJunctionIds(adsets);
+        setProgress(`<strong>Step 2/4:</strong> Resolving ${junctionIds.length.toLocaleString()} junction links…`);
+
+        const { includedZips } = await resolveIncludedZips(junctionIds, (label, chunk, total, fetched) => {
+          setProgress(`<strong>Step 2/4:</strong> ${label} — batch ${chunk}/${total} (${fetched.toLocaleString()} rows so far)`);
+        });
+
+        setProgress(`<strong>Step 3/4:</strong> Computing state exclusions for ${includedZips.length.toLocaleString()} zips…`);
+        const exclusions = await computeExclusions(includedZips, (idx, total, state) => {
+          setProgress(`<strong>Step 3/4:</strong> Scanning state ${state} (${idx}/${total})…`);
+        });
+
+        setProgress('<strong>Step 4/4:</strong> Rendering results…');
+        lastResults = {
+          adsets,
+          includedZips,
+          ...exclusions,
+        };
+        renderResults(lastResults);
+        setProgress('');
+      } catch (err) {
+        console.error(err);
+        setError(err?.message || String(err));
+        setProgress('');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    $('btnLoad').addEventListener('click', loadData);
+    $('btnCopyIncluded').addEventListener('click', () => {
+      copyText($('outIncluded').value, $('btnCopyIncluded'));
+    });
+    $('btnCopyExcludedStates').addEventListener('click', () => {
+      copyText($('outExcludedStates').value, $('btnCopyExcludedStates'));
+    });
+    $('btnCopyExcludedZips').addEventListener('click', () => {
+      copyText($('outExcludedZips').value, $('btnCopyExcludedZips'));
+    });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadData);
+    } else {
+      loadData();
+    }
+  </script>
+</body>
+</html>
