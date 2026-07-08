@@ -1391,7 +1391,7 @@
     <div class="form-wrapper" id="formSection">
         <div class="progress-area" id="progressArea">
             <div class="progress-bar" id="progressBarContainer">
-                <div class="progress-fill" id="progressFill" style="width: 14%"></div>
+                <div class="progress-fill" id="progressFill" style="width: 17%"></div>
             </div>
         </div>
 
@@ -1415,17 +1415,8 @@
             </div>
         </div>
 
-        <!-- STEP 1: Fence last installed -->
+        <!-- STEP 1: Fence Location -->
         <div class="form-step" id="step1">
-            <div class="step-header">When was your fence last installed or replaced?</div>
-            <div class="options">
-                <div class="option" data-quiz-field="fencingLastUpdated" data-quiz-value="less_than_10" onclick="selectOptionAndAdvance(this, 'fencingLastUpdated', 'less_than_10')">Less than 10 years ago</div>
-                <div class="option" data-quiz-field="fencingLastUpdated" data-quiz-value="more_than_10" onclick="selectOptionAndAdvance(this, 'fencingLastUpdated', 'more_than_10')">More than 10 years ago</div>
-            </div>
-        </div>
-
-        <!-- STEP 2: Fence Location -->
-        <div class="form-step" id="step2">
             <div class="step-header">Where will the new fence be located?</div>
             <div class="options" id="fenceLocationOptions">
                 <div class="option" data-quiz-field="fenceLocation" data-quiz-value="front_yard" onclick="selectOptionAndAdvance(this, 'fenceLocation', 'front_yard')">Front yard</div>
@@ -1435,8 +1426,8 @@
             </div>
         </div>
 
-        <!-- STEP 3: Main Goal -->
-        <div class="form-step" id="step3">
+        <!-- STEP 2: Main Goal -->
+        <div class="form-step" id="step2">
             <div class="step-header">What do you want most in your new fence?</div>
             <div class="options">
                 <div class="option" data-quiz-field="mainGoal" data-quiz-value="privacy" onclick="selectOptionAndAdvance(this, 'mainGoal', 'privacy')">Privacy</div>
@@ -1446,8 +1437,8 @@
             </div>
         </div>
 
-        <!-- STEP 4: Address -->
-        <div class="form-step" id="step4">
+        <!-- STEP 3: Address -->
+        <div class="form-step" id="step3">
             <div class="step-header">What is the location of this project?</div>
             <div class="step-subheader" id="step4AddressSubheader">Please make sure your address is full and correct</div>
             <div class="address-grid">
@@ -1478,8 +1469,8 @@
             </div>
         </div>
 
-        <!-- STEP 5: Name -->
-        <div class="form-step" id="step5">
+        <!-- STEP 4: Name -->
+        <div class="form-step" id="step4">
             <div class="step-header">Who will we be speaking with?</div>
             <div class="name-grid">
                 <div class="address-field">
@@ -1496,8 +1487,8 @@
             </div>
         </div>
 
-        <!-- STEP 6: Phone -->
-        <div class="form-step" id="step6">
+        <!-- STEP 5: Phone -->
+        <div class="form-step" id="step5">
             <div class="step-header">Where can <span id="contactReachCompany">Peak Leads Group</span> reach you?</div>
             <div class="row">
                 <div id="phoneWrap" class="address-field">
@@ -1887,7 +1878,7 @@
         // ============================================
 
         let currentStep = 0;
-        const TOTAL_STEPS = 7;
+        const TOTAL_STEPS = 6;
         let formData = {};
         let eventId = null;
         let matchedClientData = null;
@@ -2093,7 +2084,7 @@
                 validateNameForm();
                 validateAddressForm();
                 if (typeof validatePhones === 'function') validatePhones();
-                if (currentStep === 6 && typeof setupPhoneValidation === 'function') setupPhoneValidation();
+                if (currentStep === 5 && typeof setupPhoneValidation === 'function') setupPhoneValidation();
             } catch (e) {
                 console.warn('Funnel resume failed:', e);
             }
@@ -3878,7 +3869,7 @@
         }
 
         function nextStep() {
-            if (currentStep < 6) {
+            if (currentStep < 5) {
                 document.getElementById('step' + currentStep).classList.remove('active');
                 currentStep++;
                 document.getElementById('step' + currentStep).classList.add('active');
@@ -5067,7 +5058,7 @@
         const checkMarkIconHtml = '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#6190f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; display: block;"><circle cx="12" cy="12" r="10" fill="#e8ecfb"/><path d="M9 12l2 2 4-4" stroke="#6190f2" stroke-width="3"/></svg>';
         const exclamationIconHtml = '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#F9A825" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; display: block;"><circle cx="12" cy="12" r="10" fill="#FFF9C4" stroke="#F9A825"/><path d="M12 7 v6" stroke="#F9A825" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.5" fill="#F9A825"/></svg>';
         function deactivateSubmitSourceSteps() {
-            const phoneStep = document.getElementById('step6');
+            const phoneStep = document.getElementById('step5');
             const findingStep = document.getElementById('findingLocalPickStep');
             if (phoneStep) phoneStep.classList.remove('active');
             if (findingStep) findingStep.classList.remove('active');
@@ -5686,13 +5677,6 @@
             const options = { 'yes': 'Yes', 'no': 'No' };
             return options[value] || value;
         }
-        function getFencingLastUpdatedDisplay(value) {
-            const options = {
-                'less_than_10': 'Less than 10 years ago',
-                'more_than_10': 'More than 10 years ago'
-            };
-            return options[value] || value;
-        }
         function getFenceLocationDisplay(value) {
             const options = {
                 'front_yard': 'Front yard',
@@ -5771,7 +5755,6 @@
                 value: 1.00,
                 currency: 'USD',
                 homeowner_status: finalData.homeowner,
-                fencing_last_updated: finalData.fencingLastUpdated,
                 fence_location: finalData.fenceLocation,
                 main_goal: finalData.mainGoal
             };
@@ -5799,7 +5782,6 @@
 Name: ${finalData.firstName} ${finalData.lastName}
 Phone: ${formatPhoneForDisplay(finalData.phone)}
 ${emailLine}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}
-Fence last installed: ${getFencingLastUpdatedDisplay(finalData.fencingLastUpdated)}
 Fence location: ${getFenceLocationDisplay(finalData.fenceLocation)}
 Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}
 
@@ -5823,7 +5805,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             
             // Build HTML version of full summary
             const emailLineHTML = finalData.email ? `Email: ${finalData.email}<BR>` : '';
-            const fullSummaryHTML = `Fencing Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Fence last installed: ${getFencingLastUpdatedDisplay(finalData.fencingLastUpdated)}<BR>Fence location: ${getFenceLocationDisplay(finalData.fenceLocation)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
+            const fullSummaryHTML = `Fencing Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Fence location: ${getFenceLocationDisplay(finalData.fenceLocation)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
