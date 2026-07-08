@@ -1424,31 +1424,25 @@
             </div>
         </div>
 
-        <!-- STEP 2: Project Type (from Airtable Client "Project Type") -->
+        <!-- STEP 2: Fence Location -->
         <div class="form-step" id="step2">
-            <div class="step-header">Which best describes this project?</div>
-            <div class="options" id="projectTypeOptions"></div>
+            <div class="step-header">Where will the new fence be located?</div>
+            <div class="options" id="fenceLocationOptions">
+                <div class="option" data-quiz-field="fenceLocation" data-quiz-value="front_yard" onclick="selectOptionAndAdvance(this, 'fenceLocation', 'front_yard')">Front yard</div>
+                <div class="option" data-quiz-field="fenceLocation" data-quiz-value="back_yard" onclick="selectOptionAndAdvance(this, 'fenceLocation', 'back_yard')">Back yard</div>
+                <div class="option" data-quiz-field="fenceLocation" data-quiz-value="side_yard" onclick="selectOptionAndAdvance(this, 'fenceLocation', 'side_yard')">Side yard</div>
+                <div class="option" data-quiz-field="fenceLocation" data-quiz-value="entire_property" onclick="selectOptionAndAdvance(this, 'fenceLocation', 'entire_property')">Entire property</div>
+            </div>
         </div>
 
         <!-- STEP 3: Main Goal -->
         <div class="form-step" id="step3">
             <div class="step-header">What do you want most in your new fence?</div>
             <div class="options">
-                <div class="option" data-quiz-field="mainGoal" data-quiz-value="accessibility_safety" onclick="selectOptionAndAdvance(this, 'mainGoal', 'accessibility_safety')">Improve accessibility/safety</div>
-                <div class="option" data-quiz-field="mainGoal" data-quiz-value="look_function" onclick="selectOptionAndAdvance(this, 'mainGoal', 'look_function')">Improve look/function</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="privacy" onclick="selectOptionAndAdvance(this, 'mainGoal', 'privacy')">Privacy</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="security" onclick="selectOptionAndAdvance(this, 'mainGoal', 'security')">Security</div>
+                <div class="option" data-quiz-field="mainGoal" data-quiz-value="appearance" onclick="selectOptionAndAdvance(this, 'mainGoal', 'appearance')">Appearance</div>
                 <div class="option" data-quiz-field="mainGoal" data-quiz-value="home_value" onclick="selectOptionAndAdvance(this, 'mainGoal', 'home_value')">Increase home value</div>
-                <div class="option" data-quiz-field="mainGoal" data-quiz-value="repair_damage" onclick="selectOptionAndAdvance(this, 'mainGoal', 'repair_damage')">Repair damage</div>
-            </div>
-            <div class="repair-damage-message" id="repairDamageMessage" style="display: none;">
-                <div class="homeowner-no-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                    </svg>
-                </div>
-                <div class="repair-damage-content">
-                    <div class="homeowner-no-text" id="repairDamageCopy">Our contractors don't offer small repairs. They specialize exclusively in new fence installations and full replacements</div>
-                </div>
             </div>
         </div>
 
@@ -2017,10 +2011,6 @@
             const homeownerNoMsg = document.getElementById('homeownerNoMessage');
             if (homeownerNoMsg) {
                 homeownerNoMsg.style.display = (currentStep === 0 && formData.homeowner === 'no') ? 'flex' : 'none';
-            }
-            const repairDamageMsg = document.getElementById('repairDamageMessage');
-            if (repairDamageMsg) {
-                repairDamageMsg.style.display = (currentStep === 3 && formData.mainGoal === 'repair_damage') ? 'flex' : 'none';
             }
         }
 
@@ -3537,23 +3527,9 @@
             return ORDER.filter((d) => matched.has(d.value)).map((d) => ({ value: d.value, label: d.label }));
         }
 
+        /** Project type options are static (New fence installation / Replacement / Repair); no Airtable-driven rebuild. */
         function updateProjectTypeStepOptions() {
-            const container = document.getElementById('projectTypeOptions');
-            if (!container) return;
-            const choices = getProjectTypeChoicesForClient(getActiveClient());
-            container.replaceChildren();
-            choices.forEach((c) => {
-                const div = document.createElement('div');
-                div.className = 'option';
-                div.setAttribute('data-quiz-field', 'projectType');
-                div.setAttribute('data-quiz-value', c.value);
-                div.textContent = c.label;
-                const value = c.value;
-                div.addEventListener('click', function () {
-                    selectOptionAndAdvance(div, 'projectType', value);
-                });
-                container.appendChild(div);
-            });
+            /* no-op: options are defined statically in the step 2 markup */
         }
 
         function applyDefaultLocalPickLogo() {
@@ -3827,17 +3803,6 @@
                     return;
                 } else {
                     if (homeownerNoMsg) homeownerNoMsg.style.display = 'none';
-                }
-            }
-            
-            // Main goal step: show red message when "Repair damage" selected, don't advance
-            if (field === 'mainGoal') {
-                const repairDamageMsg = document.getElementById('repairDamageMessage');
-                if (value === 'repair_damage') {
-                    if (repairDamageMsg) repairDamageMsg.style.display = 'flex';
-                    return;
-                } else {
-                    if (repairDamageMsg) repairDamageMsg.style.display = 'none';
                 }
             }
             
@@ -5728,18 +5693,20 @@
             };
             return options[value] || value;
         }
-        function getProjectTypeDisplay(value) {
+        function getFenceLocationDisplay(value) {
             const options = {
-                'new_fence_installation': 'New fence installation',
-                'fence_replacement': 'Fence replacement'
+                'front_yard': 'Front yard',
+                'back_yard': 'Back yard',
+                'side_yard': 'Side yard',
+                'entire_property': 'Entire property'
             };
             return options[value] || value;
         }
         function getMainGoalDisplay(value) {
             const options = {
-                'accessibility_safety': 'Improve accessibility/safety',
-                'look_function': 'Improve look/function',
-                'repair_damage': 'Repair damage',
+                'privacy': 'Privacy',
+                'security': 'Security',
+                'appearance': 'Appearance',
                 'home_value': 'Increase home value'
             };
             return options[value] || value;
@@ -5805,7 +5772,7 @@
                 currency: 'USD',
                 homeowner_status: finalData.homeowner,
                 fencing_last_updated: finalData.fencingLastUpdated,
-                project_type: finalData.projectType,
+                fence_location: finalData.fenceLocation,
                 main_goal: finalData.mainGoal
             };
             tlpDebug('submit', 'Lead event payload prepared', leadEventData);
@@ -5833,7 +5800,7 @@ Name: ${finalData.firstName} ${finalData.lastName}
 Phone: ${formatPhoneForDisplay(finalData.phone)}
 ${emailLine}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}
 Fence last installed: ${getFencingLastUpdatedDisplay(finalData.fencingLastUpdated)}
-Project Type: ${getProjectTypeDisplay(finalData.projectType)}
+Fence location: ${getFenceLocationDisplay(finalData.fenceLocation)}
 Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}
 
 Address:
@@ -5856,7 +5823,7 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
             
             // Build HTML version of full summary
             const emailLineHTML = finalData.email ? `Email: ${finalData.email}<BR>` : '';
-            const fullSummaryHTML = `Fencing Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Fence last installed: ${getFencingLastUpdatedDisplay(finalData.fencingLastUpdated)}<BR>Project Type: ${getProjectTypeDisplay(finalData.projectType)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
+            const fullSummaryHTML = `Fencing Lead Information:<BR><BR>Name: ${finalData.firstName} ${finalData.lastName}<BR>Phone: ${formatPhoneForDisplay(finalData.phone)}<BR>${emailLineHTML}Homeowner: ${getHomeownerDisplay(finalData.homeowner)}<BR>Fence last installed: ${getFencingLastUpdatedDisplay(finalData.fencingLastUpdated)}<BR>Fence location: ${getFenceLocationDisplay(finalData.fenceLocation)}<BR>Main Goal: ${getMainGoalDisplay(finalData.mainGoal)}<BR><BR>Address:<BR>${finalData.address.street}<BR>${finalData.address.city}, ${finalData.address.state} ${finalData.address.zip}<BR><BR>Lead generated on: ${new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
