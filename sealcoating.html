@@ -2212,11 +2212,17 @@
             return [...zipLink, ...lookups];
         }
 
-        function zipRouteAdsetIdFromJunctionFields(fields) {
+        function zipRouteAdsetIdsFromJunctionFields(fields) {
             const f = ZIP_ROUTE.JUNCTION_ADSET_FIELD;
             const v = fields && fields[f];
-            if (!v) return null;
-            return Array.isArray(v) ? v[0] : v;
+            if (!v) return [];
+            const arr = Array.isArray(v) ? v : [v];
+            return arr.filter((id) => typeof id === 'string' && id.startsWith('rec'));
+        }
+
+        function zipRouteAdsetIdFromJunctionFields(fields) {
+            const ids = zipRouteAdsetIdsFromJunctionFields(fields);
+            return ids.length ? ids[0] : null;
         }
 
         async function zipRouteResolveUsZipsMatchField() {
@@ -2400,8 +2406,7 @@
                 .slice(0, 5);
         }
 
-        function zipRouteRowFromJunctionRecord(rec, idx) {
-            const adsetId = zipRouteAdsetIdFromJunctionFields(rec.fields);
+        function zipRouteRowFromJunctionRecord(rec, idx, adsetId) {
             const clientRec = adsetId ? zipRouteFindClientRecordForAdset(adsetId) : null;
             const adsetRec = adsetId && zipRouteAdsetById ? zipRouteAdsetById.get(adsetId) : null;
             return {
@@ -2421,7 +2426,18 @@
             if (!zipRecId) return [];
             const junctionRecs = await zipRouteFetchJunctionRecordsForZip(zipRecId);
             junctionRecs.sort((a, b) => new Date(a.createdTime) - new Date(b.createdTime));
-            return junctionRecs.map((rec, idx) => zipRouteRowFromJunctionRecord(rec, idx));
+            const rows = [];
+            for (const rec of junctionRecs) {
+                const adsetIds = zipRouteAdsetIdsFromJunctionFields(rec.fields);
+                if (adsetIds.length === 0) {
+                    rows.push(zipRouteRowFromJunctionRecord(rec, rows.length, null));
+                    continue;
+                }
+                for (const adsetId of adsetIds) {
+                    rows.push(zipRouteRowFromJunctionRecord(rec, rows.length, adsetId));
+                }
+            }
+            return rows;
         }
 
         async function getZipRoutingQueue(zipCode) {
@@ -2566,6 +2582,14 @@
                     const hasClient = !!(row && row.clientRec);
                     const hasAdset = !!(row && row.adsetRec && row.adsetRec.fields);
                     const adsetFields = hasAdset ? row.adsetRec.fields : null;
+                    const rowAdsetName = adsetFields && adsetFields['Adset Name']
+                        ? String(adsetFields['Adset Name']).trim()
+                        : '';
+                    const rowAdsetNiche = adsetFields && adsetFields['Adset Niche'] != null
+                        ? (Array.isArray(adsetFields['Adset Niche'])
+                            ? adsetFields['Adset Niche'].map(String).join('|')
+                            : String(adsetFields['Adset Niche']))
+                        : '';
                     const nicheMatch = hasAdset ? routingAdsetNicheMatchesFunnel(adsetFields) : false;
                     const clientActive = hasAdset ? routingIsClientActive(row.clientRec, adsetFields) : false;
                     const adsetActive = hasAdset ? routingIsAdsetActive(adsetFields) : false;
@@ -2573,7 +2597,7 @@
                     const monthlyRemaining = hasAdset ? routingMonthlyRemaining(adsetFields) : false;
                     const tier = hasAdset ? routingComputeTier(row.clientRec, adsetFields) : 0;
                     traceStep(
-                        `[S4.${idx + 1}] junction=${row && row.junctionId ? row.junctionId : 'none'} adset=${rowAdsetId || 'none'} client="${rowClientName || 'unknown'}" clientId=${rowClientId || 'none'} hasClient=${routingBoolLabel(hasClient)} hasAdset=${routingBoolLabel(hasAdset)} nicheMatch=${routingBoolLabel(nicheMatch)} clientActive=${routingBoolLabel(clientActive)} adsetActive=${routingBoolLabel(adsetActive)} weeklyRemaining=${routingBoolLabel(weeklyRemaining)} monthlyRemaining=${routingBoolLabel(monthlyRemaining)} tier=${tier}`
+                        `[S4.${idx + 1}] junction=${row && row.junctionId ? row.junctionId : 'none'} adset=${rowAdsetId || 'none'} adsetName="${rowAdsetName || 'unknown'}" adsetNiche="${rowAdsetNiche || 'none'}" client="${rowClientName || 'unknown'}" clientId=${rowClientId || 'none'} hasClient=${routingBoolLabel(hasClient)} hasAdset=${routingBoolLabel(hasAdset)} nicheMatch=${routingBoolLabel(nicheMatch)} clientActive=${routingBoolLabel(clientActive)} adsetActive=${routingBoolLabel(adsetActive)} weeklyRemaining=${routingBoolLabel(weeklyRemaining)} monthlyRemaining=${routingBoolLabel(monthlyRemaining)} tier=${tier}`
                     );
                 });
 
