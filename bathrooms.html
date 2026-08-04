@@ -2476,26 +2476,41 @@
             return Number.isFinite(n) ? n : 0;
         }
 
+        // ============================================================
+        // LIVE ROUTING (2026-08-04 locked product rules)
+        // Exact Active adset → CDN expanded Active adset →
+        // B2B exact Location ZIP (random ties) → B2B CDN neighbors
+        // No weekly/monthly capacity in matcher. No national B2B random.
+        // ============================================================
+        function routingBoolLabel(v) {
+            return v ? 'yes' : 'no';
+        }
+
+                const GEO_NEIGHBOR_BASE = 'https://geo.thelocalpick.com/zip-neighbors-30mi/by-zip';
+        const GEO_MAX_MILES = 30;
+        const GEO_MAX_NEIGHBORS = 25;
+        const B2B_TABLE_ID = 'tbldNpwtCN9y5Pkiy';
+        const B2B_CREATED_AFTER = '2025-09-02T00:00:00.000Z';
+        const B2B_NICHE_ALIASES = {
+            bathrooms: ['bathrooms', 'bathroom', 'bath', 'bath remodeling', 'bathroom remodeling'],
+        };
+        let b2bPoolCache = null; // { byZip: Map, qualifiedCount, fetched, pages, loadedAt }
+
         function routingWeeklyRemaining(adsetFields) {
-            return routingNumericLeadsLeft(adsetFields, ZIP_ROUTE_ADSET_METRIC_FIELDS.weeklyLeadsLeft) > 0;
+            // Capacity intentionally ignored in matcher (automation-owned).
+            return true;
         }
 
         function routingMonthlyRemaining(adsetFields) {
-            return routingNumericLeadsLeft(adsetFields, ZIP_ROUTE_ADSET_METRIC_FIELDS.monthlyLeadsLeft) > 0;
+            return true;
         }
 
-        /** Tier 1–4 if niche, client + adset active; else 0 */
+        /** Eligible = niche + Active client + Active adset only (no capacity tiers). */
         function routingComputeTier(clientRec, adsetFields) {
             if (!clientRec || !adsetFields) return 0;
             if (!routingAdsetNicheMatchesFunnel(adsetFields)) return 0;
             if (!routingIsClientActive(clientRec, adsetFields) || !routingIsAdsetActive(adsetFields)) return 0;
-            const w = routingWeeklyRemaining(adsetFields);
-            const m = routingMonthlyRemaining(adsetFields);
-            if (w && m) return 1;
-            if (!w && m) return 2;
-            if (w && !m) return 3;
-            if (!w && !m) return 4;
-            return 0;
+            return 1;
         }
 
         function routingDedupeCandidatesByAdset(phase1Rows) {
@@ -2507,125 +2522,622 @@
             return [...seen.values()];
         }
 
+        /** Oldest junction Linked-at / createdTime among eligible Active partners. */
         function routingPickPartnerFromPool(candidateRows) {
             const ranked = [];
             for (const row of candidateRows) {
                 const af = row.adsetRec && row.adsetRec.fields;
                 if (!af) continue;
                 const tier = routingComputeTier(row.clientRec, af);
-                if (tier >= 1 && tier <= 4) {
-                    ranked.push({
-                        tier,
-                        adsetId: row.adsetId,
-                        clientRec: row.clientRec,
-                        adsetRec: row.adsetRec,
-                        junctionId: row.junctionId,
-                        linkCreated: row.linkCreated,
-                    });
-                }
+                if (tier < 1) continue;
+                ranked.push({
+                    tier,
+                    adsetId: row.adsetId,
+                    clientRec: row.clientRec,
+                    adsetRec: row.adsetRec,
+                    junctionId: row.junctionId,
+                    linkCreated: row.linkCreated,
+                    matchedZip: row.matchedZip || null,
+                    matchedZipRec: row.matchedZipRec || null,
+                    distanceMi: row.distanceMi == null ? null : row.distanceMi,
+                });
             }
-            if (ranked.length === 0) return null;
-            const bestTier = Math.min(...ranked.map((r) => r.tier));
-            const pool = ranked.filter((r) => r.tier === bestTier);
-            pool.sort((a, b) => {
-                const ta = Date.parse(a.clientRec.createdTime) || 0;
-                const tb = Date.parse(b.clientRec.createdTime) || 0;
+            if (!ranked.length) return null;
+            ranked.sort((a, b) => {
+                const ta = Date.parse(a.linkCreated) || 0;
+                const tb = Date.parse(b.linkCreated) || 0;
+                if (ta !== tb) return ta - tb;
+                const ca = Date.parse(a.clientRec && a.clientRec.createdTime) || 0;
+                const cb = Date.parse(b.clientRec && b.clientRec.createdTime) || 0;
+                return ca - cb;
+            });
+            return ranked[0];
+        }
+
+        function routingPickClosestThenOldest(candidateRows) {
+            const ranked = [];
+            for (const row of candidateRows) {
+                const af = row.adsetRec && row.adsetRec.fields;
+                if (!af) continue;
+                if (routingComputeTier(row.clientRec, af) < 1) continue;
+                ranked.push({
+                    tier: 1,
+                    adsetId: row.adsetId,
+                    clientRec: row.clientRec,
+                    adsetRec: row.adsetRec,
+                    junctionId: row.junctionId,
+                    linkCreated: row.linkCreated,
+                    matchedZip: row.matchedZip || null,
+                    matchedZipRec: row.matchedZipRec || null,
+                    distanceMi: row.distanceMi == null ? null : Number(row.distanceMi),
+                });
+            }
+            if (!ranked.length) return null;
+            ranked.sort((a, b) => {
+                const da = a.distanceMi == null ? 9999 : a.distanceMi;
+                const db = b.distanceMi == null ? 9999 : b.distanceMi;
+                if (da !== db) return da - db;
+                const ta = Date.parse(a.linkCreated) || 0;
+                const tb = Date.parse(b.linkCreated) || 0;
                 return ta - tb;
             });
-            return pool[0];
+            return ranked[0];
         }
 
-        function routingBoolLabel(v) {
-            return v ? 'yes' : 'no';
+        async function routingLoadNeighbors(zipFive, traceStep) {
+            const url = `${GEO_NEIGHBOR_BASE}/${encodeURIComponent(zipFive)}.json`;
+            const t0 = Date.now();
+            let res;
+            try {
+                res = await fetch(url, { headers: { Accept: 'application/json' }, cache: 'no-store' });
+            } catch (e) {
+                traceStep(`[CDN] error: ${e && e.message ? e.message : e}`);
+                return [];
+            }
+            if (res.status === 404) {
+                traceStep(`[CDN] no neighbor pack for ${zipFive}`);
+                return [];
+            }
+            if (!res.ok) {
+                traceStep(`[CDN] HTTP ${res.status} for ${zipFive}`);
+                return [];
+            }
+            const data = await res.json();
+            const neighbors = Array.isArray(data.neighbors) ? data.neighbors : [];
+            const out = [];
+            for (const n of neighbors) {
+                const mi = Number(n.mi);
+                if (!Number.isFinite(mi) || mi > GEO_MAX_MILES + 1e-9) continue;
+                const z = zipRouteNormalizeZipFive(n.zip);
+                if (!/^\d{5}$/.test(z)) continue;
+                out.push({ zip: z, rec: n.rec || null, mi });
+                if (out.length >= GEO_MAX_NEIGHBORS) break;
+            }
+            traceStep(
+                `[CDN] neighbors file=${neighbors.length} using=${out.length} within ${GEO_MAX_MILES}mi ` +
+                `(${((Date.now() - t0) / 1000).toFixed(2)}s)` +
+                (out[0] ? `; nearest ${out[0].zip} @ ${out[0].mi}mi` : '')
+            );
+            return out;
         }
 
-        /** Exact-zip junction only: pick tier-qualified Bathrooms ad set, else no partner. */
+        async function routingListByIds(tableId, ids, fields) {
+            const uniq = [...new Set((ids || []).filter((id) => typeof id === 'string' && id.startsWith('rec')))];
+            const all = [];
+            const chunk = 20;
+            for (let i = 0; i < uniq.length; i += chunk) {
+                const slice = uniq.slice(i, i + chunk);
+                if (!slice.length) continue;
+                const formula = `OR(${slice.map((id) => `RECORD_ID()="${id}"`).join(',')})`;
+                try {
+                    const batch = await airtableFetchAllRecords(tableId, {
+                        formula,
+                        fields: fields && fields.length ? fields : undefined,
+                    });
+                    all.push(...batch);
+                } catch (e) {
+                    console.warn('routingListByIds batch failed', tableId, e);
+                }
+            }
+            return all;
+        }
+
+        async function routingBuildExpandedRows(neighbors, homeZip, traceStep) {
+            if (!neighbors.length) return [];
+            await zipRouteEnsureInfrastructure();
+            const t0 = Date.now();
+            const withRec = neighbors.filter((n) => n.rec);
+            const needLookup = neighbors.filter((n) => !n.rec);
+            const meta = new Map(); // zipRecId -> neighbor
+            for (const n of withRec) meta.set(n.rec, n);
+
+            // Resolve missing rec ids via US Zips table
+            for (const n of needLookup) {
+                try {
+                    const rid = await zipRouteFindZipRecordId(n.zip);
+                    if (rid) {
+                        n.rec = rid;
+                        meta.set(rid, n);
+                    }
+                } catch (_) {}
+            }
+
+            const zipRecs = neighbors.map((n) => n.rec).filter(Boolean);
+            if (!zipRecs.length) {
+                traceStep('[Expanded] no US Zip record ids for neighbors');
+                return [];
+            }
+
+            const zipRows = await routingListByIds(ZIP_ROUTE.US_ZIPS_TABLE, zipRecs, ['Zip', 'Adset Zip Tracking']);
+            const zipById = new Map(zipRows.map((r) => [r.id, r]));
+            const juncIds = [];
+            for (const zrec of zipRecs) {
+                const zrow = zipById.get(zrec);
+                const links = zrow && zrow.fields ? zrow.fields['Adset Zip Tracking'] : null;
+                if (Array.isArray(links)) {
+                    for (const jid of links) {
+                        if (typeof jid === 'string' && jid.startsWith('rec')) juncIds.push(jid);
+                    }
+                }
+            }
+            const uniqJ = [...new Set(juncIds)];
+            traceStep(`[Expanded] neighbor zips=${zipRecs.length} → junction ids=${uniqJ.length}`);
+
+            let juncRecs = [];
+            if (uniqJ.length) {
+                juncRecs = await routingListByIds(
+                    ZIP_ROUTE.ADSET_ZIPS_TABLE,
+                    uniqJ,
+                    [ZIP_ROUTE.JUNCTION_ADSET_FIELD, 'US Zips', 'Linked at']
+                );
+            }
+
+            const neighborSet = new Set(zipRecs);
+            const rows = [];
+            for (const rec of juncRecs) {
+                const zlinks = rec.fields && rec.fields['US Zips'];
+                const zarr = Array.isArray(zlinks) ? zlinks : (zlinks ? [zlinks] : []);
+                const matched = zarr.filter((z) => neighborSet.has(z));
+                if (!matched.length) continue;
+                const ads = zipRouteAdsetIdsFromJunctionFields(rec.fields || {});
+                for (const zrec of matched) {
+                    const n = meta.get(zrec) || {};
+                    for (const aid of ads) {
+                        const clientRec = zipRouteFindClientRecordForAdset(aid);
+                        const adsetRec = zipRouteAdsetById ? zipRouteAdsetById.get(aid) : null;
+                        rows.push({
+                            junctionId: rec.id,
+                            linkCreated: (rec.fields && rec.fields['Linked at']) || rec.createdTime,
+                            adsetId: aid,
+                            clientRec,
+                            adsetRec,
+                            matchedZip: n.zip || null,
+                            matchedZipRec: zrec,
+                            distanceMi: n.mi == null ? null : Number(n.mi),
+                            homeZip,
+                        });
+                    }
+                }
+            }
+            rows.sort((a, b) => {
+                const da = a.distanceMi == null ? 9999 : a.distanceMi;
+                const db = b.distanceMi == null ? 9999 : b.distanceMi;
+                if (da !== db) return da - db;
+                return String(a.linkCreated || '').localeCompare(String(b.linkCreated || ''));
+            });
+            traceStep(`[Expanded] candidate rows=${rows.length} in ${((Date.now() - t0) / 1000).toFixed(2)}s`);
+            return rows;
+        }
+
+        function parseRevenueFloor(raw) {
+            const s0 = String(raw || '').trim();
+            if (!s0) return null;
+            const s = s0.toLowerCase().replace(/,/g, '').replace(/\$/g, '').replace(/\s+/g, ' ');
+            if (s.includes('less than') || s.startsWith('less-than') || s.includes('under')) return 0;
+            const slug = s.match(/(less-than|more-than)?\s*(\d+)\s*k(?:\s*-\s*(\d+)\s*k)?/);
+            if (slug) {
+                const kind = slug[1] || '';
+                const a = Number(slug[2]) * 1000;
+                if (kind === 'less-than') return 0;
+                if (kind === 'more-than') return a;
+                return a;
+            }
+            if (s.includes('more than') || s.startsWith('more-than')) {
+                const n = Number((s.match(/(\d{2,})/) || [])[1] || NaN);
+                if (Number.isFinite(n)) return n < 1000 ? n * 1000 : n;
+            }
+            const nums = [...s.matchAll(/(\d+(?:\.\d+)?)\s*(k)?/g)].map((m) => {
+                const n = Number(m[1]);
+                return m[2] ? n * 1000 : n;
+            }).filter((n) => Number.isFinite(n));
+            if (!nums.length) return null;
+            return Math.min(...nums);
+        }
+
+        function revenueQualifies100k(raw) {
+            const floor = parseRevenueFloor(raw);
+            return floor != null && floor >= 100000;
+        }
+
+        function b2bNicheMatches(niches, funnelNiche) {
+            const key = String(funnelNiche || '').trim().toLowerCase();
+            const aliases = B2B_NICHE_ALIASES[key] || [key];
+            const have = (Array.isArray(niches) ? niches : [niches]).map((x) => String(x || '').trim().toLowerCase());
+            return have.some((h) => aliases.some((a) => h === a || h.includes(a) || a.includes(h)));
+        }
+
+        function extractB2bZip(fields) {
+            const loc = String((fields && fields.Location) || '').trim();
+            if (loc) {
+                const pure = loc.match(/^(\d{5})(?:-\d{4})?$/);
+                if (pure) return { zip: pure[1], source: 'Location' };
+                const embedded = loc.match(/\b(\d{5})(?:-\d{4})?\b/);
+                if (embedded) return { zip: embedded[1], source: 'Location-embedded' };
+            }
+            const notes = String((fields && fields.Notes) || '');
+            const fromNotes =
+                notes.match(/Zip\s*Code\s*:\s*(\d{5})\b/i) ||
+                notes.match(/\bZIP\b\s*[:=]?\s*(\d{5})\b/i);
+            if (fromNotes) return { zip: fromNotes[1], source: 'Notes' };
+            return null;
+        }
+
+        function pickRandom(arr) {
+            if (!arr || !arr.length) return null;
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        async function loadQualifiedB2bPool(traceStep) {
+            if (b2bPoolCache && b2bPoolCache.byZip) {
+                traceStep(
+                    `[B2B] using cached pool qualified=${b2bPoolCache.qualifiedCount} zips=${b2bPoolCache.byZip.size}`
+                );
+                return b2bPoolCache;
+            }
+            const t0 = Date.now();
+            const formulaParts = [
+                'NOT({Status}="Disqualified")',
+                'OR({Discovery Status}="", {Discovery Status}=BLANK(), NOT({Discovery Status}="Close Won"))',
+                'AND({Contact Email}!="", {Contact Email}!=BLANK())',
+                'OR(AND({Phone Number}!="", {Phone Number}!=BLANK()), AND({Parsed Phone}!="", {Parsed Phone}!=BLANK()))',
+                `IS_AFTER(CREATED_TIME(), "${B2B_CREATED_AFTER}")`,
+            ];
+            const filter = `AND(${formulaParts.join(',')})`;
+            const fields = [
+                'Business Name', 'Status', 'Discovery Status', 'Estimated monthly revenue',
+                'Niche(s)', 'Contact Email', 'Phone Number', 'Parsed Phone', 'Created',
+                'Location', 'Notes',
+            ];
+            const pool = [];
+            let offset = null;
+            let pages = 0;
+            do {
+                const u = new URL(`${AIRTABLE_BASE_URL}/${B2B_TABLE_ID}`, window.location.origin);
+                u.searchParams.set('pageSize', '100');
+                u.searchParams.set('filterByFormula', filter);
+                for (const f of fields) u.searchParams.append('fields[]', f);
+                if (offset) u.searchParams.set('offset', offset);
+                const page = await fetchAirtableData(u.toString());
+                pool.push(...(page.records || []));
+                offset = page.offset || null;
+                pages += 1;
+                if (pages >= 15) break;
+                if (offset) await sleepZipRoute(120);
+            } while (offset);
+
+            const byZip = new Map();
+            let qualified = 0;
+            let noZip = 0;
+            for (const rec of pool) {
+                const f = rec.fields || {};
+                if (f.Status === 'Disqualified') continue;
+                if (f['Discovery Status'] === 'Close Won') continue;
+                const email = String(f['Contact Email'] || '').trim();
+                const phone = String(f['Phone Number'] || f['Parsed Phone'] || '').trim();
+                if (!email || !phone) continue;
+                if (!b2bNicheMatches(f['Niche(s)'], FUNNEL_ADSET_NICHE)) continue;
+                if (!revenueQualifies100k(f['Estimated monthly revenue'])) continue;
+                const created = rec.createdTime || f.Created;
+                if (!created || Date.parse(created) < Date.parse(B2B_CREATED_AFTER)) continue;
+                qualified += 1;
+                const zinfo = extractB2bZip(f);
+                if (!zinfo) {
+                    noZip += 1;
+                    continue;
+                }
+                if (!byZip.has(zinfo.zip)) byZip.set(zinfo.zip, []);
+                byZip.get(zinfo.zip).push({ rec, zipSource: zinfo.source, leadZip: zinfo.zip });
+            }
+            b2bPoolCache = {
+                byZip,
+                qualifiedCount: qualified,
+                fetched: pool.length,
+                pages,
+                noZip,
+                loadedAt: Date.now(),
+            };
+            traceStep(
+                `[B2B] pool fetched=${pool.length} pages=${pages} qualified=${qualified} ` +
+                `withZip=${qualified - noZip} noZip=${noZip} distinctZips=${byZip.size} ` +
+                `(${((Date.now() - t0) / 1000).toFixed(2)}s)`
+            );
+            return b2bPoolCache;
+        }
+
+        async function pickB2BOverflow(homeZip, traceStep) {
+            const t0 = Date.now();
+            const pool = await loadQualifiedB2bPool(traceStep);
+            const byZip = pool.byZip;
+
+            traceStep(`[B2B 3a] exact Location ZIP = ${homeZip}`);
+            const exactHits = byZip.get(homeZip) || [];
+            traceStep(`[B2B 3a] exact hits: ${exactHits.length}`);
+            exactHits.slice(0, 8).forEach((h, i) => {
+                const f = h.rec.fields || {};
+                traceStep(
+                    `  exactB2B[${i + 1}] ${f['Business Name'] || h.rec.id} | loc=${f.Location || '—'} | src=${h.zipSource}`
+                );
+            });
+            if (exactHits.length) {
+                const hit = pickRandom(exactHits);
+                const f = hit.rec.fields || {};
+                traceStep(
+                    `[B2B 3a] random among ${exactHits.length}: ${f['Business Name'] || hit.rec.id} ` +
+                    `(${((Date.now() - t0) / 1000).toFixed(2)}s)`
+                );
+                return {
+                    matchMode: 'exact',
+                    matchedZip: homeZip,
+                    distanceMi: 0,
+                    leadZip: hit.leadZip,
+                    zipSource: hit.zipSource,
+                    poolSize: exactHits.length,
+                    rec: hit.rec,
+                };
+            }
+
+            traceStep('[B2B 3b] CDN neighbor ZIPs (30mi / top 25, closest first)');
+            const neighbors = await routingLoadNeighbors(homeZip, traceStep);
+            if (!neighbors.length) {
+                traceStep('[B2B 3b] no CDN neighbors — no B2B geo match');
+                return null;
+            }
+            let scanned = 0;
+            let bucket = [];
+            let firstDist = null;
+            for (const n of neighbors) {
+                scanned += 1;
+                const hits = byZip.get(n.zip) || [];
+                if (!hits.length) continue;
+                firstDist = n.mi;
+                bucket = hits.map((h) => ({ ...h, matchedZip: n.zip, distanceMi: n.mi }));
+                break;
+            }
+            traceStep(
+                `[B2B 3b] scannedUntilHit=${scanned}/${neighbors.length} ` +
+                `closestHitZip=${bucket[0] ? bucket[0].matchedZip : '—'} @ ${firstDist != null ? firstDist : '—'}mi ` +
+                `candidates=${bucket.length}`
+            );
+            if (!bucket.length) {
+                traceStep('[B2B 3b] no B2B on neighbor ZIPs — no national random fallback');
+                return null;
+            }
+            const hit = pickRandom(bucket);
+            const f = hit.rec.fields || {};
+            traceStep(
+                `[B2B 3b] random among ${bucket.length} on ${hit.matchedZip}: ` +
+                `${f['Business Name'] || hit.rec.id} @ ${hit.distanceMi}mi (${((Date.now() - t0) / 1000).toFixed(2)}s)`
+            );
+            return {
+                matchMode: 'expanded',
+                matchedZip: hit.matchedZip,
+                distanceMi: hit.distanceMi,
+                leadZip: hit.leadZip,
+                zipSource: hit.zipSource,
+                poolSize: bucket.length,
+                rec: hit.rec,
+            };
+        }
+
+        function emptyRoute(message) {
+            return {
+                phase: 4,
+                tier: null,
+                selected: null,
+                b2b: null,
+                phase1Rows: [],
+                expandedRows: [],
+                message: message || 'No match',
+                matchType: 'None',
+            };
+        }
+
+        /** Exact → CDN expanded → B2B exact → B2B CDN. */
         async function computeLeadRoute(zipInput) {
             const zipFive = zipRouteNormalizeZipFive(zipInput);
-            const empty = { phase: 3, tier: null, selected: null, phase1Rows: [], message: 'No match' };
+            const empty = emptyRoute('No match');
             const trace = [];
             const traceStep = (msg) => trace.push(msg);
             lastLeadRoutePick = empty;
             lastZipRoutingQueue = [];
             lastClientSearchTrace = trace;
-            traceStep(`[S1] rawZip="${String(zipInput || '')}" normalizedZip="${zipFive}"`);
+            traceStep(`[S1] live bathrooms router rawZip="${String(zipInput || '')}" normalizedZip="${zipFive}"`);
+            traceStep('[S1b] rules: Active-only; no capacity; exact→CDN expanded→B2B exact→B2B CDN; no national B2B random');
             if (!/^\d{5}$/.test(zipFive)) {
-                traceStep('[S2] zip validation failed (expected 5 digits)');
-                lastLeadRoutePick = { ...empty, message: 'Invalid zip' };
+                traceStep('[S2] zip validation failed');
+                lastLeadRoutePick = emptyRoute('Invalid zip');
                 return lastLeadRoutePick;
             }
             try {
                 traceStep('[S2] zip validation passed');
-                traceStep('[S3] loading routing infrastructure (US Zips field + Clients cache + Adsets cache)');
                 await zipRouteEnsureInfrastructure();
-                traceStep(`[S3] infrastructure loaded: usZipField="${zipRouteUsMatchField || 'unknown'}" usZipAsNumber=${routingBoolLabel(!!zipRouteUsMatchAsNumber)} clientsCached=${Array.isArray(zipRouteClientsCache) ? zipRouteClientsCache.length : 0} adsetsCached=${zipRouteAdsetById ? zipRouteAdsetById.size : 0}`);
-                traceStep('[S4] building phase-1 exact-zip queue from junction table');
+                traceStep(
+                    `[S3] infra clients=${Array.isArray(zipRouteClientsCache) ? zipRouteClientsCache.length : 0} ` +
+                    `adsets=${zipRouteAdsetById ? zipRouteAdsetById.size : 0}`
+                );
+
+                // Phase 1 exact
+                traceStep('[P1] exact Adset Zip Tracking');
                 const phase1Rows = await zipRouteBuildPhase1Rows(zipFive);
                 lastZipRoutingQueue = phase1Rows;
-                traceStep(`[S4] phase-1 rows found: ${phase1Rows.length}`);
-
                 phase1Rows.forEach((row, idx) => {
-                    const rowClientName = row && row.clientRec && row.clientRec.fields
-                        ? String(row.clientRec.fields.Name || '').trim()
-                        : '';
-                    const rowClientId = row && row.clientRec ? row.clientRec.id : '';
-                    const rowAdsetId = row && row.adsetId ? row.adsetId : '';
-                    const hasClient = !!(row && row.clientRec);
-                    const hasAdset = !!(row && row.adsetRec && row.adsetRec.fields);
-                    const adsetFields = hasAdset ? row.adsetRec.fields : null;
-                    const rowAdsetName = adsetFields && adsetFields['Adset Name']
-                        ? String(adsetFields['Adset Name']).trim()
-                        : '';
-                    const rowAdsetNiche = adsetFields && adsetFields['Adset Niche'] != null
-                        ? (Array.isArray(adsetFields['Adset Niche'])
-                            ? adsetFields['Adset Niche'].map(String).join('|')
-                            : String(adsetFields['Adset Niche']))
-                        : '';
-                    const nicheMatch = hasAdset ? routingAdsetNicheMatchesFunnel(adsetFields) : false;
-                    const clientActive = hasAdset ? routingIsClientActive(row.clientRec, adsetFields) : false;
-                    const adsetActive = hasAdset ? routingIsAdsetActive(adsetFields) : false;
-                    const weeklyRemaining = hasAdset ? routingWeeklyRemaining(adsetFields) : false;
-                    const monthlyRemaining = hasAdset ? routingMonthlyRemaining(adsetFields) : false;
-                    const tier = hasAdset ? routingComputeTier(row.clientRec, adsetFields) : 0;
+                    const af = row.adsetRec && row.adsetRec.fields;
+                    const clientName = row.clientRec && row.clientRec.fields
+                        ? String(row.clientRec.fields.Name || '').trim() : '';
+                    const adsetName = af && af['Adset Name'] ? String(af['Adset Name']).trim() : '';
+                    const tier = af ? routingComputeTier(row.clientRec, af) : 0;
                     traceStep(
-                        `[S4.${idx + 1}] junction=${row && row.junctionId ? row.junctionId : 'none'} adset=${rowAdsetId || 'none'} adsetName="${rowAdsetName || 'unknown'}" adsetNiche="${rowAdsetNiche || 'none'}" client="${rowClientName || 'unknown'}" clientId=${rowClientId || 'none'} hasClient=${routingBoolLabel(hasClient)} hasAdset=${routingBoolLabel(hasAdset)} nicheMatch=${routingBoolLabel(nicheMatch)} clientActive=${routingBoolLabel(clientActive)} adsetActive=${routingBoolLabel(adsetActive)} weeklyRemaining=${routingBoolLabel(weeklyRemaining)} monthlyRemaining=${routingBoolLabel(monthlyRemaining)} tier=${tier}`
+                        `[P1.${idx + 1}] ${tier >= 1 ? 'ELIGIBLE' : 'skip'} j=${row.junctionId || '—'} ` +
+                        `adset=${row.adsetId || '—'} "${adsetName}" client="${clientName}" ` +
+                        `clientActive=${routingBoolLabel(af ? routingIsClientActive(row.clientRec, af) : false)} ` +
+                        `adsetActive=${routingBoolLabel(af ? routingIsAdsetActive(af) : false)} linked=${row.linkCreated || '—'}`
                     );
                 });
-
-                const phase1Candidates = routingDedupeCandidatesByAdset(phase1Rows);
-                traceStep(`[S5] deduped phase-1 candidates by adset: ${phase1Candidates.length}`);
-                const pick1 = routingPickPartnerFromPool(phase1Candidates);
+                const pick1 = routingPickPartnerFromPool(routingDedupeCandidatesByAdset(phase1Rows));
                 if (pick1) {
-                    const pickedName = pick1.clientRec && pick1.clientRec.fields
-                        ? String(pick1.clientRec.fields.Name || '').trim()
-                        : '';
-                    traceStep(`[S6] selected candidate: adset=${pick1.adsetId || 'none'} client="${pickedName || 'unknown'}" clientId=${pick1.clientRec ? pick1.clientRec.id : 'none'} tier=${pick1.tier}`);
+                    const name = pick1.clientRec && pick1.clientRec.fields
+                        ? String(pick1.clientRec.fields.Name || '').trim() : '';
+                    traceStep(`[P1] SELECT exact client="${name}" adset=${pick1.adsetId} junction=${pick1.junctionId}`);
                     lastLeadRoutePick = {
                         phase: 1,
-                        tier: pick1.tier,
+                        tier: 1,
                         selected: pick1,
+                        b2b: null,
                         phase1Rows,
-                        message: `Exact zip match — Tier ${pick1.tier}`,
+                        expandedRows: [],
+                        message: `Exact zip match — ${name || pick1.adsetId}`,
+                        matchType: 'Exact',
                     };
                     return lastLeadRoutePick;
                 }
-                traceStep('[S6] no qualifying candidate after tier checks');
+                traceStep('[P1] no eligible exact Active partner');
+
+                // Phase 2 expanded via CDN
+                traceStep('[P2] CDN expanded Adset Zip Tracking (30mi / top 25)');
+                const neighbors = await routingLoadNeighbors(zipFive, traceStep);
+                const expandedRows = await routingBuildExpandedRows(neighbors, zipFive, traceStep);
+                let shown = 0;
+                for (const row of expandedRows) {
+                    const af = row.adsetRec && row.adsetRec.fields;
+                    if (!af || routingComputeTier(row.clientRec, af) < 1) continue;
+                    const clientName = row.clientRec && row.clientRec.fields
+                        ? String(row.clientRec.fields.Name || '').trim() : '';
+                    const adsetName = af['Adset Name'] ? String(af['Adset Name']).trim() : '';
+                    traceStep(
+                        `[P2.elig] ${clientName || '?'} / ${adsetName || row.adsetId} via ${row.matchedZip} @ ${row.distanceMi}mi`
+                    );
+                    shown += 1;
+                    if (shown >= 10) break;
+                }
+                const pick2 = routingPickClosestThenOldest(expandedRows);
+                if (pick2) {
+                    const name = pick2.clientRec && pick2.clientRec.fields
+                        ? String(pick2.clientRec.fields.Name || '').trim() : '';
+                    traceStep(
+                        `[P2] SELECT expanded client="${name}" adset=${pick2.adsetId} ` +
+                        `via ${pick2.matchedZip} @ ${pick2.distanceMi}mi junction=${pick2.junctionId}`
+                    );
+                    lastLeadRoutePick = {
+                        phase: 2,
+                        tier: 1,
+                        selected: pick2,
+                        b2b: null,
+                        phase1Rows,
+                        expandedRows,
+                        message: `Expanded zip match via ${pick2.matchedZip} @ ${pick2.distanceMi}mi — ${name || pick2.adsetId}`,
+                        matchType: 'Expanded',
+                    };
+                    return lastLeadRoutePick;
+                }
+                traceStep('[P2] no eligible expanded Active partner');
+
+                // Phase 3 B2B geo
+                traceStep('[P3] B2B overflow geo-aware');
+                const b2b = await pickB2BOverflow(zipFive, traceStep);
+                if (b2b && b2b.rec) {
+                    const f = b2b.rec.fields || {};
+                    const biz = String(f['Business Name'] || b2b.rec.id).trim();
+                    traceStep(
+                        `[P3] SELECT B2B ${b2b.matchMode} "${biz}" zip=${b2b.matchedZip}` +
+                        (b2b.distanceMi != null ? ` @ ${b2b.distanceMi}mi` : '')
+                    );
+                    // Synthesize a client-like object so thank-you UI can show a name.
+                    const syntheticClient = {
+                        // Never use a real B2B table id here — hydrateClientReviewsByIdIfNeeded
+                        // would GET Clients/{id} and overwrite Name with the wrong record (or empty).
+                        id: 'b2b:' + String(b2b.rec.id),
+                        createdTime: b2b.rec.createdTime,
+                        isB2B: true,
+                        fields: {
+                            Name: biz,
+                            Status: 'Active',
+                            'Lead Price': null,
+                            'Submit Screen': 'None',
+                            __b2bLive: true,
+                            __b2bRecordId: b2b.rec.id,
+                            __b2bMatchMode: b2b.matchMode,
+                            __b2bMatchedZip: b2b.matchedZip,
+                            __b2bDistanceMi: b2b.distanceMi,
+                        },
+                    };
+                    const syntheticSelected = {
+                        tier: null,
+                        adsetId: null,
+                        clientRec: syntheticClient,
+                        adsetRec: null,
+                        junctionId: null,
+                        linkCreated: null,
+                        matchedZip: b2b.matchedZip,
+                        distanceMi: b2b.distanceMi,
+                        b2bId: b2b.rec.id,
+                        isB2B: true,
+                    };
+                    lastLeadRoutePick = {
+                        phase: 3,
+                        tier: null,
+                        selected: syntheticSelected,
+                        b2b: {
+                            id: b2b.rec.id,
+                            businessName: biz,
+                            matchMode: b2b.matchMode,
+                            matchedZip: b2b.matchedZip,
+                            distanceMi: b2b.distanceMi,
+                            leadZip: b2b.leadZip,
+                            zipSource: b2b.zipSource,
+                            poolSize: b2b.poolSize,
+                            revenue: f['Estimated monthly revenue'] || null,
+                            niches: f['Niche(s)'] || [],
+                            location: f.Location || null,
+                            email: f['Contact Email'] || null,
+                            phone: f['Phone Number'] || f['Parsed Phone'] || null,
+                        },
+                        phase1Rows,
+                        expandedRows,
+                        message:
+                            b2b.matchMode === 'exact'
+                                ? `B2B exact Location ZIP — ${biz}`
+                                : `B2B expanded via ${b2b.matchedZip} @ ${b2b.distanceMi}mi — ${biz}`,
+                        matchType: b2b.matchMode === 'exact' ? 'B2B Exact' : 'B2B Expanded',
+                    };
+                    return lastLeadRoutePick;
+                }
+
+                traceStep('[P4] no B2C partner and no B2B geo match');
                 lastLeadRoutePick = {
-                    phase: 3,
-                    tier: null,
-                    selected: null,
+                    ...emptyRoute('No qualifying partner or B2B geo match'),
                     phase1Rows,
-                    message: 'No qualifying partner for this zip (exact junction + tier rules)',
+                    expandedRows,
                 };
                 return lastLeadRoutePick;
             } catch (e) {
                 console.error('computeLeadRoute failed:', e);
                 traceStep(`[SERR] computeLeadRoute exception: ${String(e && e.message ? e.message : e)}`);
-                lastLeadRoutePick = { ...empty, message: e.message || String(e) };
+                lastLeadRoutePick = emptyRoute(e.message || String(e));
                 lastZipRoutingQueue = [];
                 return lastLeadRoutePick;
             }
         }
+
 
         function isLikelyIpAddress(value) {
             const v = String(value || '').trim();
@@ -3044,10 +3556,19 @@
             const nowIso = new Date().toISOString();
             const route = lastLeadRoutePick || {};
             const selected = route.selected || null;
-            const selectedClientName = selected && selected.clientRec && selected.clientRec.fields
-                ? String(selected.clientRec.fields.Name || '').trim()
-                : '';
-            const selectedClientId = selected && selected.clientRec ? selected.clientRec.id : '';
+            const selectedClientName = (() => {
+                if (route.b2b && route.b2b.businessName) return String(route.b2b.businessName).trim();
+                if (selected && selected.clientRec && selected.clientRec.fields) {
+                    return String(selected.clientRec.fields.Name || '').trim();
+                }
+                return '';
+            })();
+            const selectedClientId = (() => {
+                if (route.b2b && route.b2b.id) return String(route.b2b.id);
+                if (selected && selected.isB2B) return selected.b2bId || '';
+                if (selected && selected.clientRec) return selected.clientRec.id || '';
+                return '';
+            })();
             const selectedAdsetId = selected && selected.adsetId ? selected.adsetId : '';
             const queue = Array.isArray(lastZipRoutingQueue) ? lastZipRoutingQueue : [];
             const phaseRows = Array.isArray(route.phase1Rows) ? route.phase1Rows : [];
@@ -3073,6 +3594,11 @@
                 `Selected Client: ${selectedClientName || 'none'}`,
                 `Selected Client ID: ${selectedClientId || 'none'}`,
                 `Selected Adset ID: ${selectedAdsetId || 'none'}`,
+                `Match Type: ${route.matchType || 'none'}`,
+                `B2B Lead ID: ${(route.b2b && route.b2b.id) || 'none'}`,
+                `B2B Match Mode: ${(route.b2b && route.b2b.matchMode) || 'none'}`,
+                `Matched Zip: ${(selected && selected.matchedZip) || (route.b2b && route.b2b.matchedZip) || 'none'}`,
+                `Distance Mi: ${(selected && selected.distanceMi != null) ? selected.distanceMi : ((route.b2b && route.b2b.distanceMi != null) ? route.b2b.distanceMi : 'none')}`,
                 `Adset Linked To Lead: ${adsetLinked ? 'yes' : 'no'}`,
                 `Queue Count: ${queueToUse.length}`
             ];
@@ -3289,6 +3815,18 @@
 
         async function hydrateClientReviewsByIdIfNeeded(activeClient) {
             if (!activeClient || !activeClient.id || !activeClient.fields) return activeClient;
+            // B2B overflow is not a Clients row — never hydrate from Clients table.
+            if (
+                activeClient.isB2B === true ||
+                (activeClient.fields && (activeClient.fields.__b2bLive || activeClient.fields.__b2bDryRun)) ||
+                String(activeClient.id || '').startsWith('b2b:')
+            ) {
+                tlpDebug('reviews', 'hydrate skipped: B2B synthetic client', {
+                    clientId: activeClient.id,
+                    name: activeClient.fields && activeClient.fields.Name
+                });
+                return activeClient;
+            }
             const currentFields = activeClient.fields;
             const alreadyHasReviewKeys = fieldsContainAnyReviewKeys(currentFields);
             const alreadyHasReviews = collectReviewsFromClientFields(currentFields).length > 0;
@@ -3371,6 +3909,27 @@
                     `<div class="shower-carousel-slide"><img src="${escapeHtml(src)}" alt="" loading="lazy"></div>`
             ).join('');
             return `<div class="shower-carousel-wrap"><div class="shower-carousel" role="region" aria-label="Project photos">${slides}</div></div>`;
+        }
+
+        /** Display name for thank-you / Local Pick title. Prefer route B2B name over hydrated Clients. */
+        function resolveDisplayPartnerName(activeClient, fallback) {
+            const fb = fallback != null ? fallback : 'COMPANY';
+            const b2b = lastLeadRoutePick && lastLeadRoutePick.b2b;
+            if (b2b && b2b.businessName) {
+                const n = String(b2b.businessName).trim();
+                if (n) return n;
+            }
+            if (activeClient && activeClient.fields) {
+                if ((activeClient.fields.__b2bLive || activeClient.fields.__b2bDryRun) && activeClient.fields.Name) {
+                    const n = String(activeClient.fields.Name).trim();
+                    if (n) return n;
+                }
+                if (activeClient.fields.Name) {
+                    const n = String(activeClient.fields.Name).trim();
+                    if (n) return n;
+                }
+            }
+            return fb;
         }
 
         function getActiveClient() {
@@ -3675,9 +4234,7 @@
             }
 
             const activeClient = getActiveClient();
-            const partnerName = (activeClient && activeClient.fields && activeClient.fields['Name'])
-                ? activeClient.fields['Name']
-                : null;
+            const partnerName = resolveDisplayPartnerName(activeClient, null);
             const tcpaContact = getTcpaContactFromClientFields(activeClient && activeClient.fields ? activeClient.fields : null);
             
             if (partnerNameElement) {
@@ -5138,9 +5695,7 @@
             const confirmationReadySubtitle = document.getElementById('confirmationReadySubtitle');
             if (confirmationReadySubtitle && !genericLeadFlow) {
                 const activeClient = getActiveClient();
-                const companyName = (activeClient && activeClient.fields && activeClient.fields['Name'])
-                    ? String(activeClient.fields['Name']).trim()
-                    : 'COMPANY';
+                const companyName = resolveDisplayPartnerName(activeClient, 'COMPANY');
                 confirmationReadySubtitle.textContent = `${companyName} will call you soon to schedule your free estimate!`;
             }
             deactivateSubmitSourceSteps();
@@ -5250,7 +5805,7 @@
 
             mergeStarRatingIntoLocalPickItems(localPickItems, fields);
 
-            const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
+            const partnerName = resolveDisplayPartnerName(activeClient, 'Peak Leads Group');
             buildLocalPickBlock(localPickItems, partnerName);
 
             if (reviewsContainer) reviewsContainer.innerHTML = '';
@@ -5295,7 +5850,7 @@
 
             mergeStarRatingIntoLocalPickItems(localPickItems, fields);
 
-            const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
+            const partnerName = resolveDisplayPartnerName(activeClient, 'Peak Leads Group');
             if (postFormSubmitted) {
                 if (localPickItems.length > 0) {
                     // Keep card + “what happens now” steps in #mainFunnelLocalPickWrap (under logo, above post-submit CTA).
@@ -6043,6 +6598,16 @@ Lead generated on: ${new Date().toLocaleDateString('en-US', {
                         if (leadPriceValue != null && String(leadPriceValue).trim() !== '') {
                             leadPatchFields.Price = leadPriceValue;
                         }
+                    }
+                    // B2B overflow: link B2B Lead (real B2B table record id), never a synthetic client id.
+                    const routedB2bId = (lastLeadRoutePick && lastLeadRoutePick.b2b && lastLeadRoutePick.b2b.id)
+                        ? String(lastLeadRoutePick.b2b.id)
+                        : ((lastLeadRoutePick && lastLeadRoutePick.selected && lastLeadRoutePick.selected.b2bId)
+                            ? String(lastLeadRoutePick.selected.b2bId)
+                            : '');
+                    if (routedB2bId && routedB2bId.startsWith('rec') && !isDuplicateLead) {
+                        leadPatchFields['B2B Lead'] = [routedB2bId];
+                        tlpDebug('routing', 'Linking B2B Lead on B2C record', { leadRecordId, routedB2bId });
                     }
                     await updateLeadFields(leadRecordId, leadPatchFields);
                     adsetLinkDiagnostics.patchOutcome = 'success';
