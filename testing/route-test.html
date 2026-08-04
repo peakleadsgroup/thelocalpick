@@ -515,12 +515,25 @@
       }
 
       async function junctionsForZipRec(zipRecId) {
-        // Prefer reverse links on US Zips, else formula
-        const zipRow = await atFetch(`${TABLES.US_ZIPS}/${encodeURIComponent(zipRecId)}?fields%5B%5D=Zip&fields%5B%5D=Adset%20Zip%20Tracking`);
-        let jids = asLinks(zipRow.fields && zipRow.fields['Adset Zip Tracking']);
+        // Prefer reverse links on US Zips (list endpoint supports fields[]; GET-by-id does not).
+        let jids = [];
+        try {
+          const params = new URLSearchParams();
+          params.set('filterByFormula', `RECORD_ID()="${escFormula(zipRecId)}"`);
+          params.set('maxRecords', '1');
+          params.append('fields[]', 'Zip');
+          params.append('fields[]', 'Adset Zip Tracking');
+          const data = await atFetch(`${TABLES.US_ZIPS}?${params.toString()}`);
+          const zipRow = (data.records || [])[0] || null;
+          jids = asLinks(zipRow && zipRow.fields && zipRow.fields['Adset Zip Tracking']);
+        } catch (e) {
+          // Field may be absent / empty — fall through to junction formula.
+          jids = [];
+        }
         if (jids.length) {
           return listByIds(TABLES.JUNCTION, jids, ['Adset', 'US Zips', 'Linked at', 'Adset Status', 'Client Status', 'Niche']);
         }
+        // Fallback: junction rows whose US Zips link contains this zip record.
         const formula = `FIND("${escFormula(zipRecId)}", ARRAYJOIN({US Zips}))`;
         return listAllFixed(TABLES.JUNCTION, {
           formula,
