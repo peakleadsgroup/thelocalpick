@@ -3195,8 +3195,11 @@
                     );
                     // Synthesize a client-like object so thank-you UI can show a name.
                     const syntheticClient = {
-                        id: b2b.rec.id,
+                        // Never use a real B2B table id here — hydrateClientReviewsByIdIfNeeded
+                        // would GET Clients/{id} and overwrite Name with the wrong record (or empty).
+                        id: 'b2b:' + String(b2b.rec.id),
                         createdTime: b2b.rec.createdTime,
+                        isB2B: true,
                         fields: {
                             Name: biz,
                             Status: 'Active',
@@ -3948,6 +3951,18 @@
 
         async function hydrateClientReviewsByIdIfNeeded(activeClient) {
             if (!activeClient || !activeClient.id || !activeClient.fields) return activeClient;
+            // B2B overflow is not a Clients row — never hydrate from Clients table.
+            if (
+                activeClient.isB2B === true ||
+                (activeClient.fields && activeClient.fields.__b2bDryRun) ||
+                String(activeClient.id || '').startsWith('b2b:')
+            ) {
+                tlpDebug('reviews', 'hydrate skipped: B2B synthetic client', {
+                    clientId: activeClient.id,
+                    name: activeClient.fields && activeClient.fields.Name
+                });
+                return activeClient;
+            }
             const currentFields = activeClient.fields;
             const alreadyHasReviewKeys = fieldsContainAnyReviewKeys(currentFields);
             const alreadyHasReviews = collectReviewsFromClientFields(currentFields).length > 0;
@@ -4030,6 +4045,28 @@
                     `<div class="shower-carousel-slide"><img src="${escapeHtml(src)}" alt="" loading="lazy"></div>`
             ).join('');
             return `<div class="shower-carousel-wrap"><div class="shower-carousel" role="region" aria-label="Project photos">${slides}</div></div>`;
+        }
+
+
+        /** Display name for thank-you / Local Pick title. Prefer route B2B name over hydrated Clients. */
+        function resolveDisplayPartnerName(activeClient, fallback) {
+            const fb = fallback != null ? fallback : 'COMPANY';
+            const b2b = lastLeadRoutePick && lastLeadRoutePick.b2b;
+            if (b2b && b2b.businessName) {
+                const n = String(b2b.businessName).trim();
+                if (n) return n;
+            }
+            if (activeClient && activeClient.fields) {
+                if (activeClient.fields.__b2bDryRun && activeClient.fields.Name) {
+                    const n = String(activeClient.fields.Name).trim();
+                    if (n) return n;
+                }
+                if (activeClient.fields.Name) {
+                    const n = String(activeClient.fields.Name).trim();
+                    if (n) return n;
+                }
+            }
+            return fb;
         }
 
         function getActiveClient() {
@@ -4334,9 +4371,7 @@
             }
 
             const activeClient = getActiveClient();
-            const partnerName = (activeClient && activeClient.fields && activeClient.fields['Name'])
-                ? activeClient.fields['Name']
-                : null;
+            const partnerName = resolveDisplayPartnerName(activeClient, null);
             const tcpaContact = getTcpaContactFromClientFields(activeClient && activeClient.fields ? activeClient.fields : null);
             
             if (partnerNameElement) {
@@ -5797,9 +5832,7 @@
             const confirmationReadySubtitle = document.getElementById('confirmationReadySubtitle');
             if (confirmationReadySubtitle && !genericLeadFlow) {
                 const activeClient = getActiveClient();
-                const companyName = (activeClient && activeClient.fields && activeClient.fields['Name'])
-                    ? String(activeClient.fields['Name']).trim()
-                    : 'COMPANY';
+                const companyName = resolveDisplayPartnerName(activeClient, 'COMPANY');
                 confirmationReadySubtitle.textContent = `${companyName} will call you soon to schedule your free estimate!`;
             }
             deactivateSubmitSourceSteps();
@@ -5909,7 +5942,7 @@
 
             mergeStarRatingIntoLocalPickItems(localPickItems, fields);
 
-            const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
+            const partnerName = resolveDisplayPartnerName(activeClient, 'Peak Leads Group');
             buildLocalPickBlock(localPickItems, partnerName);
 
             if (reviewsContainer) reviewsContainer.innerHTML = '';
@@ -5954,7 +5987,7 @@
 
             mergeStarRatingIntoLocalPickItems(localPickItems, fields);
 
-            const partnerName = (fields['Name'] && String(fields['Name']).trim()) || 'Peak Leads Group';
+            const partnerName = resolveDisplayPartnerName(activeClient, 'Peak Leads Group');
             if (postFormSubmitted) {
                 if (localPickItems.length > 0) {
                     // Keep card + “what happens now” steps in #mainFunnelLocalPickWrap (under logo, above post-submit CTA).

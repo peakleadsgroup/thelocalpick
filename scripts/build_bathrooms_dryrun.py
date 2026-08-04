@@ -740,8 +740,11 @@ NEW_ROUTING = r'''
                     );
                     // Synthesize a client-like object so thank-you UI can show a name.
                     const syntheticClient = {
-                        id: b2b.rec.id,
+                        // Never use a real B2B table id here — hydrateClientReviewsByIdIfNeeded
+                        // would GET Clients/{id} and overwrite Name with the wrong record (or empty).
+                        id: 'b2b:' + String(b2b.rec.id),
                         createdTime: b2b.rec.createdTime,
+                        isB2B: true,
                         fields: {
                             Name: biz,
                             Status: 'Active',
