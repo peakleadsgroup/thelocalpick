@@ -533,8 +533,8 @@
         if (jids.length) {
           return listByIds(TABLES.JUNCTION, jids, ['Adset', 'US Zips', 'Linked at', 'Adset Status', 'Client Status', 'Niche']);
         }
-        // Fallback: junction rows whose US Zips link contains this zip record.
-        const formula = `FIND("${escFormula(zipRecId)}", ARRAYJOIN({US Zips}))`;
+        // Fallback: same formula as live bathrooms — linked-record equality on US Zips.
+        const formula = `{US Zips}="${escFormula(zipRecId)}"`;
         return listAllFixed(TABLES.JUNCTION, {
           formula,
           fields: ['Adset', 'US Zips', 'Linked at', 'Adset Status', 'Client Status', 'Niche'],
