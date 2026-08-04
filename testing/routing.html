@@ -143,7 +143,8 @@
     <h1>Local Pick route test</h1>
     <div class="sub">
       Dry-run only: enter a ZIP and see <strong>what would be linked</strong> plus the decision steps.
-      Flow = exact Adset Zip Tracking → expanded CDN neighbors → B2B overflow.
+      Flow = exact Adset Zip Tracking → expanded CDN neighbors → B2B overflow
+      (B2B = exact <code>Location</code> ZIP first, random if many, else CDN neighbors).
       Does <strong>not</strong> write to Airtable and does <strong>not</strong> touch live <code>/bathrooms</code>.
     </div>
 
@@ -174,8 +175,8 @@
         </div>
 
         <div class="checks">
-          <label><input id="useExpanded" type="checkbox" checked /> Phase 2: expanded (CDN 30mi / top 25)</label>
-          <label><input id="useB2B" type="checkbox" checked /> Phase 3: B2B overflow ($100K+ pool, random)</label>
+          <label><input id="useExpanded" type="checkbox" checked /> Phase 2: expanded adsets (CDN 30mi / top 25)</label>
+          <label><input id="useB2B" type="checkbox" checked /> Phase 3: B2B overflow (exact ZIP → CDN)</label>
         </div>
 
         <div class="btns">
@@ -188,8 +189,9 @@
         <div class="meta" id="status">Ready. No Airtable writes.</div>
         <div class="note">
           Partner pick among eligible Active matches = oldest junction <code>Linked at</code>.
-          B2B overflow = pure random from qualified pool (not sticky).
-          When this logic is live, the same decision log is intended for B2C <code>Log</code>.
+          B2B = match homeowner ZIP to B2B <code>Location</code> (Notes <code>Zip Code:</code> fallback);
+          multiple exact hits = random; no exact = CDN neighbors (closest, random among same ZIP).
+          No national random fallback after geo miss. When live, decision log → B2C <code>Log</code>.
         </div>
       </div>
 
@@ -244,12 +246,14 @@
       };
 
       const PRESETS = [
-        { zip: '03839', note: 'exact proof' },
-        { zip: '03805', note: 'expanded proof' },
+        { zip: '03839', note: 'exact adset' },
+        { zip: '03805', note: 'expanded adset' },
+        { zip: '91377', note: 'B2B exact multi' },
+        { zip: '91301', note: 'B2B via CDN' },
+        { zip: '33155', note: 'B2B exact' },
+        { zip: '99999', note: 'none / no geo' },
         { zip: '75010', note: 'TX probe' },
-        { zip: '99999', note: 'B2B / none geo' },
         { zip: '10001', note: 'dense NYC' },
-        { zip: '59001', note: 'sparse MT' },
       ];
 
       let clientsCache = null;
@@ -768,7 +772,52 @@
         return have.some((h) => aliases.some((a) => h === a || h.includes(a) || a.includes(h)));
       }
 
-      async function pickB2BOverflow(funnelNiche, steps) {
+      function extractB2bZip(fields) {
+        const loc = String((fields && fields.Location) || '').trim();
+        if (loc) {
+          const pure = loc.match(/^(\d{5})(?:-\d{4})?$/);
+          if (pure) return pure[1];
+          // Location sometimes "City ST 12345" or bare zip with junk
+          const embedded = loc.match(/\b(\d{5})(?:-\d{4})?\b/);
+          if (embedded) return embedded[1];
+        }
+        const notes = String((fields && fields.Notes) || '');
+        const fromNotes =
+          notes.match(/Zip\s*Code\s*:\s*(\d{5})\b/i) ||
+          notes.match(/\bZIP\b\s*[:=]?\s*(\d{5})\b/i);
+        if (fromNotes) return fromNotes[1];
+        return null;
+      }
+
+      function summarizeB2b(rec, extra = {}) {
+        const f = (rec && rec.fields) || {};
+        return {
+          id: rec.id,
+          businessName: f['Business Name'] || null,
+          status: f.Status || null,
+          discoveryStatus: f['Discovery Status'] || null,
+          revenue: f['Estimated monthly revenue'] || null,
+          niches: f['Niche(s)'] || [],
+          email: f['Contact Email'] || null,
+          phone: f['Phone Number'] || f['Parsed Phone'] || null,
+          location: f.Location || null,
+          leadZip: extra.leadZip || extractB2bZip(f),
+          zipSource: extra.zipSource || null,
+          created: rec.createdTime || f.Created || null,
+          matchMode: extra.matchMode || null,
+          matchedZip: extra.matchedZip || null,
+          distanceMi: extra.distanceMi != null ? extra.distanceMi : null,
+          poolSize: extra.poolSize != null ? extra.poolSize : null,
+          candidateCount: extra.candidateCount != null ? extra.candidateCount : null,
+        };
+      }
+
+      function pickRandom(arr) {
+        if (!arr || !arr.length) return null;
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      async function loadQualifiedB2bPool(funnelNiche, steps) {
         const t0 = msNow();
         const formula = [
           `NOT({Status}="Disqualified")`,
@@ -789,6 +838,7 @@
           'Parsed Phone',
           'Created',
           'Location',
+          'Notes',
         ];
 
         const pool = [];
@@ -804,11 +854,14 @@
           pool.push(...(page.records || []));
           offset = page.offset || null;
           pages += 1;
-          if (pages >= 5) break; // keep test tool snappy
+          // B2B geo needs broader inventory than the old random 5-page snip when possible
+          if (pages >= 15) break;
           if (offset) await sleep(120);
         } while (offset);
 
         const qualified = [];
+        let noZip = 0;
+        const byZip = new Map(); // zip5 -> [{rec, zipSource}]
         for (const rec of pool) {
           const f = rec.fields || {};
           if (f.Status === 'Disqualified') continue;
@@ -820,35 +873,145 @@
           if (!revenueQualifies100k(f['Estimated monthly revenue'])) continue;
           const created = rec.createdTime || f.Created;
           if (!created || Date.parse(created) < Date.parse(B2B_CREATED_AFTER)) continue;
+
+          const loc = String(f.Location || '').trim();
+          let zipSource = null;
+          let leadZip = null;
+          if (loc) {
+            const pure = loc.match(/^(\d{5})(?:-\d{4})?$/);
+            if (pure) {
+              leadZip = pure[1];
+              zipSource = 'Location';
+            } else {
+              const embedded = loc.match(/\b(\d{5})(?:-\d{4})?\b/);
+              if (embedded) {
+                leadZip = embedded[1];
+                zipSource = 'Location-embedded';
+              }
+            }
+          }
+          if (!leadZip) {
+            const notes = String(f.Notes || '');
+            const fromNotes =
+              notes.match(/Zip\s*Code\s*:\s*(\d{5})\b/i) ||
+              notes.match(/\bZIP\b\s*[:=]?\s*(\d{5})\b/i);
+            if (fromNotes) {
+              leadZip = fromNotes[1];
+              zipSource = 'Notes';
+            }
+          }
+
           qualified.push(rec);
+          if (!leadZip) {
+            noZip += 1;
+            continue;
+          }
+          if (!byZip.has(leadZip)) byZip.set(leadZip, []);
+          byZip.get(leadZip).push({ rec, zipSource, leadZip });
         }
 
         steps.push(
-          `B2B pool: fetched=${pool.length} over ${pages} page(s), qualified=${qualified.length} ` +
-          `(niche~${funnelNiche}, rev floor ≥ $100k, created after 2025-09-02) in ${((msNow() - t0) / 1000).toFixed(2)}s`
+          `B2B pool: fetched=${pool.length} over ${pages} page(s), qualified=${qualified.length}, ` +
+          `withZip=${qualified.length - noZip}, noZip=${noZip}, distinctZips=${byZip.size} ` +
+          `(niche~${funnelNiche}, rev ≥ $100k, after 2025-09-02) in ${((msNow() - t0) / 1000).toFixed(2)}s`
         );
+        return { qualified, byZip, noZip };
+      }
 
-        if (!qualified.length) return null;
-        const pick = qualified[Math.floor(Math.random() * qualified.length)];
-        const f = pick.fields || {};
+      async function pickB2BOverflow(homeZip, funnelNiche, steps, { useExpandedGeo = true } = {}) {
+        const t0 = msNow();
+        const { byZip } = await loadQualifiedB2bPool(funnelNiche, steps);
+
+        // Phase 3a — exact Location ZIP
+        steps.push(`   B2B 3a — exact Location ZIP = ${homeZip}`);
+        const exactHits = byZip.get(homeZip) || [];
+        steps.push(`   exact B2B hits on ${homeZip}: ${exactHits.length}`);
+        exactHits.slice(0, 8).forEach((h, i) => {
+          const f = h.rec.fields || {};
+          steps.push(
+            `   exactB2B[${i + 1}] ${f['Business Name'] || h.rec.id} | loc=${f.Location || '—'} | ` +
+            `src=${h.zipSource} | rev=${f['Estimated monthly revenue'] || '—'}`
+          );
+        });
+        if (exactHits.length) {
+          const hit = pickRandom(exactHits);
+          const f = hit.rec.fields || {};
+          steps.push(
+            `   B2B exact random among ${exactHits.length}: ${f['Business Name'] || hit.rec.id} ` +
+            `(${((msNow() - t0) / 1000).toFixed(2)}s)`
+          );
+          return summarizeB2b(hit.rec, {
+            matchMode: 'exact',
+            matchedZip: homeZip,
+            distanceMi: 0,
+            leadZip: hit.leadZip,
+            zipSource: hit.zipSource,
+            poolSize: exactHits.length,
+            candidateCount: exactHits.length,
+          });
+        }
+
+        // Phase 3b — CDN neighbor ZIPs (same pack as adset expanded)
+        if (!useExpandedGeo) {
+          steps.push('   B2B 3b skipped (expanded toggle off)');
+          return null;
+        }
+        steps.push('   B2B 3b — CDN neighbor ZIPs (30mi / top 25, closest first)');
+        const neighbors = await loadNeighbors(homeZip, steps);
+        if (!neighbors.length) {
+          steps.push('   no CDN neighbors — no B2B geo match');
+          return null;
+        }
+
+        // Walk closest-first; first neighbor ZIP with any B2B hit wins; random among that ZIP.
+        let scanned = 0;
+        let firstDist = null;
+        let bucket = [];
+        for (const n of neighbors) {
+          const z = normZip(n.zip);
+          if (!/^\d{5}$/.test(z)) continue;
+          scanned += 1;
+          const hits = byZip.get(z) || [];
+          if (!hits.length) continue;
+          const dist = Number(n.mi);
+          bucket = hits.map((h) => ({ ...h, matchedZip: z, distanceMi: dist }));
+          firstDist = dist;
+          // First (closest) neighbor ZIP with hits wins; randomize among that ZIP only.
+          break;
+        }
+
         steps.push(
-          `B2B random pick (${qualified.length} eligible): ${f['Business Name'] || pick.id} | ` +
-          `rev=${f['Estimated monthly revenue'] || '—'} | niches=${JSON.stringify(f['Niche(s)'] || [])} | ` +
-          `status=${f.Status || '—'} | discovery=${f['Discovery Status'] || '—'}`
+          `   B2B CDN scan: neighbors=${neighbors.length}, scannedUntilHit=${scanned}, ` +
+          `closestHitZip=${bucket[0] ? bucket[0].matchedZip : '—'} @ ${firstDist != null ? firstDist : '—'}mi, ` +
+          `candidates=${bucket.length}`
         );
-        return {
-          id: pick.id,
-          businessName: f['Business Name'] || null,
-          status: f.Status || null,
-          discoveryStatus: f['Discovery Status'] || null,
-          revenue: f['Estimated monthly revenue'] || null,
-          niches: f['Niche(s)'] || [],
-          email: f['Contact Email'] || null,
-          phone: f['Phone Number'] || f['Parsed Phone'] || null,
-          location: f.Location || null,
-          created: pick.createdTime || f.Created || null,
-          poolSize: qualified.length,
-        };
+        if (!bucket.length) {
+          steps.push('   no B2B on CDN neighbor ZIPs — no national random fallback');
+          return null;
+        }
+
+        bucket.slice(0, 8).forEach((h, i) => {
+          const f = h.rec.fields || {};
+          steps.push(
+            `   expB2B[${i + 1}] ${f['Business Name'] || h.rec.id} | leadZip=${h.leadZip} | ` +
+            `via=${h.matchedZip} @ ${h.distanceMi}mi | rev=${f['Estimated monthly revenue'] || '—'}`
+          );
+        });
+        const hit = pickRandom(bucket);
+        const f = hit.rec.fields || {};
+        steps.push(
+          `   B2B expanded random among ${bucket.length} on ${hit.matchedZip}: ` +
+          `${f['Business Name'] || hit.rec.id} @ ${hit.distanceMi}mi (${((msNow() - t0) / 1000).toFixed(2)}s)`
+        );
+        return summarizeB2b(hit.rec, {
+          matchMode: 'expanded',
+          matchedZip: hit.matchedZip,
+          distanceMi: hit.distanceMi,
+          leadZip: hit.leadZip,
+          zipSource: hit.zipSource,
+          poolSize: bucket.length,
+          candidateCount: bucket.length,
+        });
       }
 
       function buildDecisionLog(result) {
@@ -872,8 +1035,12 @@
         }
         if (result.b2b) {
           const b = result.b2b;
-          lines.push(`wouldLink.b2b=${b.businessName || '—'} (${b.id || '—'}) poolSize=${b.poolSize}`);
+          lines.push(`wouldLink.b2b=${b.businessName || '—'} (${b.id || '—'}) mode=${b.matchMode || '—'} poolSize=${b.poolSize}`);
           lines.push(`b2b.revenue=${b.revenue || '—'} niches=${JSON.stringify(b.niches || [])}`);
+          lines.push(`b2b.location=${b.location || '—'} leadZip=${b.leadZip || '—'} zipSource=${b.zipSource || '—'}`);
+          if (b.matchMode === 'expanded' || (b.matchedZip && b.distanceMi)) {
+            lines.push(`b2b.matchedZip=${b.matchedZip || '—'} distanceMi=${b.distanceMi}`);
+          }
         }
         lines.push('— steps —');
         for (const s of result.steps || []) lines.push(s);
@@ -989,16 +1156,23 @@
 
           // Phase 3 B2B
           if ($('useB2B').checked) {
-            steps.push('4) Phase 3 — B2B overflow ($100K+, not Close Won / Disqualified, random)');
-            const b2b = await pickB2BOverflow(funnelNiche, steps);
+            steps.push('4) Phase 3 — B2B overflow (exact Location ZIP → CDN neighbors)');
+            // B2B geo always uses CDN on exact miss (independent of Phase 2 adset toggle)
+            const b2b = await pickB2BOverflow(zip5, funnelNiche, steps, {
+              useExpandedGeo: true,
+            });
             if (b2b) {
-              steps.push(`5) RESULT B2B — would link B2B Lead ${b2b.businessName} (${b2b.id})`);
+              const modeLabel = b2b.matchMode === 'exact' ? 'Exact ZIP' : `Expanded via ${b2b.matchedZip} @ ${b2b.distanceMi}mi`;
+              steps.push(`5) RESULT B2B — would link B2B Lead ${b2b.businessName} (${b2b.id}) [${modeLabel}]`);
               finish({
                 zip: zip5,
                 funnelNiche,
                 phase: 3,
                 matchType: 'B2B',
-                message: `Would link B2B → ${b2b.businessName} (${b2b.poolSize} qualified)`,
+                message:
+                  b2b.matchMode === 'exact'
+                    ? `Would link B2B Exact → ${b2b.businessName} (${b2b.candidateCount} on ${zip5})`
+                    : `Would link B2B Expanded → ${b2b.businessName} via ${b2b.matchedZip} @ ${b2b.distanceMi}mi`,
                 selected: null,
                 b2b,
                 exactRows: exactRows.length,
@@ -1009,7 +1183,7 @@
               });
               return;
             }
-            steps.push('   no qualified B2B overflow lead');
+            steps.push('   no qualified B2B geo match (exact or CDN)');
           } else {
             steps.push('4) Phase 3 skipped (toggle off)');
           }
@@ -1102,11 +1276,17 @@
           rows.push(
             ['Would link B2B', b.businessName || '—'],
             ['B2B ID', b.id || '—'],
+            ['B2B mode', b.matchMode || '—'],
+            ['B2B location', b.location || '—'],
+            ['B2B lead ZIP', b.leadZip || '—'],
+            ['ZIP source', b.zipSource || '—'],
+            ['Matched via ZIP', b.matchedZip || '—'],
+            ['Distance', b.distanceMi != null ? `${b.distanceMi} mi` : '—'],
             ['Revenue', b.revenue || '—'],
             ['Niches', (b.niches || []).join(', ') || '—'],
             ['Status', b.status || '—'],
             ['Discovery', b.discoveryStatus || '—'],
-            ['Pool size', b.poolSize],
+            ['Candidates at match ZIP', b.candidateCount != null ? b.candidateCount : b.poolSize],
           );
         }
 
