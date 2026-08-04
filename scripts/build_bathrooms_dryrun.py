@@ -159,6 +159,10 @@ NEW_ROUTING = r'''
         // B2B exact Location ZIP (random ties) → B2B CDN neighbors
         // No weekly/monthly capacity in matcher. No national B2B random.
         // ============================================================
+        function routingBoolLabel(v) {
+            return v ? 'yes' : 'no';
+        }
+
         const GEO_NEIGHBOR_BASE = 'https://geo.thelocalpick.com/zip-neighbors-30mi/by-zip';
         const GEO_MAX_MILES = 30;
         const GEO_MAX_NEIGHBORS = 25;
