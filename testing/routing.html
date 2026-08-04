@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Local Pick Route Test (dry-run)</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #121a2b;
+      --panel2: #182338;
+      --line: #2a3854;
+      --text: #e8eefc;
+      --muted: #9db0d0;
+      --accent: #5b8cff;
+      --good: #3ecf8e;
+      --warn: #f0b429;
+      --bad: #ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, #1a2744 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 18px 60px; }
+    h1 { margin: 0 0 6px; font-size: 1.55rem; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); margin-bottom: 18px; line-height: 1.45; }
+    .banner {
+      border: 1px solid #1f4d38;
+      background: linear-gradient(90deg, #10261c, #0f1a16);
+      color: #b7f0d2;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      font-size: 0.95rem;
+    }
+    .banner strong { color: #d9ffe9; }
+    .grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 16px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: rgba(18, 26, 43, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 6px; }
+    input[type="text"], select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 1rem;
+      outline: none;
+    }
+    input[type="text"]:focus, select:focus { border-color: var(--accent); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+    .checks { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 14px; }
+    .checks label { display: flex; gap: 8px; align-items: center; color: var(--text); font-size: 0.92rem; margin: 0; }
+    .checks input { accent-color: var(--accent); }
+    .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+    }
+    button.secondary { background: #2a3b5f; }
+    button.ghost { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+    button:disabled { opacity: 0.55; cursor: wait; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .chip {
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--text); }
+    .result-head { display: flex; justify-content: space-between; gap: 10px; align-items: start; margin-bottom: 10px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .badge.exact { background: rgba(91,140,255,0.18); color: #9bbcff; border: 1px solid rgba(91,140,255,0.35); }
+    .badge.expanded { background: rgba(176,124,255,0.16); color: #d2b4ff; border: 1px solid rgba(176,124,255,0.35); }
+    .badge.b2b { background: rgba(240,180,41,0.14); color: #ffd76a; border: 1px solid rgba(240,180,41,0.35); }
+    .badge.none { background: rgba(255,107,107,0.12); color: #ff9b9b; border: 1px solid rgba(255,107,107,0.3); }
+    .badge.idle { background: rgba(157,176,208,0.1); color: var(--muted); border: 1px solid var(--line); }
+    .kv { display: grid; grid-template-columns: 150px 1fr; gap: 6px 10px; font-size: 0.95rem; }
+    .kv div:nth-child(odd) { color: var(--muted); }
+    .kv div:nth-child(even) { word-break: break-word; }
+    pre {
+      margin: 0;
+      background: #0a101c;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      overflow: auto;
+      max-height: 480px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      color: #d7e3ff;
+      white-space: pre-wrap;
+    }
+    .meta { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
+    .section-title { margin: 18px 0 8px; font-size: 0.95rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .ok { color: var(--good); }
+    .bad { color: var(--bad); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .note {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Local Pick route test</h1>
+    <div class="sub">
+      Dry-run only: enter a ZIP and see <strong>what would be linked</strong> plus the decision steps.
+      Flow = exact Adset Zip Tracking → expanded CDN neighbors → B2B overflow.
+      Does <strong>not</strong> write to Airtable and does <strong>not</strong> touch live <code>/bathrooms</code>.
+    </div>
+
+    <div class="banner">
+      <strong>Read-only.</strong> No B2C lead create/update. No capacity checks — Active partners only; caps stay in separate automations.
+      Duplicate phone checks happen at real submit time on the live funnel (not on this page).
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="row">
+          <div>
+            <label for="zip">Homeowner ZIP</label>
+            <input id="zip" type="text" inputmode="numeric" maxlength="10" placeholder="03805" value="03805" />
+          </div>
+          <div>
+            <label for="niche">Funnel niche (Adset Niche)</label>
+            <select id="niche">
+              <option value="Bathrooms" selected>Bathrooms</option>
+              <option value="Kitchens">Kitchens</option>
+              <option value="Windows">Windows</option>
+              <option value="Floor Coating">Floor Coating</option>
+              <option value="Fencing">Fencing</option>
+              <option value="Concrete Polishing">Concrete Polishing</option>
+              <option value="Sealcoating">Sealcoating</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="checks">
+          <label><input id="useExpanded" type="checkbox" checked /> Phase 2: expanded (CDN 30mi / top 25)</label>
+          <label><input id="useB2B" type="checkbox" checked /> Phase 3: B2B overflow ($100K+ pool, random)</label>
+        </div>
+
+        <div class="btns">
+          <button id="runBtn" type="button">Run route</button>
+          <button id="clearBtn" class="secondary" type="button">Clear</button>
+          <button id="copyBtn" class="ghost" type="button">Copy decision log</button>
+        </div>
+
+        <div class="chips" id="presets"></div>
+        <div class="meta" id="status">Ready. No Airtable writes.</div>
+        <div class="note">
+          Partner pick among eligible Active matches = oldest junction <code>Linked at</code>.
+          B2B overflow = pure random from qualified pool (not sticky).
+          When this logic is live, the same decision log is intended for B2C <code>Log</code>.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="result-head">
+          <div>
+            <div class="section-title" style="margin-top:0">Would link</div>
+            <div id="summary">Enter a ZIP and run.</div>
+          </div>
+          <span id="badge" class="badge idle">idle</span>
+        </div>
+        <div class="kv" id="kv"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Decision steps (future B2C Log)</div>
+    <div class="card"><pre id="trace">No run yet.</pre></div>
+
+    <div class="section-title">Raw JSON</div>
+    <div class="card"><pre id="raw">{}</pre></div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const AIRTABLE_BASE_ID = 'appmBb0lzqRK9dI8v';
+      const AIRTABLE_BASE_URL = `/api/airtable/v0/${AIRTABLE_BASE_ID}`;
+      const GEO_BASE = 'https://geo.thelocalpick.com/zip-neighbors-30mi/by-zip';
+
+      const TABLES = {
+        CLIENTS: 'tblH2nVfmGNG8pAjC',
+        ADSETS: 'tblee61crNCoSfurx',
+        JUNCTION: 'tbl87JqHAdJwgq1GL',
+        US_ZIPS: 'tblieaHIf6rDfFZFl',
+        B2B: 'tbldNpwtCN9y5Pkiy',
+      };
+
+      const MAX_MILES = 30.0;
+      const MAX_NEIGHBOR_ZIPS = 25;
+      const BATCH = 20;
+      const B2B_CREATED_AFTER = '2025-09-02T00:00:00.000Z';
+
+      const B2B_NICHE_ALIASES = {
+        bathrooms: ['bathroom remodeling', 'bathroom remodel', 'bathrooms', 'bath remodeling'],
+        kitchens: ['kitchen remodeling', 'kitchen remodel', 'kitchens'],
+        windows: ['windows', 'window replacement'],
+        'floor coating': ['floor coating', 'concrete/coatings', 'concrete coatings', 'epoxy'],
+        fencing: ['fencing', 'fence'],
+        'concrete polishing': ['concrete polishing', 'concrete/coatings'],
+        sealcoating: ['sealcoating', 'seal coating', 'line striping'],
+      };
+
+      const PRESETS = [
+        { zip: '03839', note: 'exact proof' },
+        { zip: '03805', note: 'expanded proof' },
+        { zip: '75010', note: 'TX probe' },
+        { zip: '99999', note: 'B2B / none geo' },
+        { zip: '10001', note: 'dense NYC' },
+        { zip: '59001', note: 'sparse MT' },
+      ];
+
+      let clientsCache = null;
+      let adsetById = null;
+      let lastResult = null;
+
+      const $ = (id) => document.getElementById(id);
+      const zipEl = $('zip');
+      const nicheEl = $('niche');
+      const runBtn = $('runBtn');
+      const clearBtn = $('clearBtn');
+      const copyBtn = $('copyBtn');
+      const statusEl = $('status');
+      const summaryEl = $('summary');
+      const badgeEl = $('badge');
+      const kvEl = $('kv');
+      const traceEl = $('trace');
+      const rawEl = $('raw');
+      const presetsEl = $('presets');
+
+      PRESETS.forEach((p) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'chip';
+        b.textContent = `${p.zip} · ${p.note}`;
+        b.addEventListener('click', () => {
+          zipEl.value = p.zip;
+          runRoute();
+        });
+        presetsEl.appendChild(b);
+      });
+
+      runBtn.addEventListener('click', () => runRoute());
+      clearBtn.addEventListener('click', () => {
+        lastResult = null;
+        summaryEl.textContent = 'Cleared.';
+        badgeEl.className = 'badge idle';
+        badgeEl.textContent = 'idle';
+        kvEl.innerHTML = '';
+        traceEl.textContent = 'No run yet.';
+        rawEl.textContent = '{}';
+        statusEl.textContent = 'Ready. No Airtable writes.';
+      });
+      copyBtn.addEventListener('click', async () => {
+        const text = (lastResult && lastResult.decisionLog) || traceEl.textContent || '';
+        try {
+          await navigator.clipboard.writeText(text);
+          statusEl.textContent = 'Copied decision log.';
+        } catch {
+          statusEl.textContent = 'Copy failed — select the log manually.';
+        }
+      });
+      zipEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') runRoute();
+      });
+
+      function normZip(z) {
+        const digits = String(z || '').replace(/\D/g, '');
+        if (digits.length >= 5) return digits.slice(0, 5);
+        return digits.padStart(5, '0').slice(-5);
+      }
+
+      function escFormula(s) {
+        return String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      }
+
+      function isActive(val) {
+        return String(val || '').trim().toLowerCase() === 'active';
+      }
+
+      function firstLink(val) {
+        if (Array.isArray(val)) return val[0] || null;
+        if (typeof val === 'string' && val.startsWith('rec')) return val;
+        return null;
+      }
+
+      function asLinks(val) {
+        if (!val) return [];
+        if (Array.isArray(val)) return val.filter((x) => typeof x === 'string' && x.startsWith('rec'));
+        if (typeof val === 'string' && val.startsWith('rec')) return [val];
+        return [];
+      }
+
+      function sleep(ms) {
+        return new Promise((r) => setTimeout(r, ms));
+      }
+
+      function msNow() {
+        return performance.now();
+      }
+
+      function setBadge(kind, label) {
+        badgeEl.className = `badge ${kind}`;
+        badgeEl.textContent = label;
+      }
+
+      function setKV(rows) {
+        kvEl.innerHTML = rows
+          .map(([k, v]) => `<div>${k}</div><div>${v == null || v === '' ? '—' : String(v)}</div>`)
+          .join('');
+      }
+
+      // GET only — this page never POSTs/PATCHes Airtable.
+      async function atGet(pathAndQuery) {
+        const url = `${AIRTABLE_BASE_URL}/${pathAndQuery.replace(/^\//, '')}`;
+        const res = await fetch(url, { method: 'GET' });
+        const text = await res.text();
+        let data = null;
+        try { data = text ? JSON.parse(text) : null; } catch { data = { raw: text }; }
+        if (!res.ok) {
+          const msg = (data && ((data.error && (data.error.message || data.error)) || data.message)) || text || res.statusText;
+          throw new Error(`Airtable ${res.status}: ${msg}`);
+        }
+        return data;
+      }
+
+      async function listAll(table, { fields, formula, pageSize = 100, maxRecords = null } = {}) {
+        const out = [];
+        let offset = null;
+        do {
+          const params = new URLSearchParams();
+          params.set('pageSize', String(pageSize));
+          if (formula) params.set('filterByFormula', formula);
+          if (fields) fields.forEach((f) => params.append('fields[]', f));
+          if (offset) params.set('offset', offset);
+          const page = await atGet(`${table}?${params.toString()}`);
+          out.push(...(page.records || []));
+          if (maxRecords && out.length >= maxRecords) return out.slice(0, maxRecords);
+          offset = page.offset || null;
+          if (offset) await sleep(120);
+        } while (offset);
+        return out;
+      }
+
+      async function listByIds(table, ids, fields) {
+        const uniq = [];
+        const seen = new Set();
+        for (const id of ids || []) {
+          if (!id || seen.has(id)) continue;
+          seen.add(id);
+          uniq.push(id);
+        }
+        const out = [];
+        for (let i = 0; i < uniq.length; i += BATCH) {
+          const chunk = uniq.slice(i, i + BATCH);
+          const formula = `OR(${chunk.map((id) => `RECORD_ID()="${escFormula(id)}"`).join(',')})`;
+          const params = new URLSearchParams();
+          params.set('filterByFormula', formula);
+          params.set('pageSize', '100');
+          if (fields) fields.forEach((f) => params.append('fields[]', f));
+          const page = await atGet(`${table}?${params.toString()}`);
+          out.push(...(page.records || []));
+          if (i + BATCH < uniq.length) await sleep(80);
+        }
+        return out;
+      }
+
+      async function ensureInfra(steps) {
+        if (clientsCache && adsetById) {
+          steps.push(`Infra cache hit: ${clientsCache.length} clients, ${adsetById.size} adsets`);
+          return;
+        }
+        steps.push('Loading Clients + Adsets (read-only)…');
+        const t0 = msNow();
+        const [clients, adsets] = await Promise.all([
+          listAll(TABLES.CLIENTS, { fields: ['Name', 'Status', 'Adsets'] }),
+          listAll(TABLES.ADSETS, {
+            fields: [
+              'Adset Name',
+              'Adset Niche',
+              'Adset Status',
+              'Client Status',
+              'Adset Zip Tracking',
+              'Client',
+            ],
+          }),
+        ]);
+        clientsCache = clients;
+        adsetById = new Map(adsets.map((r) => [r.id, r]));
+        steps.push(
+          `Infra loaded in ${((msNow() - t0) / 1000).toFixed(2)}s — clients=${clients.length}, adsets=${adsets.length}`
+        );
+      }
+
+      function clientForAdset(adsetId) {
+        if (!adsetId || !clientsCache) return null;
+        for (const c of clientsCache) {
+          if (asLinks(c.fields && c.fields.Adsets).includes(adsetId)) return c;
+        }
+        const a = adsetById && adsetById.get(adsetId);
+        const cid = firstLink(a && a.fields && a.fields.Client);
+        if (cid) return clientsCache.find((c) => c.id === cid) || null;
+        return null;
+      }
+
+      function nicheMatchesAdset(adsetFields, funnelNiche) {
+        if (!adsetFields) return false;
+        const n = adsetFields['Adset Niche'];
+        if (n == null || n === '') return false;
+        const target = String(funnelNiche || '').trim().toLowerCase();
+        if (Array.isArray(n)) return n.some((x) => String(x).trim().toLowerCase() === target);
+        return String(n).trim().toLowerCase() === target;
+      }
+
+      function clientActive(clientRec, adsetFields) {
+        const fromAdset = adsetFields && adsetFields['Client Status'];
+        if (fromAdset != null && String(fromAdset).trim() !== '') return isActive(fromAdset);
+        if (clientRec && clientRec.fields && clientRec.fields.Status != null) {
+          return isActive(clientRec.fields.Status);
+        }
+        return false;
+      }
+
+      function adsetActive(adsetFields) {
+        return isActive(adsetFields && adsetFields['Adset Status']);
+      }
+
+      // Eligible = niche match + client Active + adset Active. No capacity/tier.
+      function isEligible(row, funnelNiche) {
+        const af = row && row.adsetRec && row.adsetRec.fields;
+        if (!row || !af || !row.clientRec) return false;
+        if (!nicheMatchesAdset(af, funnelNiche)) return false;
+        if (!clientActive(row.clientRec, af) || !adsetActive(af)) return false;
+        return true;
+      }
+
+      function linkedAt(rec) {
+        const f = (rec && rec.fields) || {};
+        return f['Linked at'] || rec.createdTime || '';
+      }
+
+      async function findZipRecord(zip5, steps) {
+        const formula = `OR({Zip}=${Number(zip5)}, {Zip}="${escFormula(zip5)}")`;
+        const params = new URLSearchParams();
+        params.set('maxRecords', '1');
+        params.set('filterByFormula', formula);
+        params.append('fields[]', 'Zip');
+        params.append('fields[]', 'Adset Zip Tracking');
+        const data = await atGet(`${TABLES.US_ZIPS}?${params.toString()}`);
+        const rec = (data.records || [])[0] || null;
+        steps.push(rec ? `US Zips match: ${rec.id}` : `US Zips: no record for ${zip5}`);
+        return rec;
+      }
+
+      async function junctionsForZipRec(zipRecId, steps) {
+        // Prefer reverse links via list endpoint (GET-by-id does not support fields[]).
+        let jids = [];
+        try {
+          const params = new URLSearchParams();
+          params.set('filterByFormula', `RECORD_ID()="${escFormula(zipRecId)}"`);
+          params.set('maxRecords', '1');
+          params.append('fields[]', 'Zip');
+          params.append('fields[]', 'Adset Zip Tracking');
+          const data = await atGet(`${TABLES.US_ZIPS}?${params.toString()}`);
+          const zipRow = (data.records || [])[0] || null;
+          jids = asLinks(zipRow && zipRow.fields && zipRow.fields['Adset Zip Tracking']);
+        } catch (_) {
+          jids = [];
+        }
+
+        if (jids.length) {
+          steps.push(`Junction reverse links: ${jids.length}`);
+          return listByIds(TABLES.JUNCTION, jids, [
+            'Adset', 'US Zips', 'Linked at', 'Adset Status', 'Client Status', 'Niche',
+          ]);
+        }
+
+        // Fallback: live-style linked equality (may return empty depending on Airtable link filter quirks).
+        const formula = `{US Zips}="${escFormula(zipRecId)}"`;
+        steps.push('No reverse junction links on zip; trying junction formula fallback');
+        return listAll(TABLES.JUNCTION, {
+          formula,
+          fields: ['Adset', 'US Zips', 'Linked at', 'Adset Status', 'Client Status', 'Niche'],
+        });
+      }
+
+      function buildCandidateRows(junctionRecs, meta = {}) {
+        const rows = [];
+        for (const rec of junctionRecs || []) {
+          const adsetIds = asLinks(rec.fields && rec.fields.Adset);
+          if (!adsetIds.length) {
+            rows.push({
+              junctionId: rec.id,
+              linkCreated: linkedAt(rec),
+              adsetId: null,
+              clientRec: null,
+              adsetRec: null,
+              matchedZip: meta.matchedZip || null,
+              matchedZipRec: meta.matchedZipRec || null,
+              distanceMi: meta.distanceMi == null ? null : meta.distanceMi,
+            });
+            continue;
+          }
+          for (const aid of adsetIds) {
+            rows.push({
+              junctionId: rec.id,
+              linkCreated: linkedAt(rec),
+              adsetId: aid,
+              clientRec: clientForAdset(aid),
+              adsetRec: adsetById.get(aid) || null,
+              matchedZip: meta.matchedZip || null,
+              matchedZipRec: meta.matchedZipRec || null,
+              distanceMi: meta.distanceMi == null ? null : meta.distanceMi,
+            });
+          }
+        }
+        return rows;
+      }
+
+      function summarize(row) {
+        if (!row) return null;
+        const af = (row.adsetRec && row.adsetRec.fields) || {};
+        const cf = (row.clientRec && row.clientRec.fields) || {};
+        return {
+          junctionId: row.junctionId,
+          linkCreated: row.linkCreated,
+          adsetId: row.adsetId,
+          adsetName: af['Adset Name'] || null,
+          adsetNiche: af['Adset Niche'] || null,
+          adsetStatus: af['Adset Status'] || null,
+          clientStatus: af['Client Status'] || (cf.Status || null),
+          clientId: row.clientRec ? row.clientRec.id : null,
+          clientName: cf.Name || null,
+          matchedZip: row.matchedZip,
+          distanceMi: row.distanceMi,
+        };
+      }
+
+      // PDF: among eligible Active matches, oldest Linked at wins (dedupe by adset keeping oldest link).
+      function pickOldestLinkedAt(rows, funnelNiche) {
+        const eligible = [];
+        for (const row of rows || []) {
+          if (!isEligible(row, funnelNiche)) continue;
+          eligible.push(row);
+        }
+        const byAdset = new Map();
+        for (const row of eligible) {
+          const prev = byAdset.get(row.adsetId);
+          if (!prev || String(row.linkCreated || '') < String(prev.linkCreated || '')) {
+            byAdset.set(row.adsetId, row);
+          }
+        }
+        const list = [...byAdset.values()];
+        list.sort((a, b) => String(a.linkCreated || '').localeCompare(String(b.linkCreated || '')));
+        return { pick: list[0] || null, eligibleCount: eligible.length, uniqueAdsets: list.length };
+      }
+
+      // Expanded walk: distance ASC already, first eligible adset occurrence wins.
+      function pickClosestThenOldest(rows, funnelNiche) {
+        const seen = new Set();
+        let eligibleCount = 0;
+        for (const row of rows || []) {
+          if (!row.adsetId || seen.has(row.adsetId)) continue;
+          if (!isEligible(row, funnelNiche)) continue;
+          seen.add(row.adsetId);
+          eligibleCount += 1;
+          // first eligible in distance/linked order
+          if (eligibleCount === 1) {
+            // continue counting unique eligible adsets
+          }
+        }
+        // Re-walk for actual first pick
+        const seen2 = new Set();
+        for (const row of rows || []) {
+          if (!row.adsetId || seen2.has(row.adsetId)) continue;
+          if (!isEligible(row, funnelNiche)) continue;
+          seen2.add(row.adsetId);
+          return { pick: row, eligibleCount: seen.size, uniqueAdsets: seen.size };
+        }
+        return { pick: null, eligibleCount: 0, uniqueAdsets: 0 };
+      }
+
+      async function loadNeighbors(zip5, steps) {
+        const url = `${GEO_BASE}/${encodeURIComponent(zip5)}.json`;
+        const t0 = msNow();
+        let res;
+        try {
+          res = await fetch(url, { headers: { Accept: 'application/json' } });
+        } catch (e) {
+          steps.push(`CDN error: ${e.message || e}`);
+          return [];
+        }
+        if (res.status === 404) {
+          steps.push(`CDN: no neighbor pack for ${zip5}`);
+          return [];
+        }
+        if (!res.ok) {
+          steps.push(`CDN HTTP ${res.status} for ${zip5}`);
+          return [];
+        }
+        const data = await res.json();
+        const neighbors = Array.isArray(data.neighbors) ? data.neighbors : [];
+        const out = [];
+        for (const n of neighbors) {
+          const mi = Number(n.mi);
+          if (!Number.isFinite(mi) || mi > MAX_MILES + 1e-9) continue;
+          out.push({ zip: normZip(n.zip), rec: n.rec, mi });
+          if (out.length >= MAX_NEIGHBOR_ZIPS) break;
+        }
+        steps.push(
+          `CDN neighbors: file has ${neighbors.length}, using top ${out.length} within ${MAX_MILES}mi ` +
+          `(${((msNow() - t0) / 1000).toFixed(2)}s)` +
+          (out[0] ? `; nearest ${out[0].zip} @ ${out[0].mi}mi` : '')
+        );
+        return out;
+      }
+
+      async function expandedCandidates(neighbors, homeZip, funnelNiche, steps) {
+        if (!neighbors.length) return [];
+        const meta = new Map(neighbors.map((n) => [n.rec, n]));
+        const zipRecs = neighbors.map((n) => n.rec).filter(Boolean);
+        const t0 = msNow();
+
+        const zipRows = await listByIds(TABLES.US_ZIPS, zipRecs, ['Zip', 'Adset Zip Tracking']);
+        const zipById = new Map(zipRows.map((r) => [r.id, r]));
+        const juncIds = [];
+        for (const zrec of zipRecs) {
+          const zrow = zipById.get(zrec);
+          for (const jid of asLinks(zrow && zrow.fields && zrow.fields['Adset Zip Tracking'])) {
+            juncIds.push(jid);
+          }
+        }
+        const uniqJ = [...new Set(juncIds)];
+        steps.push(`Expanded batch: ${zipRecs.length} neighbor zips → ${uniqJ.length} junction IDs`);
+
+        let juncRecs = [];
+        if (uniqJ.length) {
+          juncRecs = await listByIds(
+            TABLES.JUNCTION,
+            uniqJ,
+            ['Adset', 'US Zips', 'Linked at', 'Adset Status', 'Client Status', 'Niche']
+          );
+        }
+
+        const neighborSet = new Set(zipRecs);
+        const rows = [];
+        for (const rec of juncRecs) {
+          const zlinks = asLinks(rec.fields && rec.fields['US Zips']);
+          const matched = zlinks.filter((z) => neighborSet.has(z));
+          if (!matched.length) continue;
+          const ads = asLinks(rec.fields && rec.fields.Adset);
+          for (const zrec of matched) {
+            const n = meta.get(zrec) || {};
+            for (const aid of ads) {
+              rows.push({
+                junctionId: rec.id,
+                linkCreated: linkedAt(rec),
+                adsetId: aid,
+                clientRec: clientForAdset(aid),
+                adsetRec: adsetById.get(aid) || null,
+                matchedZip: n.zip || null,
+                matchedZipRec: zrec,
+                distanceMi: n.mi == null ? null : Number(n.mi),
+                homeZip,
+              });
+            }
+          }
+        }
+
+        rows.sort((a, b) => {
+          const da = a.distanceMi == null ? 9999 : a.distanceMi;
+          const db = b.distanceMi == null ? 9999 : b.distanceMi;
+          if (da !== db) return da - db;
+          return String(a.linkCreated || '').localeCompare(String(b.linkCreated || ''));
+        });
+
+        let shown = 0;
+        for (const row of rows) {
+          if (!isEligible(row, funnelNiche)) continue;
+          const s = summarize(row);
+          steps.push(
+            `  eligible expanded: ${s.clientName || '?'} / ${s.adsetName || s.adsetId} via ${s.matchedZip} @ ${s.distanceMi}mi (linked ${s.linkCreated})`
+          );
+          shown += 1;
+          if (shown >= 8) break;
+        }
+        steps.push(`Expanded candidates built: ${rows.length} rows in ${((msNow() - t0) / 1000).toFixed(2)}s`);
+        return rows;
+      }
+
+      function parseRevenueFloor(raw) {
+        const s0 = String(raw || '').trim();
+        if (!s0) return null;
+        const s = s0.toLowerCase().replace(/,/g, '').replace(/\$/g, '').replace(/\s+/g, ' ');
+        if (s.includes('less than') || s.startsWith('less-than') || s.includes('under')) return 0;
+        const slug = s.match(/(less-than|more-than)?\s*(\d+)\s*k(?:\s*-\s*(\d+)\s*k)?/);
+        if (slug) {
+          const kind = slug[1] || '';
+          const a = Number(slug[2]) * 1000;
+          if (kind === 'less-than') return 0;
+          if (kind === 'more-than') return a;
+          return a;
+        }
+        if (s.includes('more than') || s.startsWith('more-than')) {
+          const n = Number((s.match(/(\d{2,})/) || [])[1] || NaN);
+          if (Number.isFinite(n)) return n < 1000 ? n * 1000 : n;
+        }
+        const nums = [...s.matchAll(/(\d+(?:\.\d+)?)\s*(k)?/g)].map((m) => {
+          const n = Number(m[1]);
+          return m[2] ? n * 1000 : n;
+        }).filter((n) => Number.isFinite(n));
+        if (!nums.length) return null;
+        return Math.min(...nums);
+      }
+
+      function revenueQualifies100k(raw) {
+        const floor = parseRevenueFloor(raw);
+        return floor != null && floor >= 100000;
+      }
+
+      function b2bNicheMatches(niches, funnelNiche) {
+        const aliases = B2B_NICHE_ALIASES[String(funnelNiche || '').trim().toLowerCase()] || [
+          String(funnelNiche || '').trim().toLowerCase(),
+        ];
+        const have = (Array.isArray(niches) ? niches : [niches]).map((x) => String(x || '').trim().toLowerCase());
+        return have.some((h) => aliases.some((a) => h === a || h.includes(a) || a.includes(h)));
+      }
+
+      async function pickB2BOverflow(funnelNiche, steps) {
+        const t0 = msNow();
+        const formula = [
+          `NOT({Status}="Disqualified")`,
+          `OR({Discovery Status}="", {Discovery Status}=BLANK(), NOT({Discovery Status}="Close Won"))`,
+          `AND({Contact Email}!="", {Contact Email}!=BLANK())`,
+          `OR(AND({Phone Number}!="", {Phone Number}!=BLANK()), AND({Parsed Phone}!="", {Parsed Phone}!=BLANK()))`,
+          `IS_AFTER(CREATED_TIME(), "${B2B_CREATED_AFTER}")`,
+        ].join(',');
+        const filter = `AND(${formula})`;
+        const fields = [
+          'Business Name',
+          'Status',
+          'Discovery Status',
+          'Estimated monthly revenue',
+          'Niche(s)',
+          'Contact Email',
+          'Phone Number',
+          'Parsed Phone',
+          'Created',
+          'Location',
+        ];
+
+        const pool = [];
+        let offset = null;
+        let pages = 0;
+        do {
+          const params = new URLSearchParams();
+          params.set('pageSize', '100');
+          params.set('filterByFormula', filter);
+          fields.forEach((f) => params.append('fields[]', f));
+          if (offset) params.set('offset', offset);
+          const page = await atGet(`${TABLES.B2B}?${params.toString()}`);
+          pool.push(...(page.records || []));
+          offset = page.offset || null;
+          pages += 1;
+          if (pages >= 5) break; // keep test tool snappy
+          if (offset) await sleep(120);
+        } while (offset);
+
+        const qualified = [];
+        for (const rec of pool) {
+          const f = rec.fields || {};
+          if (f.Status === 'Disqualified') continue;
+          if (f['Discovery Status'] === 'Close Won') continue;
+          const email = String(f['Contact Email'] || '').trim();
+          const phone = String(f['Phone Number'] || f['Parsed Phone'] || '').trim();
+          if (!email || !phone) continue;
+          if (!b2bNicheMatches(f['Niche(s)'], funnelNiche)) continue;
+          if (!revenueQualifies100k(f['Estimated monthly revenue'])) continue;
+          const created = rec.createdTime || f.Created;
+          if (!created || Date.parse(created) < Date.parse(B2B_CREATED_AFTER)) continue;
+          qualified.push(rec);
+        }
+
+        steps.push(
+          `B2B pool: fetched=${pool.length} over ${pages} page(s), qualified=${qualified.length} ` +
+          `(niche~${funnelNiche}, rev floor ≥ $100k, created after 2025-09-02) in ${((msNow() - t0) / 1000).toFixed(2)}s`
+        );
+
+        if (!qualified.length) return null;
+        const pick = qualified[Math.floor(Math.random() * qualified.length)];
+        const f = pick.fields || {};
+        steps.push(
+          `B2B random pick (${qualified.length} eligible): ${f['Business Name'] || pick.id} | ` +
+          `rev=${f['Estimated monthly revenue'] || '—'} | niches=${JSON.stringify(f['Niche(s)'] || [])} | ` +
+          `status=${f.Status || '—'} | discovery=${f['Discovery Status'] || '—'}`
+        );
+        return {
+          id: pick.id,
+          businessName: f['Business Name'] || null,
+          status: f.Status || null,
+          discoveryStatus: f['Discovery Status'] || null,
+          revenue: f['Estimated monthly revenue'] || null,
+          niches: f['Niche(s)'] || [],
+          email: f['Contact Email'] || null,
+          phone: f['Phone Number'] || f['Parsed Phone'] || null,
+          location: f.Location || null,
+          created: pick.createdTime || f.Created || null,
+          poolSize: qualified.length,
+        };
+      }
+
+      function buildDecisionLog(result) {
+        const lines = [];
+        lines.push(`Local Pick route decision log`);
+        lines.push(`zip=${result.zip} niche=${result.funnelNiche} elapsed=${result.elapsed_s}s`);
+        lines.push(`matchType=${result.matchType} phase=${result.phase}`);
+        lines.push(`message=${result.message}`);
+        if (result.selected) {
+          const s = result.selected;
+          lines.push(
+            `wouldLink.client=${s.clientName || '—'} (${s.clientId || '—'})`
+          );
+          lines.push(
+            `wouldLink.adset=${s.adsetName || '—'} (${s.adsetId || '—'})`
+          );
+          lines.push(`wouldLink.junction=${s.junctionId || '—'} linkedAt=${s.linkCreated || '—'}`);
+          if (result.matchType === 'Expanded') {
+            lines.push(`wouldLink.matchedZip=${s.matchedZip || '—'} distanceMi=${s.distanceMi}`);
+          }
+        }
+        if (result.b2b) {
+          const b = result.b2b;
+          lines.push(`wouldLink.b2b=${b.businessName || '—'} (${b.id || '—'}) poolSize=${b.poolSize}`);
+          lines.push(`b2b.revenue=${b.revenue || '—'} niches=${JSON.stringify(b.niches || [])}`);
+        }
+        lines.push('— steps —');
+        for (const s of result.steps || []) lines.push(s);
+        lines.push('— end —');
+        lines.push('NOTE: dry-run only; no Airtable write. Caps not applied. Duplicates checked only on live submit.');
+        return lines.join('\n');
+      }
+
+      async function runRoute() {
+        const funnelNiche = nicheEl.value;
+        const zip5 = normZip(zipEl.value);
+        const steps = [];
+        const tAll = msNow();
+        lastResult = null;
+        runBtn.disabled = true;
+        statusEl.textContent = 'Routing (read-only)…';
+        summaryEl.textContent = 'Working…';
+        setBadge('idle', 'running');
+        setKV([]);
+        traceEl.textContent = '…';
+        rawEl.textContent = '{}';
+
+        try {
+          if (!/^\d{5}$/.test(zip5)) throw new Error('Enter a valid 5-digit ZIP');
+
+          steps.push(`1) Input zip=${zip5}, funnel niche=${funnelNiche}`);
+          steps.push(`   toggles: expanded=${$('useExpanded').checked}, b2b=${$('useB2B').checked}`);
+          steps.push('   rules: Active client+adset only; no weekly/monthly caps; oldest Linked at wins');
+          steps.push('   mode: READ-ONLY (no Airtable writes)');
+
+          await ensureInfra(steps);
+
+          // Phase 1 exact
+          steps.push('2) Phase 1 — exact Adset Zip Tracking');
+          const zipRec = await findZipRecord(zip5, steps);
+          let exactRows = [];
+          if (zipRec) {
+            const juncs = await junctionsForZipRec(zipRec.id, steps);
+            exactRows = buildCandidateRows(juncs, {
+              matchedZip: zip5,
+              matchedZipRec: zipRec.id,
+              distanceMi: 0,
+            });
+            exactRows.sort((a, b) => String(a.linkCreated || '').localeCompare(String(b.linkCreated || '')));
+          }
+          steps.push(`   exact junction rows: ${exactRows.length}`);
+          exactRows.slice(0, 12).forEach((row, i) => {
+            const s = summarize(row);
+            const elig = isEligible(row, funnelNiche);
+            steps.push(
+              `   exact[${i + 1}] ${elig ? 'ELIGIBLE' : 'skip'} | ${s.clientName || '—'} / ${s.adsetName || s.adsetId || '—'} | ` +
+              `adset=${s.adsetStatus || '—'} client=${s.clientStatus || '—'} linkedAt=${s.linkCreated || '—'}`
+            );
+          });
+
+          const exact = pickOldestLinkedAt(exactRows, funnelNiche);
+          if (exact.pick) {
+            const selected = summarize(exact.pick);
+            steps.push(
+              `3) RESULT Exact — oldest Linked at among ${exact.uniqueAdsets} eligible adset(s): ` +
+              `${selected.clientName} / ${selected.adsetName} (linked ${selected.linkCreated})`
+            );
+            finish({
+              zip: zip5,
+              funnelNiche,
+              phase: 1,
+              matchType: 'Exact',
+              message: `Would link Exact → ${selected.clientName} / ${selected.adsetName}`,
+              selected,
+              b2b: null,
+              exactRows: exactRows.length,
+              expandedNeighbors: 0,
+              expandedRows: 0,
+              elapsed_s: Number(((msNow() - tAll) / 1000).toFixed(2)),
+              steps,
+            });
+            return;
+          }
+          steps.push('   no eligible Active exact partner');
+
+          // Phase 2 expanded
+          if ($('useExpanded').checked) {
+            steps.push('3) Phase 2 — expanded CDN neighbors (30mi / top 25)');
+            const neighbors = await loadNeighbors(zip5, steps);
+            const expRows = await expandedCandidates(neighbors, zip5, funnelNiche, steps);
+            const exp = pickClosestThenOldest(expRows, funnelNiche);
+            if (exp.pick) {
+              const selected = summarize(exp.pick);
+              steps.push(
+                `4) RESULT Expanded — closest eligible then oldest link: ` +
+                `${selected.clientName} / ${selected.adsetName} via ${selected.matchedZip} @ ${selected.distanceMi}mi`
+              );
+              finish({
+                zip: zip5,
+                funnelNiche,
+                phase: 2,
+                matchType: 'Expanded',
+                message: `Would link Expanded → ${selected.clientName} via ${selected.matchedZip} @ ${selected.distanceMi}mi`,
+                selected,
+                b2b: null,
+                exactRows: exactRows.length,
+                expandedNeighbors: neighbors.length,
+                expandedRows: expRows.length,
+                elapsed_s: Number(((msNow() - tAll) / 1000).toFixed(2)),
+                steps,
+              });
+              return;
+            }
+            steps.push('   no eligible Active expanded partner in top neighbors');
+          } else {
+            steps.push('3) Phase 2 skipped (toggle off)');
+          }
+
+          // Phase 3 B2B
+          if ($('useB2B').checked) {
+            steps.push('4) Phase 3 — B2B overflow ($100K+, not Close Won / Disqualified, random)');
+            const b2b = await pickB2BOverflow(funnelNiche, steps);
+            if (b2b) {
+              steps.push(`5) RESULT B2B — would link B2B Lead ${b2b.businessName} (${b2b.id})`);
+              finish({
+                zip: zip5,
+                funnelNiche,
+                phase: 3,
+                matchType: 'B2B',
+                message: `Would link B2B → ${b2b.businessName} (${b2b.poolSize} qualified)`,
+                selected: null,
+                b2b,
+                exactRows: exactRows.length,
+                expandedNeighbors: null,
+                expandedRows: null,
+                elapsed_s: Number(((msNow() - tAll) / 1000).toFixed(2)),
+                steps,
+              });
+              return;
+            }
+            steps.push('   no qualified B2B overflow lead');
+          } else {
+            steps.push('4) Phase 3 skipped (toggle off)');
+          }
+
+          steps.push('5) RESULT None — nothing would be linked');
+          finish({
+            zip: zip5,
+            funnelNiche,
+            phase: 4,
+            matchType: 'None',
+            message: 'Would link nothing (no exact, expanded, or B2B match)',
+            selected: null,
+            b2b: null,
+            exactRows: exactRows.length,
+            elapsed_s: Number(((msNow() - tAll) / 1000).toFixed(2)),
+            steps,
+          });
+        } catch (e) {
+          console.error(e);
+          steps.push(`ERROR: ${e.message || e}`);
+          const result = {
+            zip: zip5,
+            funnelNiche,
+            phase: null,
+            matchType: 'Error',
+            message: e.message || String(e),
+            steps,
+            elapsed_s: Number(((msNow() - tAll) / 1000).toFixed(2)),
+          };
+          result.decisionLog = buildDecisionLog(result);
+          lastResult = result;
+          summaryEl.innerHTML = `<span class="bad">${result.message}</span>`;
+          setBadge('none', 'error');
+          setKV([
+            ['ZIP', zip5],
+            ['Elapsed', `${result.elapsed_s}s`],
+            ['Writes', 'none'],
+          ]);
+          traceEl.textContent = result.decisionLog;
+          rawEl.textContent = JSON.stringify(result, null, 2);
+          statusEl.textContent = 'Failed. Still no writes.';
+        } finally {
+          runBtn.disabled = false;
+        }
+      }
+
+      function finish(result) {
+        result.decisionLog = buildDecisionLog(result);
+        result.readOnly = true;
+        result.airtableWrites = 0;
+        lastResult = result;
+
+        const kind =
+          result.matchType === 'Exact' ? 'exact' :
+          result.matchType === 'Expanded' ? 'expanded' :
+          result.matchType === 'B2B' ? 'b2b' : 'none';
+        setBadge(kind, result.matchType || 'none');
+        summaryEl.textContent = result.message || result.matchType;
+
+        const rows = [
+          ['ZIP', result.zip],
+          ['Match', result.matchType],
+          ['Phase', result.phase],
+          ['Elapsed', `${result.elapsed_s}s`],
+          ['Airtable writes', 'none (dry-run)'],
+        ];
+
+        if (result.selected) {
+          const s = result.selected;
+          rows.push(
+            ['Would link client', s.clientName || '—'],
+            ['Client ID', s.clientId || '—'],
+            ['Would link adset', s.adsetName || '—'],
+            ['Adset ID', s.adsetId || '—'],
+            ['Junction', s.junctionId || '—'],
+            ['Linked at', s.linkCreated || '—'],
+            ['Adset status', s.adsetStatus || '—'],
+            ['Client status', s.clientStatus || '—'],
+          );
+          if (result.matchType === 'Expanded') {
+            rows.push(
+              ['Matched zip', s.matchedZip || '—'],
+              ['Distance', s.distanceMi != null ? `${s.distanceMi} mi` : '—']
+            );
+          }
+        }
+
+        if (result.b2b) {
+          const b = result.b2b;
+          rows.push(
+            ['Would link B2B', b.businessName || '—'],
+            ['B2B ID', b.id || '—'],
+            ['Revenue', b.revenue || '—'],
+            ['Niches', (b.niches || []).join(', ') || '—'],
+            ['Status', b.status || '—'],
+            ['Discovery', b.discoveryStatus || '—'],
+            ['Pool size', b.poolSize],
+          );
+        }
+
+        setKV(rows);
+        traceEl.textContent = result.decisionLog;
+        rawEl.textContent = JSON.stringify(result, null, 2);
+        statusEl.innerHTML = `<span class="ok">Done</span> in ${result.elapsed_s}s · read-only · 0 writes`;
+      }
+    })();
+  </script>
+</body>
+</html>
